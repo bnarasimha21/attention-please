@@ -1,0 +1,26 @@
+{
+  "name": "attention-please",
+  "version": "1.0.0",
+  "description": "Animated concept explainer videos. Built with Remotion.",
+  "main": "index.js",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bnarasimha21/attention-please.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/bnarasimha21/attention-please/issues"
+  },
+  "homepage": "https://github.com/bnarasimha21/attention-please#readme",
+  "dependencies": {
+    "@remotion/cli": "^4.0.477",
+    "remotion": "^4.0.477"
+  }
+}
