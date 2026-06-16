@@ -1,6 +1,4 @@
 import { Composition } from "remotion";
-import { Day01 } from "../videos/day01-tokenization/Day01";
-import { TOTAL_FRAMES as DAY01_FRAMES } from "../videos/day01-tokenization/timings";
 import { T01 } from "../videos/t01-agent-harness/T01";
 import { TOTAL_FRAMES as T01_FRAMES } from "../videos/t01-agent-harness/timings";
 import { T02 } from "../videos/t02-context-engineering/T02";
@@ -20,14 +18,6 @@ import { VIDEO_WIDTH, VIDEO_HEIGHT } from "./theme";
 export const RemotionRoot: React.FC = () => {
   return (
     <>
-      <Composition
-        id="Day01-Tokenization"
-        component={Day01}
-        durationInFrames={DAY01_FRAMES}
-        fps={30}
-        width={VIDEO_WIDTH}
-        height={VIDEO_HEIGHT}
-      />
       <Composition
         id="T01-AgentHarness"
         component={T01}

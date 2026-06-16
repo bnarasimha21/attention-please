@@ -4,7 +4,7 @@
 **Duration target:** 1:55
 **Word count:** ~270 words (~140 wpm)
 **Topic:** Context rot — how a model's answers degrade as a conversation grows
-**Track:** Trending (pairs with main-track context-window / memory episodes)
+**Track:** Trending
 
 ---
 

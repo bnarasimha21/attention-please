@@ -3,7 +3,7 @@
 **Duration target:** ~1:50 (silent preview cut)
 **Word count:** ~270 words (~140 wpm) — scoped to the tightened preview
 **Topic:** What happens behind the "Thinking…" indicator — the hidden chain of reasoning tokens before a short final answer
-**Track:** Trending (pairs with main-track explainers on how LLMs work)
+**Track:** Trending
 
 ---
 

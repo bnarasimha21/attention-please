@@ -4,7 +4,7 @@
 **Duration target:** 1:50
 **Word count:** ~260 words (~140 wpm, tightened preview cut)
 **Topic:** Context engineering — optimizing everything *around* the prompt
-**Track:** Trending (pairs with main-track "What is an AI agent?" + T01 harness)
+**Track:** Trending
 
 ---
 

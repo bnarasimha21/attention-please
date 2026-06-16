@@ -3,7 +3,7 @@
 **Duration target:** 6:45
 **Word count:** ~940 words (~140 wpm)
 **Topic:** The agent harness — the architecture behind Claude Code, Codex, Cursor
-**Track:** Trending (pairs with main-track Day 18 "What is an AI agent?")
+**Track:** Trending
 
 ---
 

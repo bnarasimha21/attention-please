@@ -1,11 +1,9 @@
-# Attention Please — Trending Track (Parallel 30-Day Plan)
+# Attention Please — Trending Track
 
 **Channel:** Attention Please
 **Audience:** Working developers who use AI daily and want to keep up with what's *actually* moving right now
-**Format:** 6-8 min animated explainers, Remotion (same pipeline as the main plan)
-**Arc:** This is the "trending now" track — topics that are the talk of the town as of mid-2026. Run it *in parallel* with the evergreen [30-day-plan.md](./30-day-plan.md): one fundamentals video + one trending video per day.
-
-> **Why a second track?** The main plan teaches what AI *is* (timeless foundations). This plan rides what AI *is doing right now* — agent harnesses, context engineering, the death-of-RAG debate, reasoning models. These topics are peaking in attention this month, so they bring the views; the fundamentals track keeps the channel evergreen. Together they're your daily one-two punch.
+**Format:** short (~2–3 min) animated explainers, Remotion
+**Arc:** The "trending now" track — topics that are the talk of the town as of mid-2026: agent harnesses, context engineering, the death-of-RAG debate, reasoning models. These are peaking in attention, so they bring the views.
 
 *Snapshot date: June 2026. Re-check the model-landscape days before recording — that space moves weekly.*
 
@@ -74,9 +72,8 @@
 ---
 
 ## Notes
-- Same pipeline as the main plan. Script → `scripts/dayNN-slug.md`, Remotion code → `videos/dayNN-slug/`. Consider a separate prefix (e.g. `t01`, `t02`) so the two tracks don't collide on day numbers.
+- Each video: script → `scripts/tNN-slug.md`, Remotion code → `videos/tNN-slug/` (prefix `tNN`).
 - **Trending topics go stale fast.** Re-verify Days 19–23 (reasoning models, model landscape, local models) right before you record — names and numbers change monthly.
-- These pair naturally with the fundamentals track: e.g. main Day 18 "What is an AI agent?" ↔ trending Day 01 "What is an agent harness?" Cross-link them in descriptions to funnel viewers between tracks.
 - Shorts: the harness, context engineering, "is RAG dead?", and test-time compute days are the most viral-friendly — cut those first.
 
 ---

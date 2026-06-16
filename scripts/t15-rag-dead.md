@@ -3,7 +3,7 @@
 **Duration target:** ~1:50 (tightened preview cut)
 **Word count:** ~270 words (~140 wpm at preview pacing)
 **Topic:** RAG (Retrieval-Augmented Generation) — is it obsolete, or did it just grow up?
-**Track:** Trending (pairs with main-track retrieval / context episodes)
+**Track:** Trending
 
 ---
 
