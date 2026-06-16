@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 7 — Why it matters [1:33-1:46]
 // Wrong question "Is RAG dead?" gets crossed out → replaced by the right one,
@@ -21,19 +21,20 @@ export const Scene7WhyMatters: React.FC = () => {
   const wrongDim = interpolate(frame, [fps * 5.4, fps * 6.2], [1, 0.32], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // right question rises in (6s)
-  const rightSpring = spring({ frame: frame - fps * 6, fps, config: { damping: 15 } });
+  const rightSpring = pop(frame, fps, fps * 6, { damping: 11 });
   const rightOpacity = interpolate(frame, [fps * 6, fps * 7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // guidance chips stagger in (8s+)
   const chipStart = (i: number) => fps * (8.2 + i * 1.3);
 
   const lineOpacity = interpolate(frame, [fps * 12, fps * 13.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const lineY = spring({ frame: frame - fps * 12, fps, config: { damping: 18 } });
+  const lineY = pop(frame, fps, fps * 12, { damping: 13 });
 
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig>
       <SceneHeading kicker="why it matters" accent={theme.accent}>
         Ask the <span style={gradientText("#c7d2fe", theme.accent)}>right</span> question
       </SceneHeading>
@@ -62,7 +63,7 @@ export const Scene7WhyMatters: React.FC = () => {
         <div
           style={{
             opacity: rightOpacity,
-            transform: `translateY(${(1 - rightSpring) * 22}px)`,
+            transform: `translateY(${(1 - rightSpring) * 22}px) scale(${interpolate(rightSpring, [0, 1], [0.9, 1])})`,
             fontFamily: theme.fontSans,
             fontSize: 68,
             fontWeight: 800,
@@ -77,14 +78,14 @@ export const Scene7WhyMatters: React.FC = () => {
         <div style={{ display: "flex", gap: 48, marginTop: 22 }}>
           {CHIPS.map((c, i) => {
             const start = chipStart(i);
-            const s = spring({ frame: frame - start, fps, config: { damping: 15 } });
+            const s = pop(frame, fps, start, { damping: 11 });
             const opacity = interpolate(frame, [start, start + fps * 0.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             return (
               <div
                 key={i}
                 style={{
                   opacity,
-                  transform: `translateY(${(1 - s) * 18}px)`,
+                  transform: `translateY(${(1 - s) * 18}px) scale(${interpolate(s, [0, 1], [0.8, 1])})`,
                   display: "flex",
                   alignItems: "center",
                   gap: 20,
@@ -120,6 +121,7 @@ export const Scene7WhyMatters: React.FC = () => {
       >
         Retrieval didn't disappear — it <span style={{ ...gradientText("#c7d2fe", theme.accent), fontWeight: 700 }}>grew up.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

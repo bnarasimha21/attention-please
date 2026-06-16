@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 2 — What RAG is [0:13-0:30]
 // Clean L-to-R pipeline so a beginner gets it:
@@ -21,7 +21,7 @@ export const Scene2WhatRAG: React.FC = () => {
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
   const N = STAGES.length;
-  const W = 1640; // total pipeline width
+  const W = 1540; // total pipeline width (kept inside CameraRig zoom)
   const gap = W / (N - 1);
   const startX = -W / 2;
 
@@ -37,12 +37,13 @@ export const Scene2WhatRAG: React.FC = () => {
   const dotX = startX + flowT * W;
 
   const lineOpacity = interpolate(frame, [fps * 13, fps * 14.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const lineY = spring({ frame: frame - fps * 13, fps, config: { damping: 18 } });
+  const lineY = pop(frame, fps, fps * 13, { damping: 13 });
 
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig intensity={0.5} push={0.02}>
       <SceneHeading kicker="quick refresher" accent={theme.accent}>
         What <span style={gradientText("#c7d2fe", theme.accent)}>RAG</span> actually does
       </SceneHeading>
@@ -90,7 +91,8 @@ export const Scene2WhatRAG: React.FC = () => {
           {STAGES.map((st, i) => {
             const cx = startX + gap * i;
             const start = stageStart(i);
-            const s = spring({ frame: frame - start, fps, config: { damping: 14 } });
+            const s = pop(frame, fps, start, { damping: 11 });
+            const enterScale = interpolate(s, [0, 1], [0.8, 1]);
             const opacity = interpolate(frame, [start, start + fps * 0.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             // highlight when the flow dot is near this stage
             const dist = Math.abs(dotX - cx);
@@ -103,7 +105,7 @@ export const Scene2WhatRAG: React.FC = () => {
                   position: "absolute",
                   left: "50%",
                   top: "50%",
-                  transform: `translate(calc(-50% + ${cx}px), -50%) translateY(${(1 - s) * 16}px) scale(${1 + lit * 0.08})`,
+                  transform: `translate(calc(-50% + ${cx}px), -50%) translateY(${(1 - s) * 16}px) scale(${enterScale * (1 + lit * 0.08)})`,
                   opacity,
                   display: "flex",
                   flexDirection: "column",
@@ -179,6 +181,7 @@ export const Scene2WhatRAG: React.FC = () => {
         <span style={{ color: theme.accentGreen, fontWeight: 700 }}>Retrieve</span>, then{" "}
         <span style={{ ...gradientText("#c7d2fe", theme.accent), fontWeight: 700 }}>generate.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 6 — The verdict [1:20-1:33]
 // Old approach (naive single-shot RAG) gets a red strike-through + DEAD stamp.
@@ -12,15 +12,17 @@ export const Scene6Verdict: React.FC = () => {
 
   // OLD card
   const oldOpacity = interpolate(frame, [fps * 1, fps * 2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const oldPop = pop(frame, fps, fps * 1, { damping: 11 });
   // strike-through draws across (4s -> 5s)
   const strikeT = interpolate(frame, [fps * 4, fps * 5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   // DEAD stamp drops in (5s)
-  const stampSpring = spring({ frame: frame - fps * 5, fps, config: { damping: 9, mass: 0.8 } });
+  const stampSpring = pop(frame, fps, fps * 5, { damping: 8, mass: 0.8 });
   const stampOpacity = interpolate(frame, [fps * 5, fps * 5.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // NEW card
   const newOpacity = interpolate(frame, [fps * 7, fps * 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const approveSpring = spring({ frame: frame - fps * 9, fps, config: { damping: 11 } });
+  const newPop = pop(frame, fps, fps * 7, { damping: 11 });
+  const approveSpring = pop(frame, fps, fps * 9, { damping: 9 });
   const approveOpacity = interpolate(frame, [fps * 9, fps * 9.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const newGlow = interpolate(frame, [fps * 9, fps * 10], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const pulse = 0.5 + 0.5 * Math.sin(frame / 7);
@@ -31,6 +33,7 @@ export const Scene6Verdict: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentGreen} />
 
+      <CameraRig>
       <SceneHeading kicker="the verdict" accent={theme.accentGreen}>
         So — is it <span style={gradientText("#6ee7b7", theme.accentGreen)}>dead?</span>
       </SceneHeading>
@@ -41,6 +44,7 @@ export const Scene6Verdict: React.FC = () => {
           style={{
             position: "relative",
             opacity: oldOpacity,
+            transform: `scale(${interpolate(oldPop, [0, 1], [0.85, 1])})`,
             width: 984,
             padding: "32px 44px",
             borderRadius: 22,
@@ -80,7 +84,7 @@ export const Scene6Verdict: React.FC = () => {
               right: 36,
               top: "50%",
               opacity: stampOpacity,
-              transform: `translateY(-50%) rotate(-12deg) scale(${0.6 + Math.min(1, stampSpring) * 0.6})`,
+              transform: `translateY(-50%) rotate(-12deg) scale(${interpolate(stampSpring, [0, 1], [0.6, 1.2])})`,
               padding: "10px 28px",
               border: `5px solid ${theme.accentRed}`,
               borderRadius: 12,
@@ -102,6 +106,7 @@ export const Scene6Verdict: React.FC = () => {
           style={{
             position: "relative",
             opacity: newOpacity,
+            transform: `scale(${interpolate(newPop, [0, 1], [0.85, 1])})`,
             width: 984,
             padding: "32px 44px",
             borderRadius: 22,
@@ -128,7 +133,7 @@ export const Scene6Verdict: React.FC = () => {
               right: 36,
               top: "50%",
               opacity: approveOpacity,
-              transform: `translateY(-50%) rotate(-8deg) scale(${0.6 + Math.min(1, approveSpring) * 0.5})`,
+              transform: `translateY(-50%) rotate(-8deg) scale(${interpolate(approveSpring, [0, 1], [0.6, 1.1])})`,
               padding: "10px 24px",
               border: `3px solid ${theme.accentGreen}`,
               borderRadius: 12,
@@ -162,6 +167,7 @@ export const Scene6Verdict: React.FC = () => {
       >
         Single-shot RAG is dead. <span style={{ color: theme.accentGreen }}>Agentic retrieval is the baseline.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

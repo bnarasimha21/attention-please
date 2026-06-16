@@ -25,9 +25,10 @@ export const TIMINGS = {
   scene5: { start: 81 * FPS,  duration: 21 * FPS }, // Permissions gate
   scene6: { start: 102 * FPS, duration: 21 * FPS }, // Context & compaction
   scene7: { start: 123 * FPS, duration: 19 * FPS }, // Why it matters
-  scene8: { start: 142 * FPS, duration: 18 * FPS }, // Recap + CTA
+  scene8: { start: 142 * FPS, duration: 18 * FPS }, // Recap + teaser
+  scene9: { start: 160 * FPS, duration: 14 * FPS }, // Like & Subscribe CTA
 };
 
-// Sum of scene durations (160s) minus the 7 overlapping crossfades.
-// 160*30 - 7*18 = 4800 - 126 = 4674 frames ≈ 2:36.
-export const TOTAL_FRAMES = 160 * FPS - 7 * XFADE;
+// Sum of scene durations (174s) minus the 8 overlapping crossfades.
+// 174*30 - 8*18 = 5220 - 144 = 5076 frames ≈ 2:49.
+export const TOTAL_FRAMES = 174 * FPS - 8 * XFADE;

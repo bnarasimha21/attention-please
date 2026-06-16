@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 6 — Why it's hidden [1:13–1:27]
 // Contrast: the messy PRIVATE scratchpad (left, dim) vs the clean PUBLIC answer
@@ -17,7 +17,7 @@ export const Scene6WhyHidden: React.FC = () => {
 
   const leftOpacity = interpolate(frame, [fps * 1.2, fps * 2.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const arrowOpacity = interpolate(frame, [fps * 3.5, fps * 4.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const rightSpring = spring({ frame: frame - fps * 4.5, fps, config: { damping: 15 } });
+  const rightSpring = pop(frame, fps, fps * 4.5, { damping: 10 });
   const rightOpacity = interpolate(frame, [fps * 4.5, fps * 5.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const rightGlow = interpolate(frame, [fps * 5, fps * 7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
@@ -28,6 +28,7 @@ export const Scene6WhyHidden: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig>
       <SceneHeading kicker="why it stays backstage" accent={theme.accent}>
         The scratchpad is a <span style={gradientText("#c7d2fe", theme.accent)}>tool</span>, not the answer
       </SceneHeading>
@@ -58,7 +59,7 @@ export const Scene6WhyHidden: React.FC = () => {
         </div>
 
         {/* RIGHT — clean public answer, bright */}
-        <div style={{ opacity: rightOpacity, transform: `translateX(${(1 - rightSpring) * 26}px)`, display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+        <div style={{ opacity: rightOpacity, transform: `translateX(${(1 - rightSpring) * 26}px) scale(${0.85 + rightSpring * 0.15})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
           <div style={{ fontFamily: theme.fontMono, fontSize: 27, color: theme.accentGreen, letterSpacing: 1 }}>public · clean</div>
           <div style={{
             width: 624, height: 440, borderRadius: 22, padding: "32px",
@@ -83,6 +84,7 @@ export const Scene6WhyHidden: React.FC = () => {
       }}>
         You get the clean result. The <span style={{ ...gradientText("#c7d2fe", theme.accent), fontWeight: 800 }}>thinking stays backstage.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

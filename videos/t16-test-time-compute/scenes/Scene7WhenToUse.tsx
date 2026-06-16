@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 7 — When to use it
 // Two guidance cards: LET IT THINK (hard math/code/logic — green) vs
@@ -34,6 +34,7 @@ export const Scene7WhenToUse: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentGreen} />
 
+      <CameraRig>
       <SceneHeading kicker="when to use it" accent={theme.accentGreen}>
         Match the effort to the <span style={gradientText("#6ee7b7", theme.accentGreen)}>problem</span>
       </SceneHeading>
@@ -41,12 +42,12 @@ export const Scene7WhenToUse: React.FC = () => {
       <div style={{ position: "absolute", top: 210, left: 0, right: 0, bottom: 150, display: "flex", alignItems: "center", justifyContent: "center", gap: 96 }}>
         {CARDS.map((card, ci) => {
           const cardStart = fps * (1.5 + ci * 2.5);
-          const cardSpring = spring({ frame: frame - cardStart, fps, config: { damping: 16 } });
+          const cardSpring = pop(frame, fps, cardStart, { damping: 11 });
           const cardOpacity = interpolate(frame, [cardStart, cardStart + fps * 0.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           const isGood = ci === 0;
           return (
             <div key={card.title} style={{
-              opacity: cardOpacity, transform: `translateY(${(1 - cardSpring) * 34}px)`,
+              opacity: cardOpacity, transform: `translateY(${(1 - cardSpring) * 34}px) scale(${0.9 + cardSpring * 0.1})`,
               width: 648, padding: 41, borderRadius: 26,
               background: isGood
                 ? `linear-gradient(180deg, ${card.color}12, #0c0c10)`
@@ -71,10 +72,11 @@ export const Scene7WhenToUse: React.FC = () => {
                 {card.items.map((it, ii) => {
                   const chipStart = cardStart + fps * (0.7 + ii * 1.2);
                   const o = interpolate(frame, [chipStart, chipStart + fps * 0.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-                  const x = interpolate(frame, [chipStart, chipStart + fps * 0.4], [-16, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+                  const cp = pop(frame, fps, chipStart, { damping: 11 });
+                  const x = interpolate(cp, [0, 1], [-16, 0]);
                   return (
                     <span key={it} style={{
-                      opacity: o, transform: `translateX(${x}px)`,
+                      opacity: o, transform: `translateX(${x}px) scale(${0.85 + cp * 0.15})`, transformOrigin: "left center", display: "inline-block",
                       padding: "12px 22px", borderRadius: 999,
                       background: isGood ? `${card.color}16` : theme.surface,
                       border: `1px solid ${isGood ? card.color + "55" : theme.border}`,
@@ -104,6 +106,7 @@ export const Scene7WhenToUse: React.FC = () => {
       }}>
         Don't make it <span style={{ color: theme.accentGreen, fontWeight: 700 }}>overthink</span> the easy stuff.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

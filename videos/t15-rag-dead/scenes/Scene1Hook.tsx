@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 1 — Hook [0:00-0:13]
 // "RAG IS DEAD" headlines stamp onto screen one by one (scale-punch + jitter),
@@ -25,29 +25,31 @@ export const Scene1Hook: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  const qSpring = spring({ frame: frame - fps * 9.2, fps, config: { damping: 12 } });
+  const qSpring = pop(frame, fps, fps * 9.2, { damping: 11 });
   const qOpacity = interpolate(frame, [fps * 9.2, fps * 10.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const qPulse = 0.5 + 0.5 * Math.sin(frame / 9);
 
   const titleOpacity = interpolate(frame, [fps * 11.8, fps * 12.9], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const titleY = spring({ frame: frame - fps * 11.8, fps, config: { damping: 18 } });
+  const titleY = pop(frame, fps, fps * 11.8, { damping: 12 });
 
   const subOpacity = interpolate(frame, [fps * 13.4, fps * 14.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill>
       <SceneBackground glow={theme.accentRed} />
 
+      <CameraRig style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       {/* Stamped headlines */}
       <div style={{ position: "absolute", inset: 0, opacity: headlinesFade }}>
         {HEADLINES.map((h, i) => {
           const start = fps * h.start;
-          const s = spring({ frame: frame - start, fps, config: { damping: 9, mass: 0.7 } });
+          // harder, bouncier stamp — lower damping = more overshoot punch
+          const s = pop(frame, fps, start, { damping: 8, mass: 0.7 });
           const opacity = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           // brief jitter right as it stamps
           const settle = Math.max(0, 1 - s);
           const jitter = settle * Math.sin(frame * 1.7 + i) * 4;
-          const scale = 0.4 + s * 0.6 + settle * 0.25; // overshoot then settle
+          const scale = interpolate(s, [0, 1], [0.55, 1]); // pop already overshoots past 1
           return (
             <div
               key={i}
@@ -81,7 +83,7 @@ export const Scene1Hook: React.FC = () => {
         style={{
           position: "absolute",
           opacity: qOpacity,
-          transform: `scale(${0.5 + qSpring * 0.5})`,
+          transform: `scale(${interpolate(qSpring, [0, 1], [0.55, 1])})`,
           fontFamily: theme.fontSans,
           fontSize: 432,
           fontWeight: 900,
@@ -102,7 +104,7 @@ export const Scene1Hook: React.FC = () => {
           width: "100%",
           textAlign: "center",
           opacity: titleOpacity,
-          transform: `translateY(${(1 - titleY) * 22}px)`,
+          transform: `translateY(${(1 - titleY) * 22}px) scale(${interpolate(titleY, [0, 1], [0.9, 1])})`,
           fontFamily: theme.fontSans,
           fontSize: 76,
           fontWeight: 800,
@@ -128,6 +130,7 @@ export const Scene1Hook: React.FC = () => {
       >
         Let's actually settle it.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

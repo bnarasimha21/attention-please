@@ -10,6 +10,7 @@ import { Scene5Permissions } from "./scenes/Scene5Permissions";
 import { Scene6Compaction } from "./scenes/Scene6Compaction";
 import { Scene7WhyMatters } from "./scenes/Scene7WhyMatters";
 import { Scene8CTA } from "./scenes/Scene8CTA";
+import { Scene9CTA } from "./scenes/Scene9CTA";
 
 // Trending 01 — What is an agent harness?
 // Scenes are crossfaded with @remotion/transitions. Each transition overlaps
@@ -25,6 +26,7 @@ const SCENES = [
   { C: Scene6Compaction, duration: TIMINGS.scene6.duration },
   { C: Scene7WhyMatters, duration: TIMINGS.scene7.duration },
   { C: Scene8CTA, duration: TIMINGS.scene8.duration },
+  { C: Scene9CTA, duration: TIMINGS.scene9.duration },
 ];
 
 export const T01: React.FC = () => {

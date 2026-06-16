@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 6 — Right info, right place, right time [1:12-1:26]
 // A doc shelf on the left. A retrieval "arm" reaches out, grabs the EXACT
@@ -35,8 +35,8 @@ export const Scene6JustInTime: React.FC = () => {
   const docY = interpolate(travel, [0, 1], [-8, 0]);
   const docScale = interpolate(travel, [0, 0.5, 1], [1, 1.12, 0.95]);
 
-  // "just-in-time" stamp lands when doc lands
-  const stampS = spring({ frame: frame - fps * 7.5, fps, config: { damping: 12 } });
+  // "just-in-time" stamp pops in when doc lands
+  const stampS = pop(frame, fps, fps * 7.5, { damping: 11 });
   const stampOpacity = interpolate(frame, [fps * 7.5, fps * 8.3], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   const lineOpacity = interpolate(frame, [fps * 10.5, fps * 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -45,6 +45,7 @@ export const Scene6JustInTime: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={VIOLET} />
 
+      <CameraRig push={0.025}>
       <SceneHeading kicker="just-in-time" accent={VIOLET}>
         Right info, right place,{" "}
         <span style={gradientText("#c4b5fd", VIOLET)}>right time</span>
@@ -64,13 +65,16 @@ export const Scene6JustInTime: React.FC = () => {
             <div style={{ fontFamily: theme.fontMono, fontSize: 22, letterSpacing: 2, color: theme.textDim, marginBottom: 2 }}>
               KNOWLEDGE BASE
             </div>
-            {SHELF.map((d) => {
+            {SHELF.map((d, si) => {
               const isPicked = d.need;
               const lit = isPicked ? highlightT : 0;
               const removed = isPicked && grabbed; // it has left the shelf
+              // each shelf row pops in, staggered
+              const rowPop = pop(frame, fps, fps * 1.1 + si * fps * 0.12, { damping: 12 });
               return (
                 <div key={d.label} style={{
                   opacity: removed ? interpolate(travel, [0, 0.25], [1, 0.18], { extrapolateRight: "clamp" }) : 1,
+                  transform: `scale(${0.85 + rowPop * 0.15})`, transformOrigin: "left center",
                   padding: "14px 19px", borderRadius: 12,
                   background: isPicked
                     ? `linear-gradient(160deg, ${VIOLET}${Math.round(lit * 40).toString(16).padStart(2, "0")}, rgba(0,0,0,0.2))`
@@ -153,6 +157,7 @@ export const Scene6JustInTime: React.FC = () => {
         A <span style={{ ...gradientText("#c4b5fd", VIOLET), fontWeight: 800 }}>clean</span> window beats a{" "}
         <span style={{ color: theme.textMuted }}>full</span> one.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

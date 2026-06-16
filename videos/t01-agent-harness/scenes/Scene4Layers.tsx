@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../motion";
 
 // Scene 4 — The harness layers
 // Central MODEL core; concentric rings appear one by one, each labeled:
@@ -25,7 +25,7 @@ export const Scene4Layers: React.FC = () => {
   const { fps } = useVideoConfig();
 
   // Core appears first
-  const coreSpring = spring({ frame: frame - fps * 1, fps, config: { damping: 16 } });
+  const coreSpring = pop(frame, fps, fps * 1, { damping: 11 });
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
   // Each layer staggered, starting at 2.5s, +1.4s apart (last lands ~11.9s)
@@ -37,6 +37,7 @@ export const Scene4Layers: React.FC = () => {
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
       <SceneBackground glow={theme.accent} />
+      <CameraRig>
       <div style={{ zIndex: 20 }}>
         <SceneHeading kicker="layer by layer" accent={theme.accent}>
           What's <span style={gradientText("#c7d2fe", theme.accent)}>wrapped</span> around the model
@@ -50,7 +51,7 @@ export const Scene4Layers: React.FC = () => {
           {[...LAYERS].reverse().map((layer) => {
             const i = LAYERS.indexOf(layer);
             const start = layerStart(i);
-            const s = spring({ frame: frame - start, fps, config: { damping: 15 } });
+            const s = pop(frame, fps, start, { damping: 11 });
             const opacity = interpolate(frame, [start, start + fps * 0.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             // label position on this ring's circumference
             const rad = (layer.angle * Math.PI) / 180;
@@ -90,6 +91,7 @@ export const Scene4Layers: React.FC = () => {
       <div style={{ position: "absolute", bottom: 46, width: "100%", textAlign: "center", opacity: lineOpacity, fontFamily: theme.fontSans, fontSize: 38, color: theme.text, zIndex: 20 }}>
         Strip it away → a model that can only <span style={{ color: theme.textMuted }}>talk</span>. Add it back → one that can <span style={{ color: theme.accentGreen }}>do the work.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

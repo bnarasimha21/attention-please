@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../motion";
 
 // Scene 5 — Permissions: the safety gate
 // An action arrives at a 3-way gate → routed to Auto-approve (green) /
@@ -20,6 +20,8 @@ export const Scene5Permissions: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentWarm} />
 
+      <CameraRig>
+
       <SceneHeading kicker="the safety gate" accent={theme.accentWarm}>
         Every action hits a <span style={gradientText("#fbbf24", theme.accentWarm)}>gate</span>
       </SceneHeading>
@@ -27,12 +29,15 @@ export const Scene5Permissions: React.FC = () => {
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 80, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 36 }}>
         {ROUTES.map((r, i) => {
           const start = fps * (1.5 + i * 2.2);
-          const s = spring({ frame: frame - start, fps, config: { damping: 16 } });
+          const s = pop(frame, fps, start, { damping: 11 });
           const rowOpacity = interpolate(frame, [start, start + fps * 0.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           // verdict reveals slightly after the action slides in
           const vStart = start + fps * 0.9;
           const vOpacity = interpolate(frame, [vStart, vStart + fps * 0.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           const glow = interpolate(frame, [vStart, vStart + fps * 0.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+          // gate verdict icon punches in with overshoot
+          const iconPop = pop(frame, fps, vStart, { damping: 9 });
+          const iconScale = interpolate(iconPop, [0, 1], [0.3, 1]);
 
           return (
             <div key={r.action} style={{ opacity: rowOpacity, display: "flex", alignItems: "center", gap: 36 }}>
@@ -52,6 +57,7 @@ export const Scene5Permissions: React.FC = () => {
               {/* gate icon */}
               <div style={{
                 width: 84, height: 84, borderRadius: 18, opacity: vOpacity,
+                transform: `scale(${iconScale})`,
                 background: `linear-gradient(160deg, ${r.color}, ${r.color}bb)`, color: theme.bg,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 46, fontWeight: 800,
@@ -71,6 +77,7 @@ export const Scene5Permissions: React.FC = () => {
       <div style={{ position: "absolute", bottom: 80, width: "100%", textAlign: "center", opacity: interpolate(frame, [fps * 9, fps * 10.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }), fontFamily: theme.fontSans, fontSize: 38, color: theme.text }}>
         The model <span style={{ color: theme.textMuted }}>proposes.</span> The harness <span style={{ color: theme.accent }}>disposes.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, interpolateColors } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, gradientText, EASE_OUT } from "../../../remotion-src/visuals";
+import { SceneBackground, gradientText, EASE_OUT, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 1 — Hook [0:00-0:14]
 // A chat thread grows longer and longer. An early AI reply is sharp + green;
@@ -32,11 +32,14 @@ export const Scene1Hook: React.FC = () => {
   const punchOpacity = interpolate(frame, [fps * 10, fps * 11.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const punchY = spring({ frame: frame - fps * 10, fps, config: { damping: 18 } });
 
+  // hero punch on the thread frame
+  const framePop = pop(frame, fps, fps * 0.4, { damping: 12 });
+
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.accentRed} />
 
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+      <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
         {/* phone-ish thread frame */}
         <div style={{
           width: 1060, height: 760, borderRadius: 34, padding: "32px 36px",
@@ -44,7 +47,8 @@ export const Scene1Hook: React.FC = () => {
           border: `1px solid ${theme.border}`,
           boxShadow: "0 50px 140px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)",
           overflow: "hidden", display: "flex", flexDirection: "column", gap: 19,
-          transform: `translateY(${scroll}px)`,
+          opacity: framePop,
+          transform: `translateY(${scroll}px) scale(${0.84 + framePop * 0.16})`,
         }}>
           <div style={{ fontFamily: theme.fontMono, fontSize: 22, color: theme.textDim, letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>
             chat · 1 long thread
@@ -52,7 +56,7 @@ export const Scene1Hook: React.FC = () => {
 
           {THREAD.map((m, i) => {
             const start = fps * m.delay;
-            const s = spring({ frame: frame - start, fps, config: { damping: 16 } });
+            const s = pop(frame, fps, start, { damping: 11 });
             const opacity = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             const isAI = m.role === "ai";
             // rot only applies to AI answers: blur up, color green→red
@@ -61,7 +65,8 @@ export const Scene1Hook: React.FC = () => {
             return (
               <div key={i} style={{
                 display: "flex", justifyContent: isAI ? "flex-start" : "flex-end",
-                opacity, transform: `translateY(${(1 - s) * 16}px)`,
+                opacity, transform: `translateY(${(1 - s) * 16}px) scale(${0.8 + s * 0.2})`,
+                transformOrigin: isAI ? "left center" : "right center",
               }}>
                 <div style={{
                   maxWidth: 700, padding: "18px 26px", borderRadius: 22,
@@ -84,7 +89,7 @@ export const Scene1Hook: React.FC = () => {
             );
           })}
         </div>
-      </div>
+      </CameraRig>
 
       {/* Punchline */}
       <div style={{

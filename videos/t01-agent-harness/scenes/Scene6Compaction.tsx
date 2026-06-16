@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../motion";
 
 // Scene 6 — Context & compaction
 // Context window bar fills with message blocks → hits the limit → old blocks
@@ -27,17 +27,25 @@ export const Scene6Compaction: React.FC = () => {
 
   const lineOpacity = interpolate(frame, [fps * 12, fps * 13.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Build the blocks to render
-  const blocks: { color: string; label: string; w: number }[] = [];
+  // window frame pops in just before blocks start filling
+  const windowPop = pop(frame, fps, fps * 1, { damping: 12 });
+  const windowScale = interpolate(windowPop, [0, 1], [0.85, 1]);
+  // per-slot fill timing — used so each new block pops in with a bounce
+  const slotStart = (i: number) => fps * 1.5 + i * ((fps * 4.5) / SLOTS);
+  // summary block punch when compaction lands
+  const summaryPunch = interpolate(pop(frame, fps, fps * 9, { damping: 9 }), [0, 0.5, 1], [0.6, 1.18, 1]);
+
+  // Build the blocks to render (popAt = frame the block first appears)
+  const blocks: { color: string; label: string; w: number; popAt: number }[] = [];
   if (!compacted) {
     for (let i = 0; i < Math.min(filled, SLOTS); i++) {
-      blocks.push({ color: theme.tokenColors[i % theme.tokenColors.length], label: "", w: 1 });
+      blocks.push({ color: theme.tokenColors[i % theme.tokenColors.length], label: "", w: 1, popAt: slotStart(i) });
     }
   } else {
     // one summary block (replaces the old 6) + the most recent 4 + refill
-    blocks.push({ color: theme.accent, label: "summary", w: 2 });
-    for (let i = 0; i < 4; i++) blocks.push({ color: theme.tokenColors[(i + 6) % theme.tokenColors.length], label: "", w: 1 });
-    for (let i = 0; i < refill; i++) blocks.push({ color: theme.tokenColors[i % theme.tokenColors.length], label: "", w: 1 });
+    blocks.push({ color: theme.accent, label: "summary", w: 2, popAt: fps * 9 });
+    for (let i = 0; i < 4; i++) blocks.push({ color: theme.tokenColors[(i + 6) % theme.tokenColors.length], label: "", w: 1, popAt: fps * 9 });
+    for (let i = 0; i < refill; i++) blocks.push({ color: theme.tokenColors[i % theme.tokenColors.length], label: "", w: 1, popAt: fps * 10.5 + i * ((fps * 2.5) / 3) });
   }
 
   const usedSlots = blocks.reduce((a, b) => a + b.w, 0);
@@ -46,6 +54,8 @@ export const Scene6Compaction: React.FC = () => {
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
+
+      <CameraRig>
 
       <SceneHeading kicker="memory management" accent={theme.accent}>
         Keeping memory from <span style={gradientText("#c7d2fe", theme.accent)}>overflowing</span>
@@ -65,16 +75,22 @@ export const Scene6Compaction: React.FC = () => {
             ? `0 0 ${warnFlash * 66}px ${theme.accentRed}, inset 0 0 30px rgba(0,0,0,0.6)`
             : "inset 0 0 30px rgba(0,0,0,0.6), 0 16px 50px rgba(0,0,0,0.4)",
           display: "flex", gap: 12, alignItems: "stretch", overflow: "hidden",
+          transform: `scale(${windowScale})`,
         }}>
-          {blocks.map((b, i) => (
-            <div key={i} style={{
-              flex: b.w, borderRadius: 12,
-              background: `linear-gradient(160deg, ${b.color}, ${b.color}cc)`,
-              boxShadow: `0 0 18px ${b.color}55, inset 0 1px 0 rgba(255,255,255,0.25)`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: theme.fontMono, fontSize: 24, fontWeight: 700, color: theme.bg,
-            }}>{b.label}</div>
-          ))}
+          {blocks.map((b, i) => {
+            const bp = pop(frame, fps, b.popAt, { damping: 10 });
+            const bScale = b.label === "summary" ? summaryPunch : interpolate(bp, [0, 1], [0.4, 1]);
+            return (
+              <div key={i} style={{
+                flex: b.w, borderRadius: 12,
+                background: `linear-gradient(160deg, ${b.color}, ${b.color}cc)`,
+                boxShadow: `0 0 18px ${b.color}55, inset 0 1px 0 rgba(255,255,255,0.25)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontFamily: theme.fontMono, fontSize: 24, fontWeight: 700, color: theme.bg,
+                transform: `scale(${bScale})`, opacity: b.label === "summary" ? 1 : bp,
+              }}>{b.label}</div>
+            );
+          })}
           {/* empty remaining slots */}
           {Array.from({ length: Math.max(0, SLOTS - usedSlots) }).map((_, i) => (
             <div key={`e${i}`} style={{ flex: 1, borderRadius: 10, border: `1px dashed ${theme.border}` }} />
@@ -92,6 +108,7 @@ export const Scene6Compaction: React.FC = () => {
       <div style={{ position: "absolute", bottom: 90, width: "100%", textAlign: "center", opacity: lineOpacity, fontFamily: theme.fontSans, fontSize: 38, color: theme.text }}>
         The harness quietly <span style={{ color: theme.accent }}>rewrites its own memory</span> — so the agent never "forgets."
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

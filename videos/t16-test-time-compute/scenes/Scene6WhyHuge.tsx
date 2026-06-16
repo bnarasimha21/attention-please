@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 6 — Why it's huge
 // Two scaling AXES to make AI smarter:
@@ -14,19 +14,19 @@ export const Scene6WhyHuge: React.FC = () => {
 
   // axis 1 (old) appears 1.2s
   const a1Opacity = interpolate(frame, [fps * 1.2, fps * 2.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const a1Spring = spring({ frame: frame - fps * 1.2, fps, config: { damping: 16 } });
+  const a1Spring = pop(frame, fps, fps * 1.2, { damping: 11 });
   // bigger-model nodes grow up axis 1
   const a1Grow = interpolate(frame, [fps * 2.5, fps * 5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // axis 2 (new) appears 5.5s and LIGHTS up
   const a2Opacity = interpolate(frame, [fps * 5.5, fps * 6.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const a2Spring = spring({ frame: frame - fps * 5.5, fps, config: { damping: 16 } });
+  const a2Spring = pop(frame, fps, fps * 5.5, { damping: 11 });
   const a2Grow = interpolate(frame, [fps * 6.8, fps * 9.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const a2Glow = 0.5 + 0.5 * Math.sin(frame / 7);
 
   // "biggest shift" tag — holds
   const tagOpacity = interpolate(frame, [fps * 11, fps * 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const tagSpring = spring({ frame: frame - fps * 11, fps, config: { damping: 14 } });
+  const tagSpring = pop(frame, fps, fps * 11, { damping: 11 });
 
   // closing line — holds fully visible to scene end (20s)
   const lineOpacity = interpolate(frame, [fps * 13, fps * 14.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -51,6 +51,7 @@ export const Scene6WhyHuge: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig>
       <SceneHeading kicker="why it's huge" accent={theme.accent}>
         Two ways to make AI <span style={gradientText("#c7d2fe", theme.accent)}>smarter</span>
       </SceneHeading>
@@ -59,7 +60,7 @@ export const Scene6WhyHuge: React.FC = () => {
 
         {/* Axis 1 — train bigger (old) */}
         <div style={{
-          opacity: a1Opacity, transform: `translateY(${(1 - a1Spring) * 29}px)`,
+          opacity: a1Opacity, transform: `translateY(${(1 - a1Spring) * 29}px) scale(${0.9 + a1Spring * 0.1})`,
           width: 552, padding: 34, borderRadius: 22,
           background: "linear-gradient(180deg, #131318, #0c0c10)", border: `1px solid ${theme.border}`,
           display: "flex", flexDirection: "column", alignItems: "center", gap: 22,
@@ -82,7 +83,7 @@ export const Scene6WhyHuge: React.FC = () => {
 
         {/* Axis 2 — think longer (NEW, highlighted) */}
         <div style={{
-          opacity: a2Opacity, transform: `translateY(${(1 - a2Spring) * 29}px)`,
+          opacity: a2Opacity, transform: `translateY(${(1 - a2Spring) * 29}px) scale(${0.9 + a2Spring * 0.1})`,
           width: 552, padding: 34, borderRadius: 22,
           background: `linear-gradient(180deg, ${theme.accent}14, #0c0c10)`,
           border: `2px solid ${theme.accent}`,
@@ -124,6 +125,7 @@ export const Scene6WhyHuge: React.FC = () => {
       }}>
         Buy intelligence <span style={{ ...gradientText("#c7d2fe", theme.accent), fontWeight: 800 }}>at answer-time.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

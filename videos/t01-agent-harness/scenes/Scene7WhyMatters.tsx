@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../motion";
 
 // Scene 7 — Why this matters
 // Same MODEL core in a weak harness vs a strong harness → different outcomes.
@@ -26,17 +26,25 @@ export const Scene7WhyMatters: React.FC = () => {
 
   const leftOpacity = interpolate(frame, [fps * 1.5, fps * 2.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const rightOpacity = interpolate(frame, [fps * 3, fps * 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const leftScale = interpolate(pop(frame, fps, fps * 1.5, { damping: 11 }), [0, 1], [0.8, 1]);
+  const rightScale = interpolate(pop(frame, fps, fps * 3, { damping: 11 }), [0, 1], [0.8, 1]);
 
-  // verdict chips
-  const weakVerdict = interpolate(frame, [fps * 5, fps * 6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const strongVerdict = interpolate(frame, [fps * 5.5, fps * 6.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // verdict chips pop in with overshoot
+  const weakV = pop(frame, fps, fps * 5, { damping: 10 });
+  const strongV = pop(frame, fps, fps * 5.5, { damping: 10 });
+  const weakVerdict = weakV;
+  const strongVerdict = strongV;
+  const weakVScale = interpolate(weakV, [0, 1], [0.5, 1]);
+  const strongVScale = interpolate(strongV, [0, 1], [0.5, 1]);
 
-  const lineSpring = spring({ frame: frame - fps * 8, fps, config: { damping: 16 } });
+  const lineSpring = pop(frame, fps, fps * 8, { damping: 13 });
   const lineOpacity = interpolate(frame, [fps * 8, fps * 9.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
+
+      <CameraRig>
 
       <SceneHeading kicker="the takeaway" accent={theme.accent}>
         Same model. <span style={gradientText("#c7d2fe", theme.accent)}>Different harness.</span>
@@ -44,11 +52,11 @@ export const Scene7WhyMatters: React.FC = () => {
 
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 100, display: "flex", alignItems: "center", justifyContent: "center", gap: 144 }}>
         {/* Weak harness */}
-        <div style={{ opacity: leftOpacity, display: "flex", flexDirection: "column", alignItems: "center", gap: 22 }}>
+        <div style={{ opacity: leftOpacity, transform: `scale(${leftScale})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 22 }}>
           <div style={{ fontFamily: theme.fontMono, fontSize: 32, color: theme.textMuted }}>weak harness</div>
           <Core pulse={pulse} ringCount={1} />
           <div style={{
-            opacity: weakVerdict, padding: "16px 32px", borderRadius: 14,
+            opacity: weakVerdict, transform: `scale(${weakVScale})`, padding: "16px 32px", borderRadius: 14,
             background: `${theme.accentRed}1a`, border: `1px solid ${theme.accentRed}`,
             fontFamily: theme.fontSans, fontSize: 32, color: theme.accentRed,
           }}>barely works</div>
@@ -58,11 +66,11 @@ export const Scene7WhyMatters: React.FC = () => {
         <div style={{ width: 1, height: 432, background: theme.border }} />
 
         {/* Strong harness */}
-        <div style={{ opacity: rightOpacity, display: "flex", flexDirection: "column", alignItems: "center", gap: 22 }}>
+        <div style={{ opacity: rightOpacity, transform: `scale(${rightScale})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 22 }}>
           <div style={{ fontFamily: theme.fontMono, fontSize: 32, color: theme.accent }}>strong harness</div>
           <Core pulse={pulse} ringCount={4} />
           <div style={{
-            opacity: strongVerdict, padding: "16px 32px", borderRadius: 14,
+            opacity: strongVerdict, transform: `scale(${strongVScale})`, padding: "16px 32px", borderRadius: 14,
             background: `${theme.accentGreen}1a`, border: `1px solid ${theme.accentGreen}`,
             fontFamily: theme.fontSans, fontSize: 32, color: theme.accentGreen,
           }}>ships real software</div>
@@ -76,6 +84,7 @@ export const Scene7WhyMatters: React.FC = () => {
       }}>
         The model is becoming a <span style={{ color: theme.textMuted }}>commodity.</span> The harness is the <span style={{ color: theme.accent }}>product.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

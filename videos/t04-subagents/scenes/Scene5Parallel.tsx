@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 5 — Parallel subagents [0:57-1:14]
 // Orchestrator core in center; 3 subagents (research / review / tests) fan out,
@@ -9,7 +9,7 @@ import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../..
 
 const SUBS = [
   { job: "RESEARCH", x: -672, y: -36, color: theme.tokenColors[4], result: "→ 3 key findings", noise: ["38 search hits", "12 docs read"] },
-  { job: "REVIEW",   x: 0,    y: -300, color: theme.tokenColors[5], result: "→ 2 issues found", noise: ["980-line diff", "lint · 44 warns"] },
+  { job: "REVIEW",   x: 0,    y: -258, color: theme.tokenColors[5], result: "→ 2 issues found", noise: ["980-line diff", "lint · 44 warns"] },
   { job: "TESTS",    x: 672,  y: -36, color: theme.tokenColors[2], result: "→ all green", noise: ["412-line log", "128 cases"] },
 ];
 
@@ -18,7 +18,7 @@ export const Scene5Parallel: React.FC = () => {
   const { fps } = useVideoConfig();
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
-  const orchSpring = spring({ frame: frame - fps * 0.6, fps, config: { damping: 16 } });
+  const orchSpring = pop(frame, fps, fps * 0.6, { damping: 11 });
 
   // subs fan out together at 2s
   const subStart = fps * 2;
@@ -43,12 +43,13 @@ export const Scene5Parallel: React.FC = () => {
         </SceneHeading>
       </div>
 
-      <div style={{ position: "absolute", top: 40, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <CameraRig>
+      <div style={{ position: "absolute", top: 210, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ position: "relative", width: 1, height: 1 }}>
 
           {/* connector lines + subagents */}
           {SUBS.map((s, j) => {
-            const sp = spring({ frame: frame - subStart, fps, config: { damping: 15 } });
+            const sp = pop(frame, fps, subStart + j * fps * 0.12, { damping: 12 });
             const sx = s.x * sp;
             const sy = s.y * sp;
             const op = interpolate(frame, [subStart, subStart + fps * 0.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -115,6 +116,7 @@ export const Scene5Parallel: React.FC = () => {
       }}>
         Three messy jobs at once — <span style={{ color: theme.accentGreen, fontWeight: 700 }}>one clean desk.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

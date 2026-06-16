@@ -26,7 +26,8 @@ export const TIMINGS = {
   scene6: { start: 102 * FPS, duration: 18 * FPS }, // Why it's hidden
   scene7: { start: 120 * FPS, duration: 18 * FPS }, // Why it matters
   scene8: { start: 138 * FPS, duration: 17 * FPS }, // Recap + CTA
+  scene9: { start: 155 * FPS, duration: 14 * FPS }, // Like & Subscribe CTA
 };
 
 // Sum of scene durations (155s) minus the 7 overlapping crossfades.
-export const TOTAL_FRAMES = 155 * FPS - 7 * XFADE; // ~2:31
+export const TOTAL_FRAMES = 169 * FPS - 8 * XFADE; // ~2:44 (+ CTA)

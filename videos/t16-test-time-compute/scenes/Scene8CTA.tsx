@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 8 — Recap + CTA
 // Recap diagram: MODEL core with a "think → answer" flow. Tagline
@@ -16,7 +16,7 @@ export const Scene8CTA: React.FC = () => {
   const { fps } = useVideoConfig();
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
-  const coreSpring = spring({ frame: frame - fps * 0.5, fps, config: { damping: 16 } });
+  const coreSpring = pop(frame, fps, fps * 0.5, { damping: 11 });
 
   // orbiting "think" / "answer" chips appear, staggered ~1.5s apart
   const chipStart = (i: number) => fps * 1.4 + i * fps * 1.5;
@@ -30,9 +30,10 @@ export const Scene8CTA: React.FC = () => {
   const brandOpacity = interpolate(frame, [fps * 10, fps * 11], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
       {/* Recap diagram */}
       <div style={{ position: "relative", width: 624, height: 504, display: "flex", alignItems: "center", justifyContent: "center" }}>
         {/* shimmer ring */}
@@ -45,7 +46,7 @@ export const Scene8CTA: React.FC = () => {
         {/* think → answer chips */}
         {FLOW.map((f, i) => {
           const start = chipStart(i);
-          const s = spring({ frame: frame - start, fps, config: { damping: 14 } });
+          const s = pop(frame, fps, start, { damping: 11 });
           const o = interpolate(frame, [start, start + fps * 0.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           const side = i === 0 ? -1 : 1;
           return (
@@ -76,16 +77,7 @@ export const Scene8CTA: React.FC = () => {
       <div style={{ marginTop: 22, opacity: teaserOpacity, fontFamily: theme.fontSans, fontSize: 32, color: theme.textMuted, textAlign: "center" }}>
         Next: <span style={{ color: theme.accent }}>Inside a reasoning model — what "thinking" actually is</span>
       </div>
-
-      {/* Brand */}
-      <div style={{ opacity: brandOpacity, position: "absolute", bottom: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 57, fontWeight: 800, color: theme.text, letterSpacing: 2 }}>
-          Attention<span style={{ color: theme.accent }}> Please</span>
-        </div>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 24, color: theme.textMuted }}>
-          AI concepts, animated clearly
-        </div>
-      </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

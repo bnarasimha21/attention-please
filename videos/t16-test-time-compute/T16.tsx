@@ -10,6 +10,7 @@ import { Scene5Tradeoff } from "./scenes/Scene5Tradeoff";
 import { Scene6WhyHuge } from "./scenes/Scene6WhyHuge";
 import { Scene7WhenToUse } from "./scenes/Scene7WhenToUse";
 import { Scene8CTA } from "./scenes/Scene8CTA";
+import { Scene9CTA } from "./scenes/Scene9CTA";
 
 // Trending 16 — Test-Time Compute (why the best models now "think" first)
 // Scenes are crossfaded with @remotion/transitions. Each transition overlaps
@@ -28,6 +29,7 @@ export const T16: React.FC = () => {
     { C: Scene6WhyHuge, duration: TIMINGS.scene6.duration },
     { C: Scene7WhenToUse, duration: TIMINGS.scene7.duration },
     { C: Scene8CTA, duration: TIMINGS.scene8.duration },
+    { C: Scene9CTA, duration: TIMINGS.scene9.duration },
   ];
 
   const children: React.ReactNode[] = [];

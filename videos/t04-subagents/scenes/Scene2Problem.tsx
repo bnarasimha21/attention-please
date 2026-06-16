@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText, EASE_OUT } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, EASE_OUT, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 2 — The problem [0:13-0:26]
 // The fixed window fills with junk; the GOAL line sinks and gets buried under
@@ -19,9 +19,10 @@ export const Scene2Problem: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const panelOpacity = interpolate(frame, [fps * 0.6, fps * 1.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const panelPop = pop(frame, fps, fps * 0.6, { damping: 12 });
 
   // GOAL pill enters at top, then sinks down as junk stacks above it
-  const goalIn = spring({ frame: frame - fps * 1.4, fps, config: { damping: 16 } });
+  const goalIn = pop(frame, fps, fps * 1.4, { damping: 11 });
   const sink = interpolate(frame, [fps * 3, fps * 11.5], [0, 360], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT });
   const goalDim = interpolate(frame, [fps * 4.5, fps * 11], [1, 0.28], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
@@ -42,10 +43,11 @@ export const Scene2Problem: React.FC = () => {
         The goal gets <span style={gradientText("#fca5a5", theme.accentRed)}>buried</span>
       </SceneHeading>
 
+      <CameraRig>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 72 }}>
         {/* fixed window panel */}
         <div style={{
-          opacity: panelOpacity, width: 744, height: 648, borderRadius: 26,
+          opacity: panelOpacity, transform: `scale(${interpolate(panelPop, [0, 1], [0.85, 1])})`, width: 744, height: 648, borderRadius: 26,
           background: "linear-gradient(180deg, #14141b 0%, #0c0c11 100%)",
           border: `1px solid ${theme.border}`, boxShadow: "0 30px 90px rgba(0,0,0,0.6)",
           padding: 28, position: "relative", overflow: "hidden",
@@ -58,11 +60,11 @@ export const Scene2Problem: React.FC = () => {
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {JUNK.map((j, i) => {
               const start = junkStart(i);
-              const s = spring({ frame: frame - start, fps, config: { damping: 13 } });
+              const s = pop(frame, fps, start, { damping: 11 });
               const op = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
               return (
                 <div key={j.label} style={{
-                  opacity: op, transform: `translateY(${(1 - s) * -29}px)`,
+                  opacity: op, transform: `translateY(${(1 - s) * -29}px) scale(${interpolate(s, [0, 1], [0.85, 1])})`,
                   padding: "18px 24px", borderRadius: 14,
                   background: `${j.color}14`, border: `1px solid ${j.color}44`,
                   fontFamily: theme.fontMono, fontSize: 26, color: j.color,
@@ -102,6 +104,7 @@ export const Scene2Problem: React.FC = () => {
       }}>
         Noise floods the window — and the agent <span style={{ color: theme.accentRed, fontWeight: 700 }}>loses the thread.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 2 — It talks to itself [0:13–0:27]
 // Left: what the user sees ("Thinking…"). Right: the HIDDEN stream of reasoning
@@ -23,7 +23,7 @@ export const Scene2TalksToItself: React.FC = () => {
 
   const userOpacity = interpolate(frame, [fps * 1.2, fps * 2.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const panelOpacity = interpolate(frame, [fps * 3, fps * 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const panelSpring = spring({ frame: frame - fps * 3, fps, config: { damping: 16 } });
+  const panelSpring = pop(frame, fps, fps * 3, { damping: 12 });
 
   // hidden lines stream in one by one starting at 4s, ~1.5s apart so each is
   // readable before the next appears. Last line lands ~13.5s (holds ~8.5s).
@@ -32,12 +32,13 @@ export const Scene2TalksToItself: React.FC = () => {
   const dots = (Math.floor(frame / 12) % 3) + 1;
 
   const lineOpacity = interpolate(frame, [fps * 16, fps * 17.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const lineY = spring({ frame: frame - fps * 16, fps, config: { damping: 18 } });
+  const lineY = pop(frame, fps, fps * 16, { damping: 12 });
 
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.tokenColors[5]} />
 
+      <CameraRig>
       <SceneHeading kicker="the reveal" accent={theme.tokenColors[5]}>
         It's secretly <span style={gradientText("#c4b5fd", theme.tokenColors[5])}>talking to itself</span>
       </SceneHeading>
@@ -78,10 +79,12 @@ export const Scene2TalksToItself: React.FC = () => {
           </div>
           {HIDDEN_LINES.map((ln, i) => {
             const o = interpolate(frame, [lineStart(i), lineStart(i) + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-            const x = interpolate(frame, [lineStart(i), lineStart(i) + fps * 0.5], [-14, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+            const sp = pop(frame, fps, lineStart(i), { damping: 12 });
+            const x = (1 - sp) * -14;
+            const sc = 0.8 + sp * 0.2;
             return (
               <div key={i} style={{
-                opacity: o, transform: `translateX(${x}px)`,
+                opacity: o, transform: `translateX(${x}px) scale(${sc})`, transformOrigin: "left center",
                 fontFamily: theme.fontMono, fontSize: 28, color: theme.text, lineHeight: 1.75,
               }}>
                 <span style={{ color: theme.tokenColors[5] }}>›</span> {ln}
@@ -98,6 +101,7 @@ export const Scene2TalksToItself: React.FC = () => {
       }}>
         A private <span style={{ ...gradientText("#c4b5fd", theme.tokenColors[5]), fontWeight: 800 }}>scratchpad of tokens</span>, written just for itself.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

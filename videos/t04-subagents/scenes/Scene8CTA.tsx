@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 8 — Recap + CTA [1:43-1:55]
 // Final diagram: orchestrator core ringed by 3 isolated subagent satellites,
@@ -17,7 +17,7 @@ export const Scene8CTA: React.FC = () => {
   const { fps } = useVideoConfig();
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
-  const coreSpring = spring({ frame: frame - fps * 0.4, fps, config: { damping: 16 } });
+  const coreSpring = pop(frame, fps, fps * 0.4, { damping: 11 });
 
   const satStart = (i: number) => fps * 1.2 + i * fps * 0.7;
   const R = 240;
@@ -27,14 +27,15 @@ export const Scene8CTA: React.FC = () => {
   const brandOpacity = interpolate(frame, [fps * 9, fps * 10], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
       {/* Recap diagram */}
       <div style={{ position: "relative", width: 672, height: 552, display: "flex", alignItems: "center", justifyContent: "center" }}>
         {SATS.map((s, i) => {
           const start = satStart(i);
-          const sp = spring({ frame: frame - start, fps, config: { damping: 15 } });
+          const sp = pop(frame, fps, start, { damping: 12 });
           const op = interpolate(frame, [start, start + fps * 0.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           const rad = (s.angle * Math.PI) / 180;
           const x = Math.cos(rad) * R * sp;
@@ -80,16 +81,7 @@ export const Scene8CTA: React.FC = () => {
       <div style={{ marginTop: 19, opacity: teaserOpacity, fontFamily: theme.fontSans, fontSize: 32, color: theme.textMuted, textAlign: "center" }}>
         Next: <span style={{ color: theme.accent }}>Is RAG dead?</span>
       </div>
-
-      {/* Brand */}
-      <div style={{ opacity: brandOpacity, position: "absolute", bottom: 70, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 57, fontWeight: 800, color: theme.text, letterSpacing: 2 }}>
-          Attention<span style={{ color: theme.accent }}> Please</span>
-        </div>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 24, color: theme.textMuted }}>
-          AI concepts, animated clearly
-        </div>
-      </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

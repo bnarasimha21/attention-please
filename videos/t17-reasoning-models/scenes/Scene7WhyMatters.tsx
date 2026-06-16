@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, interpolateColors } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, interpolateColors } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 7 — Why it matters [1:27–1:40]
 // Capability chips (math/code/logic/planning) light up; a "room to think" meter
@@ -32,6 +32,7 @@ export const Scene7WhyMatters: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentGreen} />
 
+      <CameraRig>
       <SceneHeading kicker="the takeaway" accent={theme.accentGreen}>
         Give them <span style={gradientText("#6ee7b7", theme.accentGreen)}>room to think</span>
       </SceneHeading>
@@ -43,7 +44,7 @@ export const Scene7WhyMatters: React.FC = () => {
           {CHIPS.map((c, i) => {
             const start = chipStart(i);
             const o = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-            const sp = spring({ frame: frame - start, fps, config: { damping: 14 } });
+            const sp = pop(frame, fps, start, { damping: 11 });
             return (
               <div key={c.label} style={{
                 opacity: o, transform: `scale(${0.8 + sp * 0.2})`,
@@ -79,6 +80,7 @@ export const Scene7WhyMatters: React.FC = () => {
       }}>
         The more space to reason, the <span style={{ ...gradientText("#6ee7b7", theme.accentGreen), fontWeight: 800 }}>better they answer.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 6 — The fixes [1:20-1:37]
 // Four clean glassy cards reveal in sequence: Compact, Re-inject, Start fresh,
@@ -30,16 +30,16 @@ export const Scene6Fixes: React.FC = () => {
         Four <span style={gradientText("#6ee7b7", theme.accentGreen)}>moves</span>
       </SceneHeading>
 
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 44 }}>
+      <CameraRig style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 36 }}>
         {FIXES.map((f, i) => {
           const start = cardStart(i);
-          const s = spring({ frame: frame - start, fps, config: { damping: 15 } });
+          const s = pop(frame, fps, start, { damping: 11 });
           const opacity = interpolate(frame, [start, start + fps * 0.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           const glowPulse = 0.5 + 0.5 * Math.sin((frame - start) / 10);
           return (
             <div key={f.title} style={{
               width: 384, height: 456,
-              opacity, transform: `translateY(${(1 - s) * 40}px) scale(${0.9 + s * 0.1})`,
+              opacity, transform: `translateY(${(1 - s) * 40}px) scale(${0.8 + s * 0.2})`,
               borderRadius: 28, padding: "40px 32px",
               background: "linear-gradient(165deg, rgba(28,28,38,0.9) 0%, rgba(14,14,19,0.92) 100%)",
               border: `1px solid ${f.color}55`,
@@ -58,7 +58,7 @@ export const Scene6Fixes: React.FC = () => {
             </div>
           );
         })}
-      </div>
+      </CameraRig>
 
       <div style={{
         position: "absolute", bottom: 60, width: "100%", textAlign: "center",

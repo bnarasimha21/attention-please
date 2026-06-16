@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText, EASE_OUT } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, EASE_OUT, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 4 — How it works [0:39-0:57] — THE KEY SCENE
 // Main delegates a messy task → subagent does all the noisy work in its OWN
@@ -15,10 +15,10 @@ const SUB_NOISE = [
 ];
 
 const Panel: React.FC<{
-  title: string; titleColor: string; borderColor: string; children?: React.ReactNode;
-}> = ({ title, titleColor, borderColor, children }) => (
+  title: string; titleColor: string; borderColor: string; popScale?: number; children?: React.ReactNode;
+}> = ({ title, titleColor, borderColor, popScale = 1, children }) => (
   <div style={{
-    width: 576, height: 552, borderRadius: 26,
+    width: 576, height: 552, borderRadius: 26, transform: `scale(${popScale})`,
     background: "linear-gradient(180deg, #14141b 0%, #0c0c11 100%)",
     border: `1px solid ${borderColor}`, boxShadow: "0 30px 90px rgba(0,0,0,0.55)",
     padding: 26, position: "relative", overflow: "hidden",
@@ -34,6 +34,9 @@ export const Scene4HowItWorks: React.FC = () => {
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
   const stageOpacity = interpolate(frame, [fps * 0.5, fps * 1.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // snappy two-panel isolation entrance (left then right)
+  const leftPop = interpolate(pop(frame, fps, fps * 0.5, { damping: 11 }), [0, 1], [0.82, 1]);
+  const rightPop = interpolate(pop(frame, fps, fps * 0.8, { damping: 11 }), [0, 1], [0.82, 1]);
 
   // 1) task crosses LEFT → RIGHT (2s-4s)
   const taskTravel = interpolate(frame, [fps * 2, fps * 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT });
@@ -50,6 +53,7 @@ export const Scene4HowItWorks: React.FC = () => {
 
   // 4) main window stamps "still clean" once answer lands
   const cleanStamp = interpolate(frame, [fps * 15.5, fps * 16.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const cleanPop = pop(frame, fps, fps * 15.5, { damping: 10 });
 
   const lineOpacity = interpolate(frame, [fps * 17, fps * 18.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const lineY = spring({ frame: frame - fps * 17, fps, config: { damping: 18 } });
@@ -62,18 +66,19 @@ export const Scene4HowItWorks: React.FC = () => {
         The noise stays <span style={gradientText("#c7d2fe", theme.accent)}>contained</span>
       </SceneHeading>
 
+      <CameraRig>
       <div style={{ position: "absolute", top: 30, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 84, opacity: stageOpacity }}>
 
         {/* LEFT — main agent, pristine window */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 22 }}>
           <ModelCore size={144} pulse={pulse} fontSize={27} label="MAIN" />
-          <Panel title="MAIN THREAD" titleColor={theme.accent} borderColor={cleanStamp > 0.3 ? theme.accentGreen : theme.border}>
+          <Panel title="MAIN THREAD" titleColor={theme.accent} borderColor={cleanStamp > 0.3 ? theme.accentGreen : theme.border} popScale={leftPop}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: 384, gap: 19, color: theme.textDim }}>
               <div style={{ fontSize: 49, opacity: 0.4 }}>✦</div>
               <div style={{ fontFamily: theme.fontSans, fontSize: 24, color: theme.textMuted }}>never saw the junk</div>
               {/* clean answer lands here */}
               <div style={{
-                opacity: cleanStamp, transform: `scale(${0.8 + cleanStamp * 0.2})`, marginTop: 10,
+                opacity: cleanStamp, transform: `scale(${interpolate(cleanPop, [0, 1], [0.8, 1])})`, marginTop: 10,
                 padding: "16px 24px", borderRadius: 14,
                 background: `${theme.accentGreen}1f`, border: `1px solid ${theme.accentGreen}`,
                 fontFamily: theme.fontMono, fontSize: 24, color: theme.accentGreen, fontWeight: 700,
@@ -92,15 +97,15 @@ export const Scene4HowItWorks: React.FC = () => {
           <div style={{ filter: "hue-rotate(80deg) saturate(1.2)" }}>
             <ModelCore size={144} pulse={pulse} fontSize={27} label="SUB" />
           </div>
-          <Panel title="SUBAGENT — ISOLATED" titleColor={theme.accentGreen} borderColor={`${theme.accentGreen}66`}>
+          <Panel title="SUBAGENT — ISOLATED" titleColor={theme.accentGreen} borderColor={`${theme.accentGreen}66`} popScale={rightPop}>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {SUB_NOISE.map((n, i) => {
                 const start = noiseStart(i);
-                const s = spring({ frame: frame - start, fps, config: { damping: 13 } });
+                const s = pop(frame, fps, start, { damping: 11 });
                 const op = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
                 return (
                   <div key={n.label} style={{
-                    opacity: op, transform: `translateY(${(1 - s) * -18}px)`,
+                    opacity: op, transform: `translateY(${(1 - s) * -18}px) scale(${interpolate(s, [0, 1], [0.85, 1])})`,
                     padding: "17px 22px", borderRadius: 14,
                     background: `${n.color}14`, border: `1px solid ${n.color}44`,
                     fontFamily: theme.fontMono, fontSize: 24, color: n.color,
@@ -138,6 +143,7 @@ export const Scene4HowItWorks: React.FC = () => {
         All the mess stays on the subagent's side — only the{" "}
         <span style={{ color: theme.accentGreen, fontWeight: 700 }}>clean answer</span> crosses back.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

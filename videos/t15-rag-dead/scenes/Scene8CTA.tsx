@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 8 — Recap + CTA [1:46-2:00]
 // Crisp recap row of pills → tagline → teaser → channel brand block (copied
@@ -27,9 +27,10 @@ export const Scene8CTA: React.FC = () => {
   const brandOpacity = interpolate(frame, [fps * 11.5, fps * 12.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
       {/* Recap title */}
       <div style={{ position: "absolute", top: 90, opacity: titleOpacity, fontFamily: theme.fontSans, fontSize: 54, fontWeight: 800, color: theme.text }}>
         The whole story, <span style={gradientText("#c7d2fe", theme.accent)}>in four lines</span>
@@ -39,14 +40,14 @@ export const Scene8CTA: React.FC = () => {
       <div style={{ display: "flex", flexDirection: "column", gap: 20, marginTop: -20 }}>
         {PILLS.map((p, i) => {
           const start = pillStart(i);
-          const s = spring({ frame: frame - start, fps, config: { damping: 15 } });
+          const s = pop(frame, fps, start, { damping: 11 });
           const opacity = interpolate(frame, [start, start + fps * 0.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           return (
             <div
               key={i}
               style={{
                 opacity,
-                transform: `translateX(${(1 - s) * -30}px)`,
+                transform: `translateX(${(1 - s) * -30}px) scale(${interpolate(s, [0, 1], [0.85, 1])})`,
                 display: "flex",
                 alignItems: "center",
                 gap: 22,
@@ -91,16 +92,7 @@ export const Scene8CTA: React.FC = () => {
       <div style={{ marginTop: 18, opacity: teaserOpacity, fontFamily: theme.fontSans, fontSize: 32, color: theme.textMuted, textAlign: "center" }}>
         Next: <span style={{ color: theme.accent }}>Test-time compute — why models now think before answering</span>
       </div>
-
-      {/* Brand */}
-      <div style={{ opacity: brandOpacity, position: "absolute", bottom: 50, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 56, fontWeight: 800, color: theme.text, letterSpacing: 2 }}>
-          Attention<span style={{ color: theme.accent }}> Please</span>
-        </div>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 24, color: theme.textMuted }}>
-          AI concepts, animated clearly
-        </div>
-      </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

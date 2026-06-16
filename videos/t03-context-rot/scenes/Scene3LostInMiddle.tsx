@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText, EASE_OUT } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, EASE_OUT, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 3 — Lost in the middle [0:30-0:47]
 // A long document; a key fact tested at START (✓), END (✓), MIDDLE (✗).
@@ -59,7 +59,7 @@ export const Scene3LostInMiddle: React.FC = () => {
         Lost in the <span style={gradientText("#fca5a5", theme.accentRed)}>middle</span>
       </SceneHeading>
 
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 28 }}>
+      <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 28 }}>
 
         {/* Chart + document */}
         <div style={{ position: "relative", width: W, height: H + 84, opacity: docOpacity }}>
@@ -108,12 +108,12 @@ export const Scene3LostInMiddle: React.FC = () => {
         <div style={{ display: "flex", gap: 84 }}>
           {PROBES.map((p) => {
             const start = fps * p.delay - fps * 6; // shift into 5s..8s window
-            const s = spring({ frame: frame - start, fps, config: { damping: 14 } });
+            const s = pop(frame, fps, start, { damping: 11 });
             const opacity = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             const c = p.found ? theme.accentGreen : theme.accentRed;
             return (
               <div key={p.label} style={{
-                opacity, transform: `translateY(${(1 - s) * 18}px) scale(${0.85 + s * 0.15})`,
+                opacity, transform: `translateY(${(1 - s) * 18}px) scale(${0.8 + s * 0.2})`,
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
                 padding: "20px 34px", borderRadius: 20,
                 background: `linear-gradient(160deg, ${c}1c, ${c}0a)`,
@@ -127,7 +127,7 @@ export const Scene3LostInMiddle: React.FC = () => {
             );
           })}
         </div>
-      </div>
+      </CameraRig>
 
       <div style={{ position: "absolute", bottom: 56, width: "100%", textAlign: "center", opacity: captionOpacity, fontFamily: theme.fontSans, fontSize: 41, color: theme.text }}>
         High at the edges, sags in the center — a{" "}

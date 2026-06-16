@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 5 — Curation is the skill [0:56-1:12]
 // Side by side: BAD context (everything dumped, messy, overflowing → bad
@@ -37,13 +37,13 @@ const Window: React.FC<{
       }}>
         {(good ? goodColors : badColors).map((c, i) => {
           const start = fillStart + i * fps * 0.18;
-          const s = spring({ frame: frame - start, fps, config: { damping: 18 } });
+          const s = pop(frame, fps, start, { damping: 11 });
           const o = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           // good blocks are tidy uniform; bad ones are jagged widths
           const w = good ? 100 : [92, 70, 100, 55, 84, 100, 63, 96, 48][i];
           return (
             <div key={i} style={{
-              opacity: o, transform: good ? `scale(${0.9 + s * 0.1})` : `translateX(${(1 - s) * (i % 2 ? 18 : -18)}px)`,
+              opacity: o, transform: good ? `scale(${0.8 + s * 0.2})` : `translateX(${(1 - s) * (i % 2 ? 18 : -18)}px) scale(${0.85 + s * 0.15})`,
               width: `${w}%`, height: good ? 60 : 29, borderRadius: 10,
               background: `linear-gradient(160deg, ${c}, ${c}cc)`,
               boxShadow: `inset 0 1px 0 rgba(255,255,255,0.18)`,
@@ -65,9 +65,11 @@ export const Scene5Curation: React.FC = () => {
   const badOpacity = interpolate(frame, [badAppear, badAppear + fps * 0.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const goodOpacity = interpolate(frame, [goodAppear, goodAppear + fps * 0.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // verdict chips
+  // verdict chips pop in
   const badVerdict = interpolate(frame, [fps * 9.5, fps * 10.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const goodVerdict = interpolate(frame, [fps * 11, fps * 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const badVerdictS = pop(frame, fps, fps * 9.5, { damping: 11 });
+  const goodVerdictS = pop(frame, fps, fps * 11, { damping: 11 });
 
   const lineOpacity = interpolate(frame, [fps * 13.5, fps * 15], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const lineY = spring({ frame: frame - fps * 13.5, fps, config: { damping: 18 } });
@@ -76,6 +78,7 @@ export const Scene5Curation: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig>
       <SceneHeading kicker="the real skill" accent={theme.accent}>
         Not <span style={{ color: theme.textMuted }}>more</span> context — the{" "}
         <span style={gradientText("#c7d2fe", theme.accent)}>right</span> context
@@ -86,7 +89,8 @@ export const Scene5Curation: React.FC = () => {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 22 }}>
           <Window good={false} opacity={badOpacity} frame={frame} fps={fps} appearAt={badAppear} />
           <div style={{
-            opacity: badVerdict, padding: "12px 26px", borderRadius: 12,
+            opacity: badVerdict, transform: `scale(${0.8 + badVerdictS * 0.2})`,
+            padding: "12px 26px", borderRadius: 12,
             background: `${theme.accentRed}1a`, border: `1px solid ${theme.accentRed}`,
             fontFamily: theme.fontSans, fontSize: 30, color: theme.accentRed,
           }}>✕ model guesses → bad answer</div>
@@ -98,7 +102,8 @@ export const Scene5Curation: React.FC = () => {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 22 }}>
           <Window good={true} opacity={goodOpacity} frame={frame} fps={fps} appearAt={goodAppear} />
           <div style={{
-            opacity: goodVerdict, padding: "12px 26px", borderRadius: 12,
+            opacity: goodVerdict, transform: `scale(${0.8 + goodVerdictS * 0.2})`,
+            padding: "12px 26px", borderRadius: 12,
             background: `${theme.accentGreen}1a`, border: `1px solid ${theme.accentGreen}`,
             fontFamily: theme.fontSans, fontSize: 30, color: theme.accentGreen,
           }}>✓ model nails it → great answer</div>
@@ -113,6 +118,7 @@ export const Scene5Curation: React.FC = () => {
         Same model. Same question. The only difference is what you put{" "}
         <span style={{ ...gradientText("#c7d2fe", theme.accent), fontWeight: 800 }}>around it.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

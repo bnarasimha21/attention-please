@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 4 — More thinking = better answers
 // Animated accuracy curve: x = thinking effort, y = accuracy. The curve draws
@@ -43,8 +43,9 @@ export const Scene4MoreThinking: React.FC = () => {
   const headX = px(headT);
   const headY = py(accAt(headT));
 
-  // counting accuracy readout
+  // counting accuracy readout — punches in as it first lands
   const accPct = Math.round(accAt(draw) * 100);
+  const readoutPop = pop(frame, fps, fps * 2.5, { damping: 10 });
 
   // area under curve points (for fill)
   const areaPts = [`${px(0)},${py(0)}`, ...pts, `${px(headT)},${py(0)}`].join(" ");
@@ -56,6 +57,7 @@ export const Scene4MoreThinking: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentGreen} />
 
+      <CameraRig>
       <SceneHeading kicker="the core insight" accent={theme.accentGreen}>
         More thinking, <span style={gradientText("#6ee7b7", theme.accentGreen)}>better answers</span>
       </SceneHeading>
@@ -107,6 +109,7 @@ export const Scene4MoreThinking: React.FC = () => {
             position: "absolute", left: headX + 28, top: headY - 32,
             fontFamily: theme.fontMono, fontSize: 51, fontWeight: 800, color: theme.accentGreen,
             textShadow: `0 0 18px ${theme.accentGreen}88`, opacity: draw > 0.02 ? 1 : 0,
+            transform: `scale(${0.8 + readoutPop * 0.2})`, transformOrigin: "left center",
           }}>{accPct}%</div>
         </div>
       </div>
@@ -118,6 +121,7 @@ export const Scene4MoreThinking: React.FC = () => {
       }}>
         Same weights. Just <span style={{ ...gradientText("#6ee7b7", theme.accentGreen), fontWeight: 800 }}>more thought.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

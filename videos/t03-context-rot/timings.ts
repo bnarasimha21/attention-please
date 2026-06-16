@@ -25,7 +25,8 @@ export const TIMINGS = {
   scene6: { start: 102 * FPS, duration: 22 * FPS }, // The fixes
   scene7: { start: 124 * FPS, duration: 18 * FPS }, // Why it matters
   scene8: { start: 142 * FPS, duration: 16 * FPS }, // Recap + CTA
+  scene9: { start: 158 * FPS, duration: 14 * FPS }, // Like & Subscribe CTA
 };
 
 // Sum of scene durations (158s) minus the 7 overlapping crossfades.
-export const TOTAL_FRAMES = 158 * FPS - 7 * XFADE; // ~2:34
+export const TOTAL_FRAMES = 172 * FPS - 8 * XFADE; // ~2:47 (+ CTA)

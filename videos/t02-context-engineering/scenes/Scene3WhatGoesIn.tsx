@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 3 — What goes into context [0:26-0:42]
 // A context-window stack fills with labeled layers sliding in one by one:
@@ -32,6 +32,7 @@ export const Scene3WhatGoesIn: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentGreen} />
 
+      <CameraRig>
       <SceneHeading kicker="layer by layer" accent={theme.accentGreen}>
         What actually goes{" "}
         <span style={gradientText("#6ee7b7", theme.accentGreen)}>into context</span>
@@ -52,12 +53,13 @@ export const Scene3WhatGoesIn: React.FC = () => {
           </div>
           {LAYERS.map((l, i) => {
             const start = layerStart(i);
-            const s = spring({ frame: frame - start, fps, config: { damping: 16 } });
+            const s = pop(frame, fps, start, { damping: 11 });
             const opacity = interpolate(frame, [start, start + fps * 0.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             const glow = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             return (
               <div key={l.label} style={{
-                opacity, transform: `translateX(${(1 - s) * -50}px)`,
+                opacity, transform: `translateX(${(1 - s) * -50}px) scale(${0.8 + s * 0.2})`,
+                transformOrigin: "left center",
                 display: "flex", alignItems: "center", gap: 22,
                 padding: "17px 24px", borderRadius: 16,
                 background: l.highlight
@@ -86,6 +88,7 @@ export const Scene3WhatGoesIn: React.FC = () => {
         The prompt is the <span style={{ color: theme.textMuted }}>last brick.</span> Context is the{" "}
         <span style={{ color: theme.accentGreen, fontWeight: 700 }}>whole building.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

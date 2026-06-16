@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 7 — Why it matters [1:26-1:38]
 // A balance scale. Left pan: STRONG model + BAD context. Right pan: WEAK model
@@ -9,10 +9,10 @@ import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-s
 
 const Pan: React.FC<{
   title: string; titleColor: string; model: string; modelGood: boolean;
-  ctx: string; ctxGood: boolean; offsetY: number; opacity: number;
-}> = ({ title, titleColor, model, modelGood, ctx, ctxGood, offsetY, opacity }) => (
+  ctx: string; ctxGood: boolean; offsetY: number; opacity: number; popS?: number;
+}> = ({ title, titleColor, model, modelGood, ctx, ctxGood, offsetY, opacity, popS = 1 }) => (
   <div style={{
-    opacity, transform: `translateY(${offsetY}px)`,
+    opacity, transform: `translateY(${offsetY}px) scale(${0.8 + popS * 0.2})`,
     display: "flex", flexDirection: "column", alignItems: "center", gap: 17,
     width: 432,
   }}>
@@ -45,6 +45,8 @@ export const Scene7WhyMatters: React.FC = () => {
 
   const leftOpacity = interpolate(frame, [fps * 1.5, fps * 2.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const rightOpacity = interpolate(frame, [fps * 3, fps * 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const leftPop = pop(frame, fps, fps * 1.5, { damping: 12 });
+  const rightPop = pop(frame, fps, fps * 3, { damping: 12 });
 
   // scale tips toward the right (down) at 5.5s
   const tip = interpolate(frame, [fps * 5.5, fps * 7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: undefined });
@@ -52,7 +54,7 @@ export const Scene7WhyMatters: React.FC = () => {
   const leftY = -tip * 34;
   const rightY = tip * 34;
 
-  const winS = spring({ frame: frame - fps * 7.2, fps, config: { damping: 13 } });
+  const winS = pop(frame, fps, fps * 7.2, { damping: 11 });
   const winOpacity = interpolate(frame, [fps * 7.2, fps * 8.1], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   const lineOpacity = interpolate(frame, [fps * 10.5, fps * 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -62,6 +64,7 @@ export const Scene7WhyMatters: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentWarm} />
 
+      <CameraRig>
       <SceneHeading kicker="the takeaway" accent={theme.accentWarm}>
         Why context{" "}
         <span style={gradientText("#fbbf24", theme.accentWarm)}>wins</span>
@@ -84,15 +87,15 @@ export const Scene7WhyMatters: React.FC = () => {
           }} />
 
           <Pan title="STRONG MODEL" titleColor={theme.accent} model="best in class" modelGood={true}
-            ctx="bad" ctxGood={false} offsetY={leftY + 84} opacity={leftOpacity} />
+            ctx="bad" ctxGood={false} offsetY={leftY + 84} opacity={leftOpacity} popS={leftPop} />
 
           {/* winner highlight on right */}
           <div style={{ position: "relative" }}>
             <Pan title="WEAK MODEL" titleColor={theme.textMuted} model="weaker" modelGood={false}
-              ctx="great" ctxGood={true} offsetY={rightY + 84} opacity={rightOpacity} />
+              ctx="great" ctxGood={true} offsetY={rightY + 84} opacity={rightOpacity} popS={rightPop} />
             <div style={{
               position: "absolute", top: rightY + 22, left: "50%",
-              transform: `translateX(-50%) scale(${0.7 + winS * 0.3})`, opacity: winOpacity,
+              transform: `translateX(-50%) scale(${0.8 + winS * 0.2})`, opacity: winOpacity,
               background: theme.accentGreen, color: theme.bg,
               fontFamily: theme.fontMono, fontSize: 24, fontWeight: 800, letterSpacing: 1,
               padding: "8px 19px", borderRadius: 24, boxShadow: `0 0 22px ${theme.accentGreen}aa`,
@@ -111,6 +114,7 @@ export const Scene7WhyMatters: React.FC = () => {
         The model is the <span style={{ color: theme.textMuted }}>engine.</span> Context is the{" "}
         <span style={{ ...gradientText("#fbbf24", theme.accentWarm), fontWeight: 800 }}>fuel — and the map.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

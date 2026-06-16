@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 3 — Why people say it's dead [0:30-0:46]
 // Naive RAG: ONE blind shot. A single query fires one arrow at a doc pile,
@@ -34,19 +34,20 @@ export const Scene3WhyDead: React.FC = () => {
 
   // model reacts, bad answer (9s+)
   const badT = interpolate(frame, [fps * 9, fps * 10.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const xSpring = spring({ frame: frame - fps * 9, fps, config: { damping: 10 } });
+  const xSpring = pop(frame, fps, fps * 9, { damping: 9 });
 
   const lineOpacity = interpolate(frame, [fps * 11.5, fps * 13], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // layout anchors (relative to a centered 1500-wide stage)
-  const queryX = -600;
+  // layout anchors (relative to a centered stage; nudged inward for CameraRig zoom)
+  const queryX = -570;
   const pileX = -40;
-  const modelX = 580;
+  const modelX = 555;
 
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.accentRed} />
 
+      <CameraRig intensity={0.6} push={0.025}>
       <SceneHeading kicker="the case against" accent={theme.accentRed}>
         Naive RAG takes <span style={gradientText("#fca5a5", theme.accentRed)}>one blind shot</span>
       </SceneHeading>
@@ -113,7 +114,7 @@ export const Scene3WhyDead: React.FC = () => {
             {CHUNKS.map((c, i) => {
               const grabbed = i === grabbedIdx;
               const start = fps * (2 + i * 0.4);
-              const s = spring({ frame: frame - start, fps, config: { damping: 16 } });
+              const s = pop(frame, fps, start, { damping: 11 });
               const opacity = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
               // grabbed chunk fades from its slot as it's carried away
               const slotFade = grabbed ? 1 - carryT : 1;
@@ -127,7 +128,7 @@ export const Scene3WhyDead: React.FC = () => {
                     height: 60,
                     borderRadius: 12,
                     opacity: opacity * slotFade,
-                    transform: `translateX(${(1 - s) * 20}px)`,
+                    transform: `translateX(${(1 - s) * 24}px) scale(${interpolate(s, [0, 1], [0.8, 1])})`,
                     background: hit ? `${theme.accentRed}22` : "linear-gradient(160deg, #15151b, #0d0d11)",
                     border: `1.5px solid ${color}`,
                     display: "flex",
@@ -196,7 +197,7 @@ export const Scene3WhyDead: React.FC = () => {
             <div
               style={{
                 opacity: badT,
-                transform: `scale(${0.7 + Math.min(1, xSpring) * 0.3})`,
+                transform: `scale(${interpolate(xSpring, [0, 1], [0.7, 1])})`,
                 padding: "15px 26px",
                 borderRadius: 14,
                 background: `${theme.accentRed}1a`,
@@ -230,6 +231,7 @@ export const Scene3WhyDead: React.FC = () => {
       >
         One bad lookup <span style={{ color: theme.accentRed }}>poisons everything.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

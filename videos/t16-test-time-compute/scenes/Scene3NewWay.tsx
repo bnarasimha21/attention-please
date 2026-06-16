@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 3 — The new way
 // Question in → the model fills a "thinking" scratchpad with reasoning steps,
@@ -31,7 +31,7 @@ export const Scene3NewWay: React.FC = () => {
   // final answer emits after all steps (≈9s), holds
   const ansStart = lastStepDone + fps * 0.4;
   const ansReveal = interpolate(frame, [ansStart, ansStart + fps * 0.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const ansSpring = spring({ frame: frame - ansStart, fps, config: { damping: 12 } });
+  const ansSpring = pop(frame, fps, ansStart, { damping: 11 });
 
   // closing line — holds fully visible to scene end (22s)
   const lineOpacity = interpolate(frame, [ansStart + fps * 1.3, ansStart + fps * 2.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -40,6 +40,7 @@ export const Scene3NewWay: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig>
       <SceneHeading kicker="the new way" accent={theme.accent}>
         First it <span style={gradientText("#c7d2fe", theme.accent)}>thinks out loud</span>
       </SceneHeading>
@@ -76,9 +77,10 @@ export const Scene3NewWay: React.FC = () => {
           {STEPS.map((s, i) => {
             const start = stepStart(i);
             const o = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-            const x = interpolate(frame, [start, start + fps * 0.5], [-20, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+            const p = pop(frame, fps, start, { damping: 11 });
+            const x = interpolate(p, [0, 1], [-20, 0]);
             return (
-              <div key={i} style={{ opacity: o, transform: `translateX(${x}px)`, display: "flex", alignItems: "baseline", gap: 14 }}>
+              <div key={i} style={{ opacity: o, transform: `translateX(${x}px) scale(${0.92 + p * 0.08})`, transformOrigin: "left center", display: "flex", alignItems: "baseline", gap: 14 }}>
                 <span style={{ fontFamily: theme.fontMono, fontSize: 24, color: theme.tokenColors[i % theme.tokenColors.length], fontWeight: 700 }}>
                   {i + 1}.
                 </span>
@@ -89,7 +91,7 @@ export const Scene3NewWay: React.FC = () => {
 
           {/* final answer */}
           <div style={{
-            marginTop: "auto", opacity: ansReveal, transform: `scale(${0.85 + ansSpring * 0.15})`,
+            marginTop: "auto", opacity: ansReveal, transform: `scale(${0.8 + ansSpring * 0.2})`,
             display: "flex", alignItems: "center", gap: 17, alignSelf: "flex-start",
             padding: "15px 27px", borderRadius: 14,
             background: `${theme.accentGreen}1a`, border: `1px solid ${theme.accentGreen}`,
@@ -110,6 +112,7 @@ export const Scene3NewWay: React.FC = () => {
         Thinking happens <span style={{ color: theme.accent, fontWeight: 700 }}>first.</span> The answer comes{" "}
         <span style={{ color: theme.accentGreen, fontWeight: 700 }}>second.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

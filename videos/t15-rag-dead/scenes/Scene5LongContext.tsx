@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 5 — Long context vs RAG [1:03-1:20]
 // Two-panel decision. LEFT: long context — pour the WHOLE doc into a big prompt
@@ -13,6 +13,9 @@ export const Scene5LongContext: React.FC = () => {
 
   const leftOpacity = interpolate(frame, [fps * 1.2, fps * 2.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const rightOpacity = interpolate(frame, [fps * 3, fps * 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // snappy overshoot entrances for the two panels
+  const leftPop = pop(frame, fps, fps * 1.2, { damping: 11 });
+  const rightPop = pop(frame, fps, fps * 3, { damping: 11 });
 
   // LEFT: window fills with the whole doc (5s -> 8s)
   const fillT = interpolate(frame, [fps * 5, fps * 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -25,19 +28,20 @@ export const Scene5LongContext: React.FC = () => {
   const rightV = interpolate(frame, [fps * 10.3, fps * 11.3], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   const ruleOpacity = interpolate(frame, [fps * 13, fps * 14.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const ruleY = spring({ frame: frame - fps * 13, fps, config: { damping: 18 } });
+  const ruleY = pop(frame, fps, fps * 13, { damping: 13 });
 
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.accentWarm} />
 
+      <CameraRig intensity={0.6} push={0.025}>
       <SceneHeading kicker="the tradeoff" accent={theme.accentWarm}>
         Long context <span style={gradientText("#fbbf24", theme.accentWarm)}>vs</span> retrieval
       </SceneHeading>
 
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 130, display: "flex", alignItems: "center", justifyContent: "center", gap: 90 }}>
         {/* LEFT — Long context */}
-        <div style={{ opacity: leftOpacity, display: "flex", flexDirection: "column", alignItems: "center", gap: 24, width: 540 }}>
+        <div style={{ opacity: leftOpacity, transform: `scale(${interpolate(leftPop, [0, 1], [0.8, 1])})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 24, width: 540 }}>
           <div style={{ fontFamily: theme.fontMono, fontSize: 32, fontWeight: 700, color: theme.tokenColors[5] }}>Long context</div>
 
           {/* big prompt window filling up with the whole doc */}
@@ -101,7 +105,7 @@ export const Scene5LongContext: React.FC = () => {
         <div style={{ width: 1, height: 456, background: theme.border }} />
 
         {/* RIGHT — Retrieval */}
-        <div style={{ opacity: rightOpacity, display: "flex", flexDirection: "column", alignItems: "center", gap: 24, width: 540 }}>
+        <div style={{ opacity: rightOpacity, transform: `scale(${interpolate(rightPop, [0, 1], [0.8, 1])})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 24, width: 540 }}>
           <div style={{ fontFamily: theme.fontMono, fontSize: 32, fontWeight: 700, color: theme.accentGreen }}>Retrieval</div>
 
           {/* giant DB with a few chunks plucked out */}
@@ -209,6 +213,7 @@ export const Scene5LongContext: React.FC = () => {
       >
         Long context is a <span style={{ ...gradientText("#fbbf24", theme.accentWarm), fontWeight: 700 }}>tool</span> — not a replacement.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

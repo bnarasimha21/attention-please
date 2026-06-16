@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 5 — The trace collapses [0:59–1:13]
 // A tall stack of reasoning lines (many) compresses, scales down and fades,
@@ -23,8 +23,8 @@ export const Scene5TraceCollapses: React.FC = () => {
   const stackScaleY = interpolate(collapse, [0, 1], [1, 0.04]);
   const stackFade = interpolate(collapse, [0, 0.85], [1, 0], { extrapolateRight: "clamp" });
 
-  // answer card springs in at 6.6s; holds until scene end (18s)
-  const ansSpring = spring({ frame: frame - fps * 6.6, fps, config: { damping: 14 } });
+  // answer card pops in HARD at 6.6s; holds until scene end (18s)
+  const ansSpring = pop(frame, fps, fps * 6.6, { damping: 9 });
   const ansOpacity = interpolate(frame, [fps * 6.6, fps * 7.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const ansGlow = interpolate(frame, [fps * 7, fps * 8.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
@@ -34,6 +34,7 @@ export const Scene5TraceCollapses: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentGreen} />
 
+      <CameraRig>
       <SceneHeading kicker="the payoff" accent={theme.accentGreen}>
         Pages of thinking → <span style={gradientText("#6ee7b7", theme.accentGreen)}>one clean answer</span>
       </SceneHeading>
@@ -86,6 +87,7 @@ export const Scene5TraceCollapses: React.FC = () => {
       }}>
         All that working — <span style={{ ...gradientText("#6ee7b7", theme.accentGreen), fontWeight: 800 }}>distilled into one line.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

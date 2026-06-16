@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText, EASE_OUT } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, EASE_OUT, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 6 — When to use [1:14-1:30]
 // Two-column decision guide: green "use a subagent" vs amber "keep in main".
@@ -21,11 +21,11 @@ const KEEP = [
 const Column: React.FC<{
   title: string; sub: string; items: string[]; color: string; icon: string; baseDelay: number; frame: number; fps: number;
 }> = ({ title, sub, items, color, icon, baseDelay, frame, fps }) => {
-  const headSpring = spring({ frame: frame - baseDelay, fps, config: { damping: 16 } });
+  const headSpring = pop(frame, fps, baseDelay, { damping: 12 });
   const headOpacity = interpolate(frame, [baseDelay, baseDelay + fps * 0.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
     <div style={{
-      width: 696, opacity: headOpacity, transform: `translateY(${(1 - headSpring) * 24}px)`,
+      width: 696, opacity: headOpacity, transform: `translateY(${(1 - headSpring) * 24}px) scale(${interpolate(headSpring, [0, 1], [0.9, 1])})`,
       borderRadius: 26, padding: 34,
       background: `linear-gradient(180deg, ${color}10 0%, #0c0c11 100%)`,
       border: `1px solid ${color}55`, boxShadow: `0 24px 70px rgba(0,0,0,0.5), 0 0 30px ${color}14`,
@@ -38,11 +38,11 @@ const Column: React.FC<{
       <div style={{ display: "flex", flexDirection: "column", gap: 17 }}>
         {items.map((it, i) => {
           const start = baseDelay + fps * 0.6 + i * fps * 1.2;
-          const s = spring({ frame: frame - start, fps, config: { damping: 15 } });
+          const s = pop(frame, fps, start, { damping: 11 });
           const op = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT });
           return (
             <div key={it} style={{
-              opacity: op, transform: `translateX(${(1 - s) * -22}px)`,
+              opacity: op, transform: `translateX(${(1 - s) * -22}px) scale(${interpolate(s, [0, 1], [0.9, 1])})`,
               display: "flex", alignItems: "center", gap: 17,
               padding: "17px 22px", borderRadius: 14,
               background: `${color}0e`, border: `1px solid ${color}33`,
@@ -73,6 +73,7 @@ export const Scene6WhenToUse: React.FC = () => {
         Hand off the mess — or <span style={gradientText("#fbbf24", theme.accentWarm)}>keep it close</span>
       </SceneHeading>
 
+      <CameraRig>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 60, display: "flex", alignItems: "center", justifyContent: "center", gap: 72 }}>
         <Column title="Use a subagent" sub="ISOLATED · PARALLEL" items={USE} color={theme.accentGreen} icon="✓" baseDelay={fps * 1.2} frame={frame} fps={fps} />
         <Column title="Keep in main" sub="COUPLED · SEQUENTIAL" items={KEEP} color={theme.accentWarm} icon="⚠" baseDelay={fps * 2.0} frame={frame} fps={fps} />
@@ -86,6 +87,7 @@ export const Scene6WhenToUse: React.FC = () => {
         Offload what's <span style={{ color: theme.accentGreen, fontWeight: 700 }}>independent</span> — keep what's{" "}
         <span style={{ color: theme.accentWarm, fontWeight: 700 }}>connected.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

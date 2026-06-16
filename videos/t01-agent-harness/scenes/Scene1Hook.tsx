@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, ModelCore, gradientText, CameraRig, pop } from "../motion";
 
 // Scene 1 — Hook
 // Terminal `$ claude` prompt → dissolves → glowing MODEL core appears,
@@ -21,21 +21,25 @@ export const Scene1Hook: React.FC = () => {
   // Phase 2: terminal fades, core appears (5s-7s)
   const termFade = interpolate(frame, [fps * 5, fps * 6.5], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const termScale = interpolate(frame, [fps * 5, fps * 6.5], [1, 0.92], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const coreSpring = spring({ frame: frame - fps * 6, fps, config: { damping: 16 } });
+  const coreSpring = pop(frame, fps, fps * 6, { damping: 11 });
   const coreOpacity = interpolate(frame, [fps * 6, fps * 7.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
   // "harness" ring + label (8s+)
-  const ringScale = spring({ frame: frame - fps * 8, fps, config: { damping: 14 } });
+  const ringScale = pop(frame, fps, fps * 8, { damping: 11 });
   const ringOpacity = interpolate(frame, [fps * 8, fps * 9.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const ringSpin = interpolate(frame, [fps * 8, fps * 40], [0, 80], { extrapolateLeft: "clamp" });
   const subtitleOpacity = interpolate(frame, [fps * 10, fps * 11.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const subtitleY = spring({ frame: frame - fps * 10, fps, config: { damping: 18 } });
+  const subtitleY = pop(frame, fps, fps * 10, { damping: 13 });
+  // quick scale punch on the "~20%" number just after the line lands
+  const pctPunch = interpolate(pop(frame, fps, fps * 10.7, { damping: 9 }), [0, 0.5, 1], [1, 1.28, 1]);
 
   return (
-    <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
+
+      <CameraRig style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
 
       {/* Terminal */}
       <div style={{
@@ -101,9 +105,10 @@ export const Scene1Hook: React.FC = () => {
         transform: `translateY(${(1 - subtitleY) * 20}px)`,
         fontFamily: theme.fontSans, fontSize: 43, color: theme.textMuted, textAlign: "center", maxWidth: 1200, lineHeight: 1.5,
       }}>
-        The model is <span style={{ color: theme.text, fontWeight: 700 }}>~20%</span> of it.{" "}
+        The model is <span style={{ color: theme.text, fontWeight: 700, display: "inline-block", transform: `scale(${pctPunch})` }}>~20%</span> of it.{" "}
         The <span style={{ ...gradientText("#c7d2fe", theme.accent), fontWeight: 700 }}>harness</span> is the rest.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, interpolateColors } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../motion";
 
 // smallest angular distance between two angles (deg)
 const angDist = (a: number, b: number) => {
@@ -22,8 +22,10 @@ export const Scene3Loop: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Ring appears (1s)
+  // Ring appears (1s) with a pop-in
   const ringOpacity = interpolate(frame, [fps * 1, fps * 2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const ringPop = pop(frame, fps, fps * 1, { damping: 12 });
+  const ringScale = interpolate(ringPop, [0, 1], [0.78, 1]);
 
   // Rotating token starts at 2.5s; ~2s per lap
   const rotateStart = fps * 2.5;
@@ -46,6 +48,8 @@ export const Scene3Loop: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig>
+
       <SceneHeading kicker="the beating heart" accent={theme.accent}>
         At the center: <span style={gradientText("#c7d2fe", theme.accent)}>a loop</span>
       </SceneHeading>
@@ -57,20 +61,24 @@ export const Scene3Loop: React.FC = () => {
           <div style={{
             position: "absolute", inset: 60, borderRadius: "50%",
             border: `2px solid ${theme.border}`, opacity: ringOpacity,
+            transform: `scale(${ringScale})`,
             boxShadow: `inset 0 0 80px ${theme.accent}14`,
           }} />
 
           {/* nodes */}
-          {NODES.map((n) => {
+          {NODES.map((n, ni) => {
             const x = Math.cos((n.angle * Math.PI) / 180) * R;
             const y = Math.sin((n.angle * Math.PI) / 180) * R;
             // smooth 0..1 "litness" as the token sweeps past this node
             const lit = active ? Math.max(0, 1 - angDist(tokenAngle, n.angle) / 55) : 0;
+            // staggered pop-in per node
+            const nodePop = pop(frame, fps, fps * 1.3 + ni * fps * 0.22, { damping: 10 });
+            const nodeIn = interpolate(nodePop, [0, 1], [0.4, 1]);
             return (
               <div key={n.label} style={{
                 position: "absolute", left: "50%", top: "50%",
-                transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${1 + lit * 0.16})`,
-                opacity: ringOpacity,
+                transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${nodeIn * (1 + lit * 0.16)})`,
+                opacity: ringOpacity * nodePop,
                 padding: "20px 36px", borderRadius: 18,
                 background: interpolateColors(lit, [0, 1], [theme.surface, n.color]),
                 color: interpolateColors(lit, [0, 1], [theme.text, theme.bg]),
@@ -113,6 +121,7 @@ export const Scene3Loop: React.FC = () => {
       <div style={{ position: "absolute", bottom: 100, width: "100%", textAlign: "center", opacity: captionOpacity, fontFamily: theme.fontSans, fontSize: 38, color: theme.text }}>
         A chatbot answers <span style={{ color: theme.textMuted }}>once</span>. An agent runs the loop — <span style={{ color: theme.accent }}>on a budget.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

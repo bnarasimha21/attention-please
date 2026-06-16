@@ -10,6 +10,7 @@ import { Scene5TraceCollapses } from "./scenes/Scene5TraceCollapses";
 import { Scene6WhyHidden } from "./scenes/Scene6WhyHidden";
 import { Scene7WhyMatters } from "./scenes/Scene7WhyMatters";
 import { Scene8CTA } from "./scenes/Scene8CTA";
+import { Scene9CTA } from "./scenes/Scene9CTA";
 
 // Trending 17 — Inside a Reasoning Model
 // Scenes are crossfaded with @remotion/transitions. Each transition overlaps
@@ -29,6 +30,7 @@ export const T17: React.FC = () => {
     { C: Scene6WhyHidden, duration: TIMINGS.scene6.duration },
     { C: Scene7WhyMatters, duration: TIMINGS.scene7.duration },
     { C: Scene8CTA, duration: TIMINGS.scene8.duration },
+    { C: Scene9CTA, duration: TIMINGS.scene9.duration },
   ];
 
   const children: React.ReactNode[] = [];

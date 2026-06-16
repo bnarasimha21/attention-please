@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, ModelCore, gradientText, EASE_OUT } from "../../../remotion-src/visuals";
+import { SceneBackground, ModelCore, gradientText, EASE_OUT, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 1 — Hook [0:00-0:13]
 // Main MODEL core beside its context window. Tool-output chips rain in and
@@ -20,10 +20,10 @@ export const Scene1Hook: React.FC = () => {
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
   const coreOpacity = interpolate(frame, [fps * 0.4, fps * 1.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const coreSpring = spring({ frame: frame - fps * 0.4, fps, config: { damping: 16 } });
+  const coreSpring = pop(frame, fps, fps * 0.4, { damping: 11 });
 
   const panelOpacity = interpolate(frame, [fps * 1, fps * 2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const panelSpring = spring({ frame: frame - fps * 1, fps, config: { damping: 18 } });
+  const panelSpring = pop(frame, fps, fps * 1, { damping: 12 });
 
   // chips drop in one by one starting 2.6s, 1.3s apart
   const chipStart = (i: number) => fps * 2.6 + i * fps * 1.3;
@@ -38,19 +38,20 @@ export const Scene1Hook: React.FC = () => {
   const subtitleOpacity = interpolate(frame, [fps * 12.4, fps * 13.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 108, transform: `translateX(${shake}px)` }}>
+      <CameraRig style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 100, transform: `translateX(${shake}px)` }}>
         {/* Main agent core */}
-        <div style={{ opacity: coreOpacity, transform: `scale(${0.6 + coreSpring * 0.4})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+        <div style={{ opacity: coreOpacity, transform: `scale(${interpolate(coreSpring, [0, 1], [0.8, 1])})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
           <ModelCore size={252} pulse={pulse} fontSize={40} />
           <div style={{ fontFamily: theme.fontSans, fontSize: 30, color: theme.textMuted }}>your agent</div>
         </div>
 
         {/* Context window panel */}
         <div style={{
-          opacity: panelOpacity, transform: `scale(${0.85 + panelSpring * 0.15})`,
+          opacity: panelOpacity, transform: `scale(${interpolate(panelSpring, [0, 1], [0.8, 1])})`,
           width: 672, height: 576, borderRadius: 26,
           background: "linear-gradient(180deg, #14141b 0%, #0c0c11 100%)",
           border: `1px solid ${overload > 0.3 ? theme.accentRed : theme.border}`,
@@ -69,11 +70,11 @@ export const Scene1Hook: React.FC = () => {
           <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 8 }}>
             {NOISE.map((n, i) => {
               const start = chipStart(i);
-              const s = spring({ frame: frame - start, fps, config: { damping: 13 } });
+              const s = pop(frame, fps, start, { damping: 11 });
               const op = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT });
               return (
                 <div key={n.label} style={{
-                  opacity: op, transform: `translateY(${(1 - s) * -18}px)`,
+                  opacity: op, transform: `translateY(${(1 - s) * -18}px) scale(${interpolate(s, [0, 1], [0.85, 1])})`,
                   padding: "16px 22px", borderRadius: 14,
                   background: `${n.color}14`, border: `1px solid ${n.color}55`,
                   fontFamily: theme.fontMono, fontSize: 26, color: n.color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
@@ -98,6 +99,7 @@ export const Scene1Hook: React.FC = () => {
       }}>
         One brain. <span style={{ ...gradientText("#fca5a5", theme.accentRed), fontWeight: 800 }}>Too much noise.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

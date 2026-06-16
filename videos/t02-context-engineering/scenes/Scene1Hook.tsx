@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 1 — Hook [0:00-0:13]
 // A "perfect prompt" is typed into a chat box → the AI replies with garbage (✕)
@@ -23,12 +23,14 @@ export const Scene1Hook: React.FC = () => {
   const cursorOn = Math.floor(frame / 15) % 2 === 0;
   const doneTyping = frame > fps * 3;
 
-  // "perfect prompt" badge appears once typed
-  const badgeS = spring({ frame: frame - fps * 3.4, fps, config: { damping: 16 } });
+  // "perfect prompt" badge pops in once typed
+  const badgeS = pop(frame, fps, fps * 3.4, { damping: 11 });
   const badgeOpacity = interpolate(frame, [fps * 3.4, fps * 4.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // quick hero punch on the badge shortly after it lands
+  const badgePunch = 1 + interpolate(frame, [fps * 4.2, fps * 4.45, fps * 4.7], [0, 0.12, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // AI reply bubble returns garbage (5.4s)
-  const replyS = spring({ frame: frame - fps * 5.4, fps, config: { damping: 15 } });
+  const replyS = pop(frame, fps, fps * 5.4, { damping: 12 });
   const replyOpacity = interpolate(frame, [fps * 5.4, fps * 6.3], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const replyShake = frame > fps * 6.1 && frame < fps * 7.1 ? Math.sin(frame / 1.4) * 5 : 0;
 
@@ -41,9 +43,10 @@ export const Scene1Hook: React.FC = () => {
   const tagY = spring({ frame: frame - fps * 11.6, fps, config: { damping: 18 } });
 
   return (
-    <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       {/* Empty context stage behind the chat */}
       <div style={{
         position: "absolute", width: 1416, height: 672, borderRadius: 34,
@@ -78,7 +81,7 @@ export const Scene1Hook: React.FC = () => {
           {/* perfect-prompt badge */}
           <div style={{
             position: "absolute", top: -19, right: 17, opacity: badgeOpacity,
-            transform: `scale(${0.7 + badgeS * 0.3})`,
+            transform: `scale(${(0.8 + badgeS * 0.2) * badgePunch})`,
             background: theme.accentGreen, color: theme.bg,
             fontFamily: theme.fontMono, fontSize: 20, fontWeight: 800, letterSpacing: 1,
             padding: "5px 14px", borderRadius: 24, boxShadow: `0 0 18px ${theme.accentGreen}88`,
@@ -90,7 +93,7 @@ export const Scene1Hook: React.FC = () => {
         {/* AI reply — garbage */}
         <div style={{
           alignSelf: "flex-start", maxWidth: 760, opacity: replyOpacity,
-          transform: `scale(${0.85 + replyS * 0.15}) translateX(${replyShake}px)`,
+          transform: `scale(${0.8 + replyS * 0.2}) translateX(${replyShake}px)`,
           background: `linear-gradient(160deg, ${theme.accentRed}1c, #101015)`,
           border: `1px solid ${theme.accentRed}`,
           borderRadius: "19px 19px 19px 5px",
@@ -113,6 +116,7 @@ export const Scene1Hook: React.FC = () => {
         The magic was never the{" "}
         <span style={{ ...gradientText("#c7d2fe", theme.accent), fontWeight: 800 }}>question.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

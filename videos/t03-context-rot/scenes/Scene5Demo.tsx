@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 5 — The demo [1:03-1:20]
 // An instruction given early ("always reply in French") gets buried under 50
@@ -26,7 +26,7 @@ export const Scene5Demo: React.FC = () => {
   // The user question + broken reply (13s+)
   const qOpacity = interpolate(frame, [fps * 12, fps * 13], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const replyOpacity = interpolate(frame, [fps * 14.5, fps * 15.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const replySpring = spring({ frame: frame - fps * 14.5, fps, config: { damping: 14 } });
+  const replySpring = pop(frame, fps, fps * 14.5, { damping: 11 });
 
   const lineOpacity = interpolate(frame, [fps * 17, fps * 18.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
@@ -38,7 +38,7 @@ export const Scene5Demo: React.FC = () => {
         The rule it <span style={gradientText("#fca5a5", theme.accentRed)}>forgot</span>
       </SceneHeading>
 
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 72 }}>
+      <CameraRig style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 72 }}>
 
         {/* Left: the thread with buried instruction */}
         <div style={{ width: 760, position: "relative", height: 620 }}>
@@ -66,6 +66,7 @@ export const Scene5Demo: React.FC = () => {
             if (i >= msgVisible) return null;
             const isAI = i % 2 === 1;
             const top = 116 + i * 66;
+            const mp = pop(frame, fps, fps * 5 + (i / NMSG) * fps * 5, { damping: 11 });
             return (
               <div key={i} style={{
                 position: "absolute", top, left: isAI ? 0 : 140, right: isAI ? 140 : 0,
@@ -75,6 +76,8 @@ export const Scene5Demo: React.FC = () => {
                 display: "flex", alignItems: "center", paddingLeft: 20,
                 fontFamily: theme.fontSans, fontSize: 22, color: theme.textDim,
                 boxShadow: "0 6px 18px rgba(0,0,0,0.4)",
+                opacity: mp, transform: `translateY(${(1 - mp) * 14}px) scale(${0.85 + mp * 0.15})`,
+                transformOrigin: isAI ? "left center" : "right center",
               }}>
                 {isAI ? "…sure, here's that…" : "…and another thing…"}
               </div>
@@ -102,7 +105,8 @@ export const Scene5Demo: React.FC = () => {
           </div>
           <div style={{
             opacity: replyOpacity, alignSelf: "flex-start", maxWidth: 580,
-            transform: `translateY(${(1 - replySpring) * 16}px)`,
+            transform: `translateY(${(1 - replySpring) * 16}px) scale(${0.85 + replySpring * 0.15})`,
+            transformOrigin: "left center",
             padding: "24px 30px", borderRadius: 22, borderTopLeftRadius: 8,
             background: `linear-gradient(160deg, ${theme.accentRed}22, ${theme.accentRed}0d)`,
             border: `1px solid ${theme.accentRed}88`, boxShadow: `0 0 30px ${theme.accentRed}33`,
@@ -115,7 +119,7 @@ export const Scene5Demo: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </CameraRig>
 
       <div style={{ position: "absolute", bottom: 56, width: "100%", textAlign: "center", opacity: lineOpacity, fontFamily: theme.fontSans, fontSize: 41, color: theme.text }}>
         It didn't disobey — it just couldn't{" "}

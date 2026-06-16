@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText, EASE_OUT } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, EASE_OUT, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 4 — Why it happens [0:47-1:03]
 // A spotlight covers a small stage (bright) → stage widens with each message →
@@ -24,6 +24,7 @@ export const Scene4WhyItHappens: React.FC = () => {
   // running token counter
   const tokens = Math.round(interpolate(frame, [fps * 2, fps * 10], [1200, 92000], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
 
+  const stagePop = pop(frame, fps, fps * 1, { damping: 12 });
   const stageOpacity = interpolate(frame, [fps * 1, fps * 2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const spotColor = brightness > 0.6 ? theme.accentGreen : brightness > 0.38 ? theme.accentWarm : theme.accentRed;
 
@@ -38,10 +39,10 @@ export const Scene4WhyItHappens: React.FC = () => {
         One <span style={gradientText("#fbbf24", theme.accentWarm)}>spotlight</span>, an ever-bigger stage
       </SceneHeading>
 
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 50 }}>
+      <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 50 }}>
 
         {/* spotlight + stage */}
-        <div style={{ position: "relative", width: 1600, height: 430, display: "flex", alignItems: "flex-end", justifyContent: "center", opacity: stageOpacity }}>
+        <div style={{ position: "relative", width: 1600, height: 430, display: "flex", alignItems: "flex-end", justifyContent: "center", opacity: stageOpacity, transform: `scale(${0.9 + stagePop * 0.1})` }}>
 
           {/* spotlight cone from above */}
           <div style={{
@@ -95,7 +96,7 @@ export const Scene4WhyItHappens: React.FC = () => {
             <div style={{ fontFamily: theme.fontMono, fontSize: 46, fontWeight: 800, color: spotColor }}>{Math.round(brightness * 100)}%</div>
           </div>
         </div>
-      </div>
+      </CameraRig>
 
       <div style={{
         position: "absolute", bottom: 56, width: "100%", textAlign: "center",

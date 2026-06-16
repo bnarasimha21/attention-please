@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 1 — Hook [0:00–0:13]
 // A hard question types into a chat card → MODEL core appears with a pulsing
@@ -19,23 +19,25 @@ export const Scene1Hook: React.FC = () => {
   const cursorOn = Math.floor(frame / 14) % 2 === 0;
   const qOpacity = interpolate(frame, [fps * 0.3, fps * 1], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Phase 2: model core springs in (3s)
-  const coreSpring = spring({ frame: frame - fps * 3, fps, config: { damping: 16 } });
+  // Phase 2: model core pops in (3s) with overshoot
+  const coreSpring = pop(frame, fps, fps * 3, { damping: 11 });
   const coreOpacity = interpolate(frame, [fps * 3, fps * 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
-  // Phase 3: "Thinking…" pill (4s+)
+  // Phase 3: "Thinking…" pill (4s+) — snappy pop
+  const thinkPop = pop(frame, fps, fps * 4, { damping: 11 });
   const thinkOpacity = interpolate(frame, [fps * 4, fps * 4.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const dots = (Math.floor(frame / 12) % 3) + 1; // 1..3 animated dots
 
   // Phase 4: the freeze question (8s+) — holds ~8s before scene end (16s)
   const askOpacity = interpolate(frame, [fps * 8, fps * 9.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const askY = spring({ frame: frame - fps * 8, fps, config: { damping: 18 } });
+  const askY = pop(frame, fps, fps * 8, { damping: 12 });
 
   return (
-    <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       {/* Question chat card */}
       <div style={{
         position: "absolute", top: 150, opacity: qOpacity,
@@ -53,10 +55,11 @@ export const Scene1Hook: React.FC = () => {
       </div>
 
       {/* Model core + Thinking pill */}
-      <div style={{ position: "absolute", top: 490, display: "flex", flexDirection: "column", alignItems: "center", gap: 32, opacity: coreOpacity, transform: `scale(${0.7 + coreSpring * 0.3})` }}>
+      <div style={{ position: "absolute", top: 490, display: "flex", flexDirection: "column", alignItems: "center", gap: 32, opacity: coreOpacity, transform: `scale(${0.8 + coreSpring * 0.2})` }}>
         <ModelCore size={240} pulse={pulse} fontSize={40} />
         <div style={{
-          opacity: thinkOpacity, display: "flex", alignItems: "center", gap: 14,
+          opacity: thinkOpacity, transform: `scale(${0.8 + thinkPop * 0.2})`,
+          display: "flex", alignItems: "center", gap: 14,
           padding: "16px 34px", borderRadius: 999,
           background: `${theme.accent}14`, border: `1px solid ${theme.accent}66`,
           boxShadow: `0 0 ${20 + pulse * 30}px ${theme.accent}55`,
@@ -76,6 +79,7 @@ export const Scene1Hook: React.FC = () => {
         What's actually happening{" "}
         <span style={{ ...gradientText("#c7d2fe", theme.accent), fontWeight: 800 }}>in there?</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

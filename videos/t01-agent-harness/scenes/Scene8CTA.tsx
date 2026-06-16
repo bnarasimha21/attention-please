@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, ModelCore, gradientText, CameraRig, pop } from "../motion";
 
 // Scene 8 — Recap + CTA
 // Final diagram: MODEL core wrapped in layers, "The model thinks. The harness
@@ -13,25 +13,28 @@ export const Scene8CTA: React.FC = () => {
   const { fps } = useVideoConfig();
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
-  const coreSpring = spring({ frame: frame - fps * 0.5, fps, config: { damping: 16 } });
+  const coreSpring = pop(frame, fps, fps * 0.5, { damping: 11 });
 
   // rings appear one by one
   const ringStart = (i: number) => fps * 1.2 + i * fps * 0.55;
 
   const taglineOpacity = interpolate(frame, [fps * 4.5, fps * 5.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const taglineScale = interpolate(pop(frame, fps, fps * 4.5, { damping: 11 }), [0, 1], [0.85, 1]);
   const teaserOpacity = interpolate(frame, [fps * 7, fps * 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const brandOpacity = interpolate(frame, [fps * 9, fps * 10], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
+
+      <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
 
       {/* Recap diagram */}
       <div style={{ position: "relative", width: 560, height: 560, display: "flex", alignItems: "center", justifyContent: "center" }}>
         {[...RECAP_LAYERS].reverse().map((label) => {
           const i = RECAP_LAYERS.indexOf(label);
           const start = ringStart(i);
-          const s = spring({ frame: frame - start, fps, config: { damping: 15 } });
+          const s = pop(frame, fps, start, { damping: 11 });
           const opacity = interpolate(frame, [start, start + fps * 0.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           const size = 220 + (i + 1) * 64;
           const color = theme.tokenColors[i % theme.tokenColors.length];
@@ -56,7 +59,7 @@ export const Scene8CTA: React.FC = () => {
       </div>
 
       {/* Tagline */}
-      <div style={{ marginTop: 36, opacity: taglineOpacity, fontFamily: theme.fontSans, fontSize: 51, fontWeight: 700, color: theme.text }}>
+      <div style={{ marginTop: 36, opacity: taglineOpacity, transform: `scale(${taglineScale})`, fontFamily: theme.fontSans, fontSize: 51, fontWeight: 700, color: theme.text }}>
         The model <span style={{ color: theme.textMuted }}>thinks.</span> The harness{" "}
         <span style={gradientText("#c7d2fe", theme.accent)}>acts.</span>
       </div>
@@ -65,16 +68,7 @@ export const Scene8CTA: React.FC = () => {
       <div style={{ marginTop: 22, opacity: teaserOpacity, fontFamily: theme.fontSans, fontSize: 32, color: theme.textMuted, textAlign: "center" }}>
         Next: <span style={{ color: theme.accent }}>Context engineering — the skill replacing prompts</span>
       </div>
-
-      {/* Brand */}
-      <div style={{ opacity: brandOpacity, position: "absolute", bottom: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 56, fontWeight: 800, color: theme.text, letterSpacing: 2 }}>
-          Attention<span style={{ color: theme.accent }}> Please</span>
-        </div>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 24, color: theme.textMuted }}>
-          AI concepts, animated clearly
-        </div>
-      </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

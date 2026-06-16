@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 7 — Why it matters [1:37-1:48]
 // Side-by-side: a huge bloated thread (rotting, red) vs a short curated one
@@ -10,8 +10,8 @@ export const Scene7WhyMatters: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const leftIn = spring({ frame: frame - fps * 1, fps, config: { damping: 16 } });
-  const rightIn = spring({ frame: frame - fps * 1.4, fps, config: { damping: 16 } });
+  const leftIn = pop(frame, fps, fps * 1, { damping: 12 });
+  const rightIn = pop(frame, fps, fps * 1.4, { damping: 12 });
 
   // bloated side keeps stacking (rot creeping up)
   const bloatRows = Math.round(interpolate(frame, [fps * 2, fps * 8], [4, 14], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
@@ -31,7 +31,7 @@ export const Scene7WhyMatters: React.FC = () => {
     return (
       <div style={{
         width: 672, height: 648,
-        transform: `translateX(${(1 - springV) * (bad ? -40 : 40)}px) scale(${0.94 + springV * 0.06})`,
+        transform: `translateX(${(1 - springV) * (bad ? -40 : 40)}px) scale(${0.88 + springV * 0.12})`,
         borderRadius: 28, padding: 32,
         background: "linear-gradient(180deg, rgba(20,20,26,0.92), rgba(11,11,15,0.94))",
         border: `1px solid ${c}66`, boxShadow: `0 24px 70px rgba(0,0,0,0.5), 0 0 30px ${c}22`,
@@ -78,11 +78,11 @@ export const Scene7WhyMatters: React.FC = () => {
         Bigger window <span style={gradientText("#6ee7b7", theme.accentGreen)}>≠ bigger brain</span>
       </SceneHeading>
 
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 44 }}>
+      <CameraRig style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 44 }}>
         <Panel side="bad" springV={leftIn} />
         <div style={{ fontFamily: theme.fontSans, fontSize: 54, fontWeight: 800, color: theme.textMuted }}>vs</div>
         <Panel side="good" springV={rightIn} />
-      </div>
+      </CameraRig>
 
       <div style={{ position: "absolute", bottom: 60, width: "100%", textAlign: "center", opacity: lineOpacity, fontFamily: theme.fontSans, fontSize: 41, color: theme.text }}>
         Short, curated context{" "}

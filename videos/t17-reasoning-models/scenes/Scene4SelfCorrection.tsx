@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 4 — Self-correction [0:44–0:59]
 // Mid-reasoning the model writes a wrong step, catches it ("wait, that's
@@ -11,9 +11,11 @@ export const Scene4SelfCorrection: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const cardOpacity = interpolate(frame, [fps * 0.8, fps * 1.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const cardPop = pop(frame, fps, fps * 0.8, { damping: 12 });
 
-  // wrong step appears (1.5s)
+  // wrong step appears (1.5s) with a snappy pop
   const wrongOpacity = interpolate(frame, [fps * 1.5, fps * 2.3], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const wrongPop = pop(frame, fps, fps * 1.5, { damping: 11 });
 
   // "wait, that's wrong" catch (4s) + flash
   const catchOpacity = interpolate(frame, [fps * 4, fps * 4.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -24,8 +26,8 @@ export const Scene4SelfCorrection: React.FC = () => {
   // wrong step dims as it's struck
   const wrongDim = interpolate(frame, [fps * 5, fps * 6.5], [1, 0.35], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // corrected branch glows in (6.5s)
-  const fixSpring = spring({ frame: frame - fps * 6.5, fps, config: { damping: 16 } });
+  // corrected branch glows in (6.5s) with a hard, satisfying pop
+  const fixSpring = pop(frame, fps, fps * 6.5, { damping: 10 });
   const fixOpacity = interpolate(frame, [fps * 6.5, fps * 7.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const fixGlow = interpolate(frame, [fps * 6.5, fps * 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
@@ -36,13 +38,15 @@ export const Scene4SelfCorrection: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentWarm} />
 
+      <CameraRig>
       <SceneHeading kicker="the magic part" accent={theme.accentWarm}>
         It catches its <span style={gradientText("#fbbf24", theme.accentWarm)}>own mistakes</span>
       </SceneHeading>
 
       <div style={{ position: "absolute", top: 190, left: 0, right: 0, bottom: 140, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{
-          opacity: cardOpacity, width: 1200, padding: "41px 53px", borderRadius: 24,
+          opacity: cardOpacity, transform: `scale(${0.92 + cardPop * 0.08})`,
+          width: 1200, padding: "41px 53px", borderRadius: 24,
           background: "linear-gradient(180deg, #131318 0%, #0c0c10 100%)",
           border: `1px solid ${theme.border}`, boxShadow: "0 30px 90px rgba(0,0,0,0.55)",
         }}>
@@ -53,7 +57,7 @@ export const Scene4SelfCorrection: React.FC = () => {
           </div>
 
           {/* WRONG step + strike-through */}
-          <div style={{ position: "relative", opacity: wrongOpacity, marginBottom: 10 }}>
+          <div style={{ position: "relative", opacity: wrongOpacity, transform: `translateX(${(1 - wrongPop) * -18}px)`, transformOrigin: "left center", marginBottom: 10 }}>
             <div style={{ fontFamily: theme.fontSans, fontSize: 40, color: theme.accentRed, opacity: wrongDim, padding: "10px 0" }}>
               <span style={{ fontFamily: theme.fontMono }}>Step 3 </span>
               10:40 + 35 = 10:75.
@@ -78,7 +82,7 @@ export const Scene4SelfCorrection: React.FC = () => {
 
           {/* corrected branch */}
           <div style={{
-            opacity: fixOpacity, transform: `translateX(${(1 - fixSpring) * 26}px)`,
+            opacity: fixOpacity, transform: `translateX(${(1 - fixSpring) * 26}px) scale(${0.82 + fixSpring * 0.18})`, transformOrigin: "left center",
             display: "flex", alignItems: "center", gap: 20, padding: "18px 26px", borderRadius: 14,
             background: `${theme.accentGreen}12`, border: `1px solid ${theme.accentGreen}66`,
             boxShadow: `0 0 ${fixGlow * 40}px ${theme.accentGreen}44`,
@@ -97,6 +101,7 @@ export const Scene4SelfCorrection: React.FC = () => {
       }}>
         It <span style={{ ...gradientText("#fbbf24", theme.accentWarm), fontWeight: 800 }}>checks its own work</span> as it goes — and backtracks.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

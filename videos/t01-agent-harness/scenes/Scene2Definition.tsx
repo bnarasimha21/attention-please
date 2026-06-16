@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../motion";
 
 // Scene 2 — The one-line definition
 // Model emits a text bubble → it hits a harness GATE → routes to the real
@@ -9,10 +9,10 @@ import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../..
 const WorldIcon: React.FC<{ label: string; emoji: string; opacity: number; delay: number; frame: number; fps: number }> = ({
   label, emoji, opacity, delay, frame, fps,
 }) => {
-  const s = spring({ frame: frame - delay, fps, config: { damping: 14 } });
+  const s = pop(frame, fps, delay, { damping: 11 });
   return (
     <div style={{
-      opacity, transform: `translateX(${(1 - s) * -30}px)`,
+      opacity, transform: `translateX(${(1 - s) * -30}px) scale(${interpolate(s, [0, 1], [0.8, 1])})`,
       display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
     }}>
       <div style={{
@@ -32,6 +32,11 @@ export const Scene2Definition: React.FC = () => {
   const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
   const modelOpacity = interpolate(frame, [fps * 1.5, fps * 2.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const modelPop = pop(frame, fps, fps * 1.5, { damping: 11 });
+  const modelScale = interpolate(modelPop, [0, 1], [0.8, 1]);
+  // gate slams in with a little overshoot
+  const gatePop = pop(frame, fps, fps * 2.5, { damping: 10 });
+  const gateScaleY = interpolate(gatePop, [0, 1], [0.7, 1]);
 
   // Bubble emits from the model, travels toward the gate, and dissolves INTO
   // it (the harness intercepting the text) — so it never overlaps the gate/cards.
@@ -53,6 +58,8 @@ export const Scene2Definition: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentWarm} />
 
+      <CameraRig>
+
       <SceneHeading kicker="the core idea" accent={theme.accentWarm}>
         What a harness actually <span style={gradientText("#fbbf24", theme.accentWarm)}>does</span>
       </SceneHeading>
@@ -60,7 +67,7 @@ export const Scene2Definition: React.FC = () => {
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 96 }}>
 
         {/* Model */}
-        <div style={{ opacity: modelOpacity, display: "flex", flexDirection: "column", alignItems: "center", gap: 20, position: "relative" }}>
+        <div style={{ opacity: modelOpacity, transform: `scale(${modelScale})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 20, position: "relative" }}>
           <ModelCore size={180} pulse={pulse} fontSize={32} />
           <div style={{ fontFamily: theme.fontSans, fontSize: 27, color: theme.textMuted }}>generates text</div>
 
@@ -81,6 +88,7 @@ export const Scene2Definition: React.FC = () => {
         <div style={{
           opacity: gateOpacity,
           width: 38, height: 384, borderRadius: 19,
+          transform: `scaleY(${gateScaleY})`,
           background: `linear-gradient(180deg, ${theme.accentWarm}, #b45309)`,
           boxShadow: `0 0 ${26 + gatePulse * 66}px ${theme.accentWarm}`,
           position: "relative",
@@ -106,6 +114,7 @@ export const Scene2Definition: React.FC = () => {
         The model generates text. The harness decides{" "}
         <span style={{ ...gradientText("#fbbf24", theme.accentWarm), fontWeight: 800 }}>what it can touch.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

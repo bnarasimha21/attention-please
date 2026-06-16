@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 2 — The old way
 // Question token → ONE single quick pulse straight through the MODEL core →
@@ -21,9 +21,9 @@ export const Scene2OldWay: React.FC = () => {
   // core flashes as the pulse passes through
   const coreFlash = Math.max(0, 1 - Math.abs(travel - 0.5) / 0.18);
 
-  // answer pops the instant the pulse exits (4.5s), holds
+  // answer pops the instant the pulse exits (4.5s), holds — snappy punch
   const ansReveal = interpolate(frame, [fps * 4.5, fps * 5.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const ansSpring = spring({ frame: frame - fps * 4.5, fps, config: { damping: 12 } });
+  const ansSpring = pop(frame, fps, fps * 4.5, { damping: 11 });
 
   // "fast but shallow" tag (6.5s), holds
   const tagOpacity = interpolate(frame, [fps * 6.5, fps * 7.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -36,6 +36,7 @@ export const Scene2OldWay: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentRed} />
 
+      <CameraRig>
       <SceneHeading kicker="the old way" accent={theme.accentRed}>
         Answer in <span style={gradientText("#fca5a5", theme.accentRed)}>one pass</span>
       </SceneHeading>
@@ -115,6 +116,7 @@ export const Scene2OldWay: React.FC = () => {
         No working it out. On a hard problem — a{" "}
         <span style={{ color: theme.accentRed, fontWeight: 700 }}>coin flip.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

@@ -10,6 +10,7 @@ import { Scene5LongContext } from "./scenes/Scene5LongContext";
 import { Scene6Verdict } from "./scenes/Scene6Verdict";
 import { Scene7WhyMatters } from "./scenes/Scene7WhyMatters";
 import { Scene8CTA } from "./scenes/Scene8CTA";
+import { Scene9CTA } from "./scenes/Scene9CTA";
 
 // Trending 15 — Is RAG dead?
 // Scenes are crossfaded with @remotion/transitions. Each transition overlaps
@@ -28,6 +29,7 @@ export const T15: React.FC = () => {
     { C: Scene6Verdict, duration: TIMINGS.scene6.duration },
     { C: Scene7WhyMatters, duration: TIMINGS.scene7.duration },
     { C: Scene8CTA, duration: TIMINGS.scene8.duration },
+    { C: Scene9CTA, duration: TIMINGS.scene9.duration },
   ];
 
   const children: React.ReactNode[] = [];

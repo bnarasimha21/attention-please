@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 1 — Hook
 // Same hard question to two model cores. Model A blurts an INSTANT wrong answer
@@ -18,18 +18,20 @@ export const Scene1Hook: React.FC = () => {
   const qSpring = spring({ frame: frame - fps * 0.4, fps, config: { damping: 18 } });
   const qOpacity = interpolate(frame, [fps * 0.4, fps * 1.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Both cores appear (1.8s-2.8s)
+  // Both cores appear (1.8s-2.8s) — snappy staggered pop-in
   const coreOpacity = interpolate(frame, [fps * 1.8, fps * 2.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const coreAPop = pop(frame, fps, fps * 1.8, { damping: 11 });
+  const coreBPop = pop(frame, fps, fps * 2.0, { damping: 11 });
 
-  // Model A blurts INSTANTLY (3.2s) — wrong answer in red, holds
+  // Model A blurts INSTANTLY (3.2s) — wrong answer in red, holds (punch)
   const aReveal = interpolate(frame, [fps * 3.2, fps * 3.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const aSpring = spring({ frame: frame - fps * 3.2, fps, config: { damping: 12 } });
+  const aSpring = pop(frame, fps, fps * 3.2, { damping: 11 });
 
   // Model B THINKS — reasoning dots from 3.4s..9.5s (long, readable), then resolves green at 9.5s
   const thinking = frame > fps * 3.4 && frame < fps * 9.5;
   const dotCount = 3;
   const bReveal = interpolate(frame, [fps * 9.5, fps * 10.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const bSpring = spring({ frame: frame - fps * 9.5, fps, config: { damping: 12 } });
+  const bSpring = pop(frame, fps, fps * 9.5, { damping: 11 });
 
   // closing line (12s+) — holds fully visible to scene end (20s)
   const lineOpacity = interpolate(frame, [fps * 12, fps * 13.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -39,6 +41,7 @@ export const Scene1Hook: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig>
       {/* Question card */}
       <div style={{
         position: "absolute", top: 96, left: "50%",
@@ -60,7 +63,7 @@ export const Scene1Hook: React.FC = () => {
       <div style={{ position: "absolute", top: 360, left: 0, right: 0, bottom: 150, display: "flex", alignItems: "center", justifyContent: "center", gap: 240 }}>
 
         {/* Model A — blurts instantly, WRONG */}
-        <div style={{ opacity: coreOpacity, display: "flex", flexDirection: "column", alignItems: "center", gap: 26, position: "relative" }}>
+        <div style={{ opacity: coreOpacity, transform: `scale(${0.8 + coreAPop * 0.2})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 26, position: "relative" }}>
           <div style={{ fontFamily: theme.fontMono, fontSize: 30, color: theme.textMuted, letterSpacing: 2 }}>MODEL A</div>
           <ModelCore size={204} label="MODEL" pulse={pulse * 0.5} fontSize={35} />
           <div style={{ fontFamily: theme.fontSans, fontSize: 24, color: theme.textDim }}>answers instantly</div>
@@ -78,7 +81,7 @@ export const Scene1Hook: React.FC = () => {
         </div>
 
         {/* Model B — thinks, then RIGHT */}
-        <div style={{ opacity: coreOpacity, display: "flex", flexDirection: "column", alignItems: "center", gap: 26, position: "relative" }}>
+        <div style={{ opacity: coreOpacity, transform: `scale(${0.8 + coreBPop * 0.2})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 26, position: "relative" }}>
           <div style={{ fontFamily: theme.fontMono, fontSize: 30, color: theme.accent, letterSpacing: 2 }}>MODEL B</div>
           <div style={{ position: "relative" }}>
             {/* thinking shimmer ring */}
@@ -130,6 +133,7 @@ export const Scene1Hook: React.FC = () => {
         Same model. The difference? Time to{" "}
         <span style={{ ...gradientText("#c7d2fe", theme.accent), fontWeight: 800 }}>think.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 8 — Recap + CTA [1:48-1:55]
 // Three recap chips (spread thin · lost in middle · fades) → fix line →
@@ -25,8 +25,10 @@ export const Scene8CTA: React.FC = () => {
   const brandOpacity = interpolate(frame, [fps * 10.5, fps * 11.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill>
       <SceneBackground glow={theme.accentRed} />
+
+      <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
 
       {/* Recap header */}
       <div style={{ fontFamily: theme.fontMono, fontSize: 24, letterSpacing: 6, textTransform: "uppercase", color: theme.accentRed, marginBottom: 34 }}>
@@ -37,11 +39,11 @@ export const Scene8CTA: React.FC = () => {
       <div style={{ display: "flex", gap: 28, marginBottom: 54 }}>
         {CHIPS.map((c, i) => {
           const start = chipStart(i);
-          const s = spring({ frame: frame - start, fps, config: { damping: 15 } });
+          const s = pop(frame, fps, start, { damping: 11 });
           const opacity = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           return (
             <div key={c.label} style={{
-              opacity, transform: `translateY(${(1 - s) * 20}px) scale(${0.9 + s * 0.1})`,
+              opacity, transform: `translateY(${(1 - s) * 20}px) scale(${0.8 + s * 0.2})`,
               padding: "20px 34px", borderRadius: 20,
               background: `linear-gradient(160deg, ${c.color}1f, ${c.color}0a)`,
               border: `1px solid ${c.color}66`, boxShadow: `0 0 26px ${c.color}26`,
@@ -64,16 +66,7 @@ export const Scene8CTA: React.FC = () => {
       <div style={{ marginTop: 28, opacity: teaserOpacity, fontFamily: theme.fontSans, fontSize: 32, color: theme.textMuted, textAlign: "center" }}>
         Next: <span style={{ color: theme.accent }}>Subagents — giving each task its own brain</span>
       </div>
-
-      {/* Brand */}
-      <div style={{ opacity: brandOpacity, position: "absolute", bottom: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 57, fontWeight: 800, color: theme.text, letterSpacing: 2 }}>
-          Attention<span style={{ color: theme.accent }}> Please</span>
-        </div>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 24, color: theme.textMuted }}>
-          AI concepts, animated clearly
-        </div>
-      </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

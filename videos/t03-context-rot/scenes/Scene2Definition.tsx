@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 2 — What is context rot [0:14-0:30]
 // A context box fills with grey "noise" lines; one gold "signal" line gets
@@ -21,6 +21,7 @@ export const Scene2Definition: React.FC = () => {
   const snrColor = snr > 55 ? theme.accentGreen : snr > 28 ? theme.accentWarm : theme.accentRed;
   const meterOpacity = interpolate(frame, [fps * 1.8, fps * 2.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
+  const boxPop = pop(frame, fps, fps * 0.6, { damping: 12 });
   const boxOpacity = interpolate(frame, [fps * 0.6, fps * 1.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   const lineOpacity = interpolate(frame, [fps * 12.5, fps * 14], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -34,7 +35,7 @@ export const Scene2Definition: React.FC = () => {
         Attention spreads <span style={gradientText("#fbbf24", theme.accentWarm)}>thin</span>
       </SceneHeading>
 
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 84 }}>
+      <CameraRig style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 84 }}>
 
         {/* The context box */}
         <div style={{
@@ -43,6 +44,7 @@ export const Scene2Definition: React.FC = () => {
           border: `1px solid ${theme.border}`,
           boxShadow: "inset 0 0 36px rgba(0,0,0,0.6), 0 24px 60px rgba(0,0,0,0.45)",
           display: "flex", flexDirection: "column", gap: 15,
+          transform: `scale(${0.86 + boxPop * 0.14})`, transformOrigin: "center",
         }}>
           <div style={{ fontFamily: theme.fontMono, fontSize: 22, color: theme.textDim, letterSpacing: 2, textTransform: "uppercase" }}>
             the model's context
@@ -98,7 +100,7 @@ export const Scene2Definition: React.FC = () => {
             {Math.round(snr)}%
           </div>
         </div>
-      </div>
+      </CameraRig>
 
       <div style={{
         position: "absolute", bottom: 84, width: "100%", textAlign: "center",

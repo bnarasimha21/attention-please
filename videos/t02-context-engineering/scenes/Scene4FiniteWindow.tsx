@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 4 — The window is finite [0:42-0:56]
 // A fixed-size container. A few green "relevant facts" sit inside. Then gray
@@ -40,6 +40,7 @@ export const Scene4FiniteWindow: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentRed} />
 
+      <CameraRig>
       <SceneHeading kicker="the catch" accent={theme.accentRed}>
         The window is{" "}
         <span style={gradientText("#fca5a5", theme.accentRed)}>finite</span>
@@ -67,6 +68,9 @@ export const Scene4FiniteWindow: React.FC = () => {
             const isSignal = kind === "signal";
             const c = isSignal ? theme.accentGreen : "#4b4b52";
             const scale = isSignal ? squeeze : 1;
+            // signal facts pop in with a bounce as they land (staggered 2.5s-4.8s)
+            const sigDelay = fps * 2.5 + i * fps * 0.55;
+            const sigPop = isSignal ? pop(frame, fps, sigDelay, { damping: 11 }) : 1;
             return (
               <div key={i} style={{
                 borderRadius: 14, position: "relative",
@@ -75,7 +79,7 @@ export const Scene4FiniteWindow: React.FC = () => {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontFamily: theme.fontMono, fontSize: 22 * (isSignal ? scale : 1), fontWeight: 800, color: theme.bg,
                 opacity: isSignal ? 1 : 0.92,
-                transform: `scale(${isSignal ? 0.6 + scale * 0.4 : 1})`,
+                transform: `scale(${isSignal ? (0.8 + sigPop * 0.2) * scale : 1})`,
               }}>
                 {isSignal ? "FACT" : "noise"}
               </div>
@@ -95,6 +99,7 @@ export const Scene4FiniteWindow: React.FC = () => {
         Signal drowns in <span style={{ color: theme.textMuted }}>noise.</span> Same window —{" "}
         <span style={{ color: theme.accentRed, fontWeight: 700 }}>worse answer.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 2 — Prompt vs context [0:13-0:26]
 // A tiny "PROMPT" box (being tweaked) next to a large glassy "CONTEXT WINDOW"
@@ -11,15 +11,15 @@ export const Scene2PromptVsContext: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Small prompt box appears (2s)
-  const promptS = spring({ frame: frame - fps * 2, fps, config: { damping: 16 } });
+  // Small prompt box pops in (2s)
+  const promptS = pop(frame, fps, fps * 2, { damping: 11 });
   const promptOpacity = interpolate(frame, [fps * 2, fps * 2.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   // wrench tweaks the box — tiny jitter to show "optimizing"
   const tweak = frame > fps * 3.1 && frame < fps * 5.5 ? Math.sin(frame / 2.2) * 2.5 : 0;
   const tweakBadge = interpolate(frame, [fps * 3.3, fps * 4.1], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Large context stage appears (5.8s)
-  const stageS = spring({ frame: frame - fps * 5.8, fps, config: { damping: 18 } });
+  // Large context stage pops in (5.8s)
+  const stageS = pop(frame, fps, fps * 5.8, { damping: 12 });
   const stageOpacity = interpolate(frame, [fps * 5.8, fps * 6.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // stage fills with arranged chips (7s+)
@@ -32,6 +32,7 @@ export const Scene2PromptVsContext: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentWarm} />
 
+      <CameraRig>
       <SceneHeading kicker="the shift" accent={theme.accentWarm}>
         Optimize the question, or the{" "}
         <span style={gradientText("#fbbf24", theme.accentWarm)}>whole room</span>
@@ -75,6 +76,9 @@ export const Scene2PromptVsContext: React.FC = () => {
             {Array.from({ length: CHIPS }).map((_, i) => {
               const on = filled > i;
               const fillT = interpolate(filled - i, [0, 1], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+              // each chip pops in with a bounce as the fill front reaches it
+              const chipDelay = interpolate(i, [0, CHIPS - 1], [fps * 7, fps * 10.5]);
+              const chipPop = pop(frame, fps, chipDelay, { damping: 11 });
               const c = theme.tokenColors[i % theme.tokenColors.length];
               return (
                 <div key={i} style={{
@@ -82,7 +86,7 @@ export const Scene2PromptVsContext: React.FC = () => {
                   background: on ? `linear-gradient(160deg, ${c}, ${c}bb)` : "transparent",
                   border: on ? "none" : `1px dashed ${theme.border}`,
                   opacity: on ? fillT : 0.5,
-                  transform: `scale(${on ? 0.9 + fillT * 0.1 : 1})`,
+                  transform: `scale(${on ? 0.8 + chipPop * 0.2 : 1})`,
                   boxShadow: on ? `0 0 16px ${c}55, inset 0 1px 0 rgba(255,255,255,0.25)` : "none",
                 }} />
               );
@@ -100,6 +104,7 @@ export const Scene2PromptVsContext: React.FC = () => {
         One is a <span style={{ color: theme.textMuted }}>sentence.</span> The other is the{" "}
         <span style={{ ...gradientText("#fbbf24", theme.accentWarm), fontWeight: 800 }}>whole room</span> the model thinks in.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

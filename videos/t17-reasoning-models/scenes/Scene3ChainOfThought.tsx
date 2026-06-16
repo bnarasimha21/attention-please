@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 3 — Chain of thought [0:27–0:44]
 // THE HEART. Zoom into the scratchpad: a word problem reasoned one step at a
@@ -19,7 +19,7 @@ export const Scene3ChainOfThought: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const cardOpacity = interpolate(frame, [fps * 0.8, fps * 1.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const cardSpring = spring({ frame: frame - fps * 0.8, fps, config: { damping: 18 } });
+  const cardSpring = pop(frame, fps, fps * 0.8, { damping: 12 });
 
   // each step reveals starting at 2.4s, ~1.7s apart so each line is read before
   // the next appears. Final step lands ~9.4s; holds ~16s before scene end (26s).
@@ -31,6 +31,7 @@ export const Scene3ChainOfThought: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accent} />
 
+      <CameraRig>
       <SceneHeading kicker="the heart of it" accent={theme.accent}>
         Reasoning, <span style={gradientText("#c7d2fe", theme.accent)}>one step at a time</span>
       </SceneHeading>
@@ -38,7 +39,7 @@ export const Scene3ChainOfThought: React.FC = () => {
       <div style={{ position: "absolute", top: 190, left: 0, right: 0, bottom: 140, display: "flex", alignItems: "center", justifyContent: "center" }}>
         {/* scratchpad card */}
         <div style={{
-          opacity: cardOpacity, transform: `scale(${0.94 + cardSpring * 0.06})`,
+          opacity: cardOpacity, transform: `scale(${0.9 + cardSpring * 0.1})`,
           width: 1180, padding: "38px 50px", borderRadius: 24,
           background: "linear-gradient(180deg, #131318 0%, #0c0c10 100%)",
           border: `1px solid ${theme.border}`,
@@ -51,8 +52,9 @@ export const Scene3ChainOfThought: React.FC = () => {
           {STEPS.map((s, i) => {
             const start = stepStart(i);
             const o = interpolate(frame, [start, start + fps * 0.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-            const sp = spring({ frame: frame - start, fps, config: { damping: 16 } });
+            const sp = pop(frame, fps, start, { damping: s.final ? 9 : 12 });
             const x = (1 - sp) * -22;
+            const sc = (s.final ? 0.78 : 0.85) + sp * (s.final ? 0.22 : 0.15);
             // connector to NEXT step draws after this step lands
             const connT = i < STEPS.length - 1
               ? interpolate(frame, [start + fps * 0.6, start + fps * 1.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
@@ -60,7 +62,7 @@ export const Scene3ChainOfThought: React.FC = () => {
             return (
               <div key={i} style={{ position: "relative" }}>
                 <div style={{
-                  opacity: o, transform: `translateX(${x}px)`,
+                  opacity: o, transform: `translateX(${x}px) scale(${sc})`, transformOrigin: "left center",
                   display: "flex", alignItems: "baseline", gap: 24, padding: "15px 0",
                 }}>
                   <div style={{
@@ -98,6 +100,7 @@ export const Scene3ChainOfThought: React.FC = () => {
       }}>
         Each line <span style={{ color: theme.accent, fontWeight: 700 }}>builds on the last</span> — exactly like working it out on paper.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

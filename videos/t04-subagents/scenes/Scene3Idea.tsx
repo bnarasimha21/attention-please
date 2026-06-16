@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 3 — The idea [0:26-0:39]
 // Main core "clones": a second core buds off and slides aside, popping its
@@ -27,8 +27,8 @@ export const Scene3Idea: React.FC = () => {
 
   const mainOpacity = interpolate(frame, [fps * 0.6, fps * 1.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // bud-off: a clone scales out of the main core, then slides right
-  const budPop = spring({ frame: frame - fps * 3, fps, config: { damping: 13 } });
+  // bud-off: a clone pops out of the main core with bounce, then slides right
+  const budPop = pop(frame, fps, fps * 3, { damping: 11 });
   const slide = interpolate(frame, [fps * 4, fps * 5.8], [0, 432], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: undefined });
   const slideSpring = spring({ frame: frame - fps * 4, fps, config: { damping: 18 } });
   const cloneX = slide * slideSpring;
@@ -38,7 +38,7 @@ export const Scene3Idea: React.FC = () => {
 
   // subagent label + empty window appear after it settles
   const subLabelOpacity = interpolate(frame, [fps * 6, fps * 7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const winSpring = spring({ frame: frame - fps * 6.8, fps, config: { damping: 16 } });
+  const winSpring = pop(frame, fps, fps * 6.8, { damping: 11 });
   const winOpacity = interpolate(frame, [fps * 6.8, fps * 7.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   const lineOpacity = interpolate(frame, [fps * 11.5, fps * 12.9], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -52,6 +52,7 @@ export const Scene3Idea: React.FC = () => {
         Spin off a <span style={gradientText("#6ee7b7", theme.accentGreen)}>subagent</span>
       </SceneHeading>
 
+      <CameraRig>
       <div style={{ position: "absolute", top: 40, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ position: "relative", width: 1080, height: 456, display: "flex", alignItems: "center", justifyContent: "center" }}>
 
@@ -76,7 +77,7 @@ export const Scene3Idea: React.FC = () => {
           )}
 
           {/* Fresh empty window beside the subagent */}
-          <div style={{ position: "absolute", right: -24, top: "50%", transform: "translateY(-50%)" }}>
+          <div style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)" }}>
             <EmptyWindow opacity={winOpacity} scale={0.85 + winSpring * 0.15} tag="fresh · empty" />
           </div>
         </div>
@@ -89,6 +90,7 @@ export const Scene3Idea: React.FC = () => {
       }}>
         A second agent — with its own <span style={{ color: theme.accentGreen, fontWeight: 700 }}>fresh, empty</span> context window.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

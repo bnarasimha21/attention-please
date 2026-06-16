@@ -1,13 +1,13 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, interpolateColors } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 5 — The tradeoff
 // A speed-vs-accuracy DIAL turns from low → high. As it turns, three meters
 // move in tandem: accuracy ↑ (good), but latency ↑ and cost ↑ (the price).
 
-const Meter: React.FC<{ label: string; value: number; color: string; good?: boolean }> = ({ label, value, color, good }) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 11, width: 432 }}>
+const Meter: React.FC<{ label: string; value: number; color: string; good?: boolean; enter?: number }> = ({ label, value, color, good, enter = 1 }) => (
+  <div style={{ display: "flex", flexDirection: "column", gap: 11, width: 432, opacity: enter, transform: `translateX(${(1 - enter) * 36}px) scale(${0.85 + enter * 0.15})`, transformOrigin: "left center" }}>
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
       <span style={{ fontFamily: theme.fontMono, fontSize: 30, color: theme.text, letterSpacing: 1 }}>{label}</span>
       <span style={{ fontFamily: theme.fontMono, fontSize: 27, color, fontWeight: 700 }}>
@@ -25,6 +25,10 @@ export const Scene5Tradeoff: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const stageOpacity = interpolate(frame, [fps * 1, fps * 2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+  // snappy staggered entrances for the dial + the three meters
+  const dialPop = pop(frame, fps, fps * 1.0, { damping: 11 });
+  const meterPop = (i: number) => pop(frame, fps, fps * (1.4 + i * 0.18), { damping: 11 });
 
   // dial value 0..1 — sweep up (2.5s..9s), hold, the whole "turning the knob" feel
   const dial = interpolate(frame, [fps * 2.5, fps * 9], [0.08, 0.92], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -47,6 +51,7 @@ export const Scene5Tradeoff: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentWarm} />
 
+      <CameraRig>
       <SceneHeading kicker="the tradeoff" accent={theme.accentWarm}>
         A dial you <span style={gradientText("#fbbf24", theme.accentWarm)}>turn</span>
       </SceneHeading>
@@ -54,7 +59,7 @@ export const Scene5Tradeoff: React.FC = () => {
       <div style={{ position: "absolute", top: 220, left: 0, right: 0, bottom: 150, display: "flex", alignItems: "center", justifyContent: "center", gap: 144, opacity: stageOpacity }}>
 
         {/* The dial */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 26 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 26, transform: `scale(${0.85 + dialPop * 0.15})` }}>
           <div style={{ position: "relative", width: 336, height: 336 }}>
             {/* arc track */}
             <svg width={336} height={336} viewBox="0 0 280 280" style={{ position: "absolute", inset: 0 }}>
@@ -88,9 +93,9 @@ export const Scene5Tradeoff: React.FC = () => {
 
         {/* The meters */}
         <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
-          <Meter label="accuracy" value={accuracy} color={theme.accentGreen} good />
-          <Meter label="latency" value={latency} color={theme.accentWarm} />
-          <Meter label="cost" value={cost} color={theme.accentRed} />
+          <Meter label="accuracy" value={accuracy} color={theme.accentGreen} good enter={meterPop(0)} />
+          <Meter label="latency" value={latency} color={theme.accentWarm} enter={meterPop(1)} />
+          <Meter label="cost" value={cost} color={theme.accentRed} enter={meterPop(2)} />
         </div>
       </div>
 
@@ -101,6 +106,7 @@ export const Scene5Tradeoff: React.FC = () => {
         Smarter answers cost <span style={{ color: theme.accentWarm, fontWeight: 700 }}>time</span> and{" "}
         <span style={{ color: theme.accentRed, fontWeight: 700 }}>money.</span> You choose the trade.
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };

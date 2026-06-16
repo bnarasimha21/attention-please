@@ -1,6 +1,6 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText } from "../../../remotion-src/visuals";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
 // Scene 4 — What actually changed [0:46-1:03]
 // Agentic retrieval: the agent reformulates into sub-queries, searches multiple
@@ -31,7 +31,7 @@ export const Scene4WhatChanged: React.FC = () => {
 
   // final lock-in of good chunks (11.5s+)
   const lockT = interpolate(frame, [fps * 11.4, fps * 12.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const lockSpring = spring({ frame: frame - fps * 11.4, fps, config: { damping: 13 } });
+  const lockSpring = pop(frame, fps, fps * 11.4, { damping: 11 });
 
   const lineOpacity = interpolate(frame, [fps * 14, fps * 15.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
@@ -42,6 +42,7 @@ export const Scene4WhatChanged: React.FC = () => {
     <AbsoluteFill>
       <SceneBackground glow={theme.accentGreen} />
 
+      <CameraRig intensity={0.6} push={0.025}>
       <SceneHeading kicker="what actually changed" accent={theme.accentGreen}>
         Retrieval became <span style={gradientText("#6ee7b7", theme.accentGreen)}>agentic</span>
       </SceneHeading>
@@ -139,7 +140,7 @@ export const Scene4WhatChanged: React.FC = () => {
           {/* sub-queries fanning out + verdicts */}
           {SUBQ.map((q, i) => {
             const start = subStart(i);
-            const s = spring({ frame: frame - start, fps, config: { damping: 15 } });
+            const s = pop(frame, fps, start, { damping: 11 });
             const opacity = interpolate(frame, [start, start + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             const es = evalStart(i);
             const vOpacity = interpolate(frame, [es, es + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -153,7 +154,7 @@ export const Scene4WhatChanged: React.FC = () => {
                   position: "absolute",
                   left: "50%",
                   top: "50%",
-                  transform: `translate(calc(-50% + ${(agentX + kbX) / 2 - 40}px), calc(-50% + ${q.y * s}px)) scale(${0.85 + s * 0.15})`,
+                  transform: `translate(calc(-50% + ${(agentX + kbX) / 2 - 40}px), calc(-50% + ${q.y * s}px)) scale(${interpolate(s, [0, 1], [0.8, 1])})`,
                   opacity: opacity * rejectFade,
                   display: "flex",
                   alignItems: "center",
@@ -237,6 +238,7 @@ export const Scene4WhatChanged: React.FC = () => {
       >
         Search, check, retry — <span style={{ color: theme.accentGreen }}>retrieval got a brain.</span>
       </div>
+      </CameraRig>
     </AbsoluteFill>
   );
 };
