@@ -1,34 +1,31 @@
-// Scene timings — adjust these after audio is recorded
-// All values in FRAMES at 30fps
-// To convert seconds to frames: seconds * 30
-//
-// NOTE: these are currently tightened for SILENT preview — each scene ends
-// ~2s after its last animation beat (no narration dead-air). When you record
-// voiceover, lengthen each `duration` to match the spoken script in
-// scripts/t01-agent-harness.md (the full read is ~6:45).
+// Scene timings — t01 DEEP v2 (15 scenes). All values in FRAMES at 30fps.
+// Durations track the narration script (scripts/t01-agent-harness.md).
+// Scene layout is driven by `duration` via <TransitionSeries> in T01.tsx.
 
 export const FPS = 30;
 
-// Crossfade length between scenes (frames). Each transition overlaps two
-// scenes, so it's subtracted from the grand total below.
+// Crossfade length between scenes (frames). Each transition overlaps two scenes.
 export const XFADE = 18;
 
-// Scene start frames (cumulative).
-// NOTE: `start` is reference-only now; scene layout is driven by `duration`
-// via <TransitionSeries> in T01.tsx.
-// Durations lengthened so every readable line holds ≥3s after animating in.
 export const TIMINGS = {
-  scene1: { start: 0,         duration: 19 * FPS }, // Hook
-  scene2: { start: 19 * FPS,  duration: 20 * FPS }, // One-line definition
-  scene3: { start: 39 * FPS,  duration: 20 * FPS }, // The agent loop
-  scene4: { start: 59 * FPS,  duration: 22 * FPS }, // The harness layers
-  scene5: { start: 81 * FPS,  duration: 21 * FPS }, // Permissions gate
-  scene6: { start: 102 * FPS, duration: 21 * FPS }, // Context & compaction
-  scene7: { start: 123 * FPS, duration: 19 * FPS }, // Why it matters
-  scene8: { start: 142 * FPS, duration: 18 * FPS }, // Recap + teaser
-  scene9: { start: 160 * FPS, duration: 14 * FPS }, // Like & Subscribe CTA
+  scene1:  { start: 0,   duration: 32 * FPS }, // Hook — model is helpless without the harness
+  scene2:  { start: 0,   duration: 23 * FPS }, // Definition — brain in a jar / harness is the body
+  scene3:  { start: 0,   duration: 30 * FPS }, // Stateless function — amnesia
+  scene4:  { start: 0,   duration: 43 * FPS }, // The agentic loop (ReAct) + pseudocode
+  scene5:  { start: 0,   duration: 34 * FPS }, // Tool calling for real (tool_use JSON)
+  scene6:  { start: 0,   duration: 30 * FPS }, // Context assembly (rebuilt every turn)
+  scene7:  { start: 0,   duration: 38 * FPS }, // Window + prompt caching + compaction
+  scene8:  { start: 0,   duration: 30 * FPS }, // Permissions gate + classifier
+  scene9:  { start: 0,   duration: 28 * FPS }, // Subagents — isolated context
+  scene10: { start: 0,   duration: 28 * FPS }, // MCP — USB for AI
+  scene11: { start: 0,   duration: 24 * FPS }, // Hooks — deterministic guardrails
+  scene12: { start: 0,   duration: 34 * FPS }, // Why harness > model
+  scene13: { start: 0,   duration: 30 * FPS }, // How harnesses go wrong (failure modes)
+  scene14: { start: 0,   duration: 20 * FPS }, // Recap — assemble the full diagram
+  scene15: { start: 0,   duration: 14 * FPS }, // Like & Subscribe CTA
 };
 
-// Sum of scene durations (174s) minus the 8 overlapping crossfades.
-// 174*30 - 8*18 = 5220 - 144 = 5076 frames ≈ 2:49.
-export const TOTAL_FRAMES = 174 * FPS - 8 * XFADE;
+// `start` is reference-only (layout is driven by durations in TransitionSeries).
+// Total = sum(durations) - 14 overlapping crossfades.
+// sum = 438s → 438*30 - 14*18 = 13140 - 252 = 12888 frames ≈ 7:10.
+export const TOTAL_FRAMES = 438 * FPS - 14 * XFADE;

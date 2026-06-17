@@ -1,167 +1,225 @@
-# Trending 01 — What is an agent harness?
-**Title:** Claude Code isn't a CLI that calls Claude (it's a harness)
-**Duration target:** 6:45
-**Word count:** ~940 words (~140 wpm)
-**Topic:** The agent harness — the architecture behind Claude Code, Codex, Cursor
+# Trending 01 — What is an agent harness?  ★ DEEP REWRITE v2 ★
+**Title:** The Agent Harness: why the model is only 20% of Claude Code
+**Duration target:** ~6:55 narration (+ ~14s Like/Subscribe CTA scene)
+**Word count:** ~1,000 words (~145 wpm)
+**Topic:** The agent harness — the architecture that turns a stateless LLM into an autonomous agent (Claude Code / Codex / Cursor)
+**Audience:** Developers. Assume they know what an LLM is; give them the real mechanism, named systems, numbers, and selective code.
 **Track:** Trending
+
+> v2 (critiqued + improved): sharper accurate hook, a planted open loop paid off
+> at compaction, a vivid reframe per scene, 5-line loop pseudocode, real numbers,
+> context depth deferred to t02/t03, and Scene 13 reframed from a checklist to
+> failure modes. 14 content scenes + CTA. ★ = new scene vs the current 8-scene build.
 
 ---
 
 ## NARRATION SCRIPT
-*(Read this aloud to record your audio. Tone cues in [brackets].)*
+*(Read aloud to record. Tone cues in [brackets]. On-screen code/snippets noted in the animation guide.)*
 
 ---
 
-### SCENE 1 — Hook [0:00–0:30]
+### SCENE 1 — Hook [0:00–0:32]
+[Calm, then a hook of disbelief — open the loop]
 
-[Calm, a little provocative — pull them in]
+Give a top AI model a real bug to fix — but hand it *only* the issue. No access to the code. No way to run anything.
 
-You probably think Claude Code is a command-line tool that calls Claude.
+It's helpless. Not because it's dumb — because by itself, a language model can't open a file, run a test, or take a single action. It can only produce text.
 
-Type a prompt, the model answers, done.
-
-It's not.
-
-The model is maybe twenty percent of what's happening. The other eighty percent is something most people have never heard of.
-
-It's called a *harness*. And in 2026, it's become the most important idea in AI engineering.
+Everything that turns it into something that *actually fixes the bug* is a wrapper called the **harness** — and the model is maybe twenty percent of it. One layer in here even rewrites the AI's own memory behind your back. Let's open the whole thing up.
 
 ---
 
-### SCENE 2 — The one-line definition [0:30–1:30]
+### SCENE 2 — The one-line definition [0:32–0:55]
+[Explanatory, crisp]
 
-[Explanatory, clear]
+Cleanest one-liner: the model generates text; the **harness** decides what that text can *touch*.
 
-Here's the cleanest way to say it:
-
-The model generates text. The *harness* decides what that text can touch.
-
-That's it. That's the whole idea.
-
-A raw language model can't do anything. It can't read a file. It can't run a command. It can't remember what you said five minutes ago. All it does is predict text.
-
-The harness is everything *between* that text and the real world. When the model says "edit this file" — something has to actually open the file, apply the change, and hand the result back. That something is the harness.
-
-So the model is the engine. The harness is the entire car around it — the wheels, the brakes, the steering, the dashboard.
+Picture the model as a brilliant brain in a jar. It can think, it can plan, it can write you flawless instructions. But it has no hands, no eyes, no memory. The harness is the body.
 
 ---
 
-### SCENE 3 — The agent loop [1:30–2:30]
+### SCENE 3 — The raw model is a stateless function [0:55–1:25]
+[The surprising foundation]
 
-[Building — this is the beating heart]
+And here's what surprises people: that brain has *amnesia*.
 
-At the center of every harness is a loop.
+The model is a **stateless function** — tokens in, tokens out, nothing remembered between calls. The AI you've been chatting with? Every single reply, it silently re-reads the entire conversation from scratch, like it's seeing it for the first time.
 
-The model looks at the situation — that's *observe*. It decides what to do next — *plan*. It calls a tool — *act*. Then it looks at the result, and the loop starts again.
-
-Observe, plan, act. Over and over, until the job is done.
-
-A chatbot answers once and stops. An agent runs this loop — sometimes dozens of times — chaining actions together to finish a real task.
-
-And here's the catch: every trip around the loop costs tokens and time. So the harness runs the loop on a *budget*. It has to be smart about how it spends each step — because the loop can't run forever.
+No memory, and no hands. Those two gaps are the *entire* reason the harness exists. Everything else is the harness covering for them.
 
 ---
 
-### SCENE 4 — The harness layers [2:30–3:45]
+### SCENE 4 — The agentic loop [1:25–2:08]
+[The beating heart — let the pseudocode breathe]
 
-[A bit more technical — let the animation breathe]
+So how do you get an *agent* out of a stateless brain? You put it in a loop. Here's the whole engine, in about five lines.
 
-So what's actually wrapped around the model? Layer by layer.
+The harness sends the model the situation. The model replies with one of two things: a final answer — or a **tool call**, a structured request that says "run *this* for me."
 
-*Context* — the harness assembles everything the model needs to see this turn: your message, the files, the history.
-
-*Tools* — file reads, edits, shell commands, web search. The model's hands.
-
-*Permissions* — a gate on every single action, deciding what's allowed.
-
-*Memory and compaction* — keeping the conversation from overflowing.
-
-*MCP* — a standard plug for connecting outside systems: GitHub, databases, browsers.
-
-*Subagents* — spinning off isolated helpers so messy work doesn't pollute the main thread.
-
-*Hooks* — your own code firing at key moments, like running a linter after every edit.
-
-Strip all of that away, and you're left with a model that can only talk. Add it back, and you get something that can actually *do the work*.
+The harness runs it, adds the result to the conversation, and sends everything back. Look, act, observe — again and again, until the job's done. Researchers call this **ReAct**: reasoning and acting, interleaved. A chatbot answers once. An agent runs this loop ten, twenty, fifty times to finish real work.
 
 ---
 
-### SCENE 5 — Permissions: the safety gate [3:45–4:30]
+### SCENE 5 — Tool calling, for real [2:08–2:42]
+[A bit more technical — let the code breathe]
 
-[Slightly serious — this is the trust part]
+Let's zoom into that "tool call," because it's subtler than it sounds.
 
-Let's zoom in on one layer, because it's the one that keeps the whole thing safe: permissions.
+The harness hands the model a menu of tools — each just a name, a description, and typed parameters. A schema. The model never runs anything itself. It emits a structured block — "call `edit_file` with these arguments" — and the harness does the actual work, then hands back the result, or the error.
 
-The model wants to take an action. Before anything happens, the harness asks a question — is this safe?
-
-Reading a file, searching text — that's harmless. Auto-approved. Green light.
-
-Editing a file, changing state — that gets a pause. The harness asks *you* first.
-
-And something destructive — deleting things, running risky commands — gets blocked or escalated.
-
-This is the line the model can't cross on its own. The model proposes. The harness disposes. That gate is exactly why you can let an agent loose on your codebase without losing sleep.
+So the model is basically an intern with brilliant ideas and zero keys. It can only *ask*. That one choice — propose, never execute — is the foundation of everything safe about agents.
 
 ---
 
-### SCENE 6 — Context & compaction [4:30–5:15]
+### SCENE 6 — Context assembly [2:42–3:12]
+[Land it, then defer the deep-dive]
 
-[Matter-of-fact, landing a key concept]
+Remember — the model's stateless. So before *every* turn, the harness rebuilds the entire prompt from nothing.
 
-Now, one more layer worth understanding: how the harness manages memory.
+It stacks together the system prompt — who the agent is — the tool menu, the relevant files, the history so far, and the latest result, and ships all of it, every loop.
 
-The model has a fixed window — a maximum amount it can look at, at once. A long task overflows it fast.
-
-So the harness watches the window fill up. When it gets close to the limit, it does something clever: it *compacts*. It summarizes the older parts of the conversation into a tight recap, frees up the space, and keeps going — without you ever noticing.
-
-That's why a coding agent can work for an hour straight and not "forget" what it was doing. The harness is quietly rewriting its own memory the whole time.
+Deciding *what* earns a spot in that stack is its own craft — **context engineering** — deep enough that it's got its own episode. Here, just hold this: the harness is the model's working memory, assembled by hand, every single step.
 
 ---
 
-### SCENE 7 — Why this matters [5:15–6:00]
+### SCENE 7 — The context window & compaction [3:12–3:50]
+[Matter-of-fact — pay off the open loop]
 
-[Practical — the big takeaway]
+But that memory has a ceiling — a fixed **token window**, often around two hundred thousand tokens. Long tasks blow right through it, and resending everything each loop gets *expensive*.
 
-Here's why this changes how you should think about AI.
+So the harness pulls two tricks. **Prompt caching**: the stable front — system prompt, tools — gets cached, cutting the cost of resending it by up to ninety percent.
 
-Everyone obsesses over which model is best. But take the *same* model, and put it in two different harnesses — a weak one and a strong one — and you get wildly different results. One barely works. The other ships real software.
-
-The model is becoming a commodity. They're all converging, all getting cheaper. The *harness* is where the real product lives now.
-
-That's why the hottest skill in AI engineering this year isn't prompting — it's *harness engineering*. Designing the loop, the tools, the permissions, the memory. The stuff around the model.
+And **compaction** — remember the memory-rewrite I promised? When the window fills, the harness quietly summarizes the old turns into a tight recap, keeps the key facts, and discards the rest. That's why an agent can grind for an hour and never lose the thread. It's editing its own memory as it goes — and you never see it happen.
 
 ---
 
-### SCENE 8 — Recap + CTA [6:00–6:45]
+### SCENE 8 — Permissions: the safety gate [3:50–4:20]
+[Slightly serious — the trust layer]
 
+Now — you're about to let this thing run commands on your machine. So every tool call hits a **gate** first.
+
+Reading a file, searching — harmless. Auto-approved. Editing a file, changing state — pause, ask the human. Something destructive — delete, force-push, curl a script into your shell — blocked, or escalated. Modern harnesses even run a fast **classifier** to sort actions into those buckets automatically.
+
+The model proposes; the harness disposes. That gate is the whole difference between "autonomous coding agent" and "unsupervised intern with sudo."
+
+---
+
+### SCENE 9 — Subagents: isolated context [4:20–4:48]
+[Building — the scaling move]
+
+Some jobs are just *messy* — grepping the whole codebase, reading forty files to answer one question. Do that in the main conversation and you bury the actual goal under noise.
+
+So the harness spins off a **subagent**: a second model instance with its own clean, empty context. It does the messy digging in isolation and hands back only the answer. The noise stays quarantined; the main thread stays sharp. And because they're independent, you can fire off several at once.
+
+---
+
+### SCENE 10 — MCP: plugging into the world [4:48–5:16]
+[Explanatory — the ecosystem layer]
+
+So far the tools are local. But real agents need GitHub, databases, browsers, your internal systems — and you do *not* want to hand-build an integration for each one.
+
+That's what **MCP** — the Model Context Protocol — fixed when it landed in late 2024. Think USB for AI. Your harness is the **host**; it speaks one standard protocol to **MCP servers**, and each server exposes its tools the same way. Write a server once, and *any* MCP-aware agent can plug in. That's how the toolbox grows without ever touching the harness.
+
+---
+
+### SCENE 11 — Hooks: deterministic guardrails [5:16–5:40]
+[Quick, practical]
+
+One layer people forget: not every decision should be the AI's.
+
+**Hooks** are *your* code — plain, deterministic — fired at fixed moments in the loop. Auto-format after every edit. Run the tests after a change. Hard-block a commit to main. This is the boring, reliable scaffolding wrapped around the smart, unpredictable model — and you want both.
+
+---
+
+### SCENE 12 — Why the harness beats the model [5:40–6:14]
+[Bigger — the thesis]
+
+Step back, because this flips how you should think about AI.
+
+Everyone argues about which *model* is smartest. But take one model and drop it into a weak harness versus a strong one — no memory, clumsy tools, bloated context, versus a tight loop, clean context, sharp tools — and the *same brain* goes from barely functional to shipping real software.
+
+Models are converging and getting cheaper — they're commoditizing. The harness is where the lasting product lives. Which is exactly why **harness engineering** is the hottest skill in AI right now.
+
+---
+
+### SCENE 13 — How harnesses go wrong [6:14–6:44]
+[Practical payoff — failure modes, not a checklist]
+
+So how does a harness go *wrong*? Four classic ways.
+
+The **loop runs away** — no budget, and it burns through your money chasing its own tail. **Context rot** — the window fills with junk and the model gets *dumber* the longer it works. **Tool sprawl** — fifty vague tools it can't choose between. And **over-permission** — you auto-approve everything, and one bad call wipes your repo.
+
+A great harness is really just the absence of these: tight loop, clean context, few sharp tools, safe defaults.
+
+---
+
+### SCENE 14 — Recap [6:44–6:58]
 [Warm, direct — close strong]
 
-So, to recap.
+So there's the whole machine: a stateless, hands-free model — wrapped in a loop, fed a hand-built context, reaching the world only through gated tools, MCP, and hooks; remembering through compaction, scaling through subagents.
 
-A harness is everything between the language model and the real world.
+The model thinks. The harness *acts.* Run Claude Code now, and you'll see every layer of it working.
 
-It runs a loop — observe, plan, act. It wraps the model in tools, permissions, memory, and connections. And it decides what the model's text is actually allowed to touch.
+---
 
-The model thinks. The harness *acts*.
+### SCENE 15 — Like & Subscribe CTA [6:58–7:12]
+[handled by the existing animated CTA scene]
 
-Next time you use Claude Code or any coding agent, you'll see it for what it really is — not a chatbot in a terminal, but a harness with a model at its core.
-
-If this made something click, hit like — it really helps the channel.
-
-See you in the next one.
+If this made the whole thing click — hit like, and subscribe for the rest of the series. See you in the next one.
 
 ---
 
 ## SCENE-BY-SCENE ANIMATION GUIDE
-*(For Remotion build — maps to each scene above)*
+*(Reuse the motion toolkit: SceneBackground, kinetic SceneHeading, CameraRig, pop, ModelCore, crossfades. ★ = new scene to build.)*
 
-| Scene | Timestamp | Animation to build | Remotion notes |
-|-------|-----------|-------------------|----------------|
-| 1 — Hook | 0:00–0:30 | Terminal `$ claude` prompt → dissolves → glowing MODEL core appears, the word "harness" materializes around it | Typewriter prompt, fade-to-core, label reveal |
-| 2 — Definition | 0:30–1:30 | Model emits a text bubble → it hits a harness gate → gate routes it to the real world (file/shell/web icons) | Bubble travels, gate intercept, fan-out to world icons |
-| 3 — The loop | 1:30–2:30 | Circular loop: Observe → Plan → Act → repeat, a token rotating around; budget bar draining each lap | Rotating ring, animated node highlight, depleting budget bar |
-| 4 — Layers | 2:30–3:45 | Central MODEL core; concentric rings appear one by one: Context, Tools, Permissions, Memory, MCP, Subagents, Hooks | Staggered ring reveal with labels, spring scale-in |
-| 5 — Permissions | 3:45–4:30 | An action arrives at a 3-way gate → routes to Auto-approve (green) / Ask (amber) / Block (red) | Branching paths, color-coded outcomes, lock icon |
-| 6 — Compaction | 4:30–5:15 | Context bar fills with message blocks → hits limit → old blocks collapse into a small summary → bar frees up | Bar fill, overflow flash, collapse-into-summary animation |
-| 7 — Why it matters | 5:15–6:00 | Same MODEL core duplicated into a weak harness vs strong harness → different outputs | Split screen, identical core, divergent results |
-| 8 — Recap | 6:00–6:45 | Clean final diagram: MODEL core wrapped in loop + layers, "The model thinks. The harness acts." | Assemble full diagram, fade in tagline, CTA |
+| # | Scene | Animation | Selective code / on-screen detail |
+|---|-------|-----------|-----------------------------------|
+| 1 | Hook | A lone MODEL core gets an issue card; it reaches for file/run/test icons but they're behind glass — "no hands." Tease the harness wrap forming, dim. | "can't: open file · run · act" struck through |
+| 2 | Definition | Brain-in-a-jar MODEL core (thinks) → grows a "body" (the harness) that reaches file/shell/web. | "model = brain · harness = body" |
+| 3 ★ | Raw model = stateless fn | Pure-function box `tokens →[ model ]→ tokens`; same input twice → identical output; an "amnesia" pass re-reads the whole chat each reply. | `f(prompt) → text` ; "stateless · no memory · no hands" |
+| 4 | The agentic loop (ReAct) | The pseudocode types in; then a circular loop animates it — model → tool_call? → run → result → back; **budget bar** drains each lap; beats THINK · ACT · OBSERVE. | 5-line loop pseudocode (below) + `ReAct` tag |
+| 5 ★ | Tool calling | Tool-schema "menu" → model emits a `tool_use` JSON block → harness runs it → `tool_result` returns. Caption: "the model only *asks*." | real `tool_use` + `tool_result` JSON |
+| 6 ★ | Context assembly | Each loop a prompt is *rebuilt* by stacking labeled blocks: System · Tools · Files · History · Latest result. Small "→ full episode" tag to t02. | "rebuilt every turn (stateless)" |
+| 7 | Window + compaction | Token bar fills toward **~200K**; **prompt-cache** badge locks the stable prefix (−90% cost); near limit, old turns **collapse into a summary**. | token meter; "cached −90%" |
+| 8 | Permissions gate | Action → classifier → routes: read = auto (green), edit = ask (amber), `rm -rf` = block (red). | 3-tier; `rm -rf /` blocked |
+| 9 | Subagents | Main core spins off a subagent with its own fresh window; messy work contained on its side; clean summary crosses back; then 3 in parallel. | "isolated context" |
+| 10 ★ | MCP | Host ⇄ standard protocol ⇄ MCP servers (GitHub / DB / browser), each exposing tools identically. "USB for AI." | host · protocol · servers · "late 2024" |
+| 11 ★ | Hooks | Loop timeline with hook points firing: PreToolUse → (lint), PostEdit → (tests), commit → (block main). Deterministic, not LLM. | `PreToolUse` / `PostToolUse` |
+| 12 | Harness > model | Same core in weak vs strong harness → divergent outcomes; "barely works" vs "ships real software"; "model = commodity · harness = product." | — |
+| 13 ★ | How harnesses go wrong | Four failure cards pop in red→resolve green: Runaway loop · Context rot · Tool sprawl · Over-permission → tight loop · clean context · sharp tools · safe defaults. | — |
+| 14 | Recap | Assemble the full diagram: MODEL core + loop ring + layer rings (Context/Tools/Permissions/Memory/MCP/Subagents/Hooks); tagline "The model thinks. The harness acts." | — |
+| 15 | CTA | Existing Scene9 Like/Subscribe (channel icon + animated cursor taps buttons). | — |
+
+**Scene 4 pseudocode (on screen):**
+```python
+while not done:
+    reply = model(context)          # stateless call
+    if reply.tool_call:
+        result = run(reply.tool_call)   # harness executes
+        context += result               # observe
+    else:
+        done = True                     # final answer
+```
+
+**Scene 5 tool-call (on screen):**
+```json
+// model emits →
+{ "type": "tool_use", "name": "edit_file",
+  "input": { "path": "app.py", "find": "...", "replace": "..." } }
+// harness runs it, returns →
+{ "type": "tool_result", "content": "✓ 1 change applied" }
+```
+
+---
+
+### Fact-check notes (keep claims defensible)
+- **"helpless without the harness"**: given only the issue and no repo access / no tools, a model can't resolve a real GitHub issue — it can't see the code or act. Accurate and visceral (avoids the shaky "same model 33→70" figure).
+- **Stateless / re-sent context**: LLM API calls are stateless; the harness resends the full prompt each turn. True.
+- **ReAct**: Reason+Act interleaving (Yao et al., 2022).
+- **tool_use / tool_result**: Anthropic's structured tool-calling block names (OpenAI = "function/tool calls"). Model emits a request; harness executes.
+- **~200K window**: Claude's context window is ~200K tokens (some tiers larger) — "often around 200K" is safe.
+- **Prompt caching −90%**: cached prompt-prefix reads are ~90% cheaper than uncached input on Anthropic; phrase "up to ninety percent."
+- **Compaction**: Claude Code auto-summarizes near the context limit. True.
+- **MCP**: Model Context Protocol — open client/server standard, announced late 2024 (Nov 2024).
+- **Hooks**: lifecycle hooks (PreToolUse/PostToolUse) run deterministic commands. True.
+- **Failure modes** (runaway loop / context rot / tool sprawl / over-permission) are well-documented practitioner pitfalls; context rot has its own episode (t03).

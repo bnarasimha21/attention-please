@@ -1,119 +1,203 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../motion";
+import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 2 — The one-line definition
-// Model emits a text bubble → it hits a harness GATE → routes to the real
-// world. "The model generates text. The harness decides what it can touch."
-
-const WorldIcon: React.FC<{ label: string; emoji: string; opacity: number; delay: number; frame: number; fps: number }> = ({
-  label, emoji, opacity, delay, frame, fps,
-}) => {
-  const s = pop(frame, fps, delay, { damping: 11 });
-  return (
-    <div style={{
-      opacity, transform: `translateX(${(1 - s) * -30}px) scale(${interpolate(s, [0, 1], [0.8, 1])})`,
-      display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
-    }}>
-      <div style={{
-        width: 142, height: 142, borderRadius: 26,
-        background: "linear-gradient(160deg, #17171f 0%, #0e0e13 100%)",
-        border: `1px solid ${theme.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 60,
-        boxShadow: "0 14px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
-      }}>{emoji}</div>
-      <div style={{ fontFamily: theme.fontMono, fontSize: 27, color: theme.textMuted, letterSpacing: 1 }}>{label}</div>
-    </div>
-  );
-};
+// Scene 2 — Definition [~23s / 690 frames]
+// The one-liner. Left: the model as a "brain in a jar" (glass dome over the core,
+// label "thinks"). An arrow → the harness "body" / exoskeleton grows on the right,
+// reaching three world icons: files, shell, web.
 
 export const Scene2Definition: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const pulse = 0.5 + 0.5 * Math.sin(frame / 8);
 
-  const modelOpacity = interpolate(frame, [fps * 1.5, fps * 2.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const modelPop = pop(frame, fps, fps * 1.5, { damping: 11 });
-  const modelScale = interpolate(modelPop, [0, 1], [0.8, 1]);
-  // gate slams in with a little overshoot
-  const gatePop = pop(frame, fps, fps * 2.5, { damping: 10 });
-  const gateScaleY = interpolate(gatePop, [0, 1], [0.7, 1]);
+  // Brain in a jar
+  const jarS = pop(frame, fps, fps * 1.2, { damping: 13 });
+  const jarOpacity = interpolate(frame, [fps * 1.2, fps * 2.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const corePulse = 0.5 + 0.5 * Math.sin(frame / 24);
 
-  // Bubble emits from the model, travels toward the gate, and dissolves INTO
-  // it (the harness intercepting the text) — so it never overlaps the gate/cards.
-  const travel = interpolate(frame, [fps * 3, fps * 4.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const bubbleX = interpolate(travel, [0, 1], [-180, 84]);
-  const bubbleScale = interpolate(travel, [0.7, 1], [1, 0.7], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const bubbleOpacity = interpolate(frame, [fps * 3, fps * 3.7, fps * 4.3, fps * 4.9], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // Arrow draw
+  const arrow = interpolate(frame, [fps * 3.5, fps * 4.8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  const gateOpacity = interpolate(frame, [fps * 2.5, fps * 3.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const gatePulse = travel > 0.85 ? 0.5 + 0.5 * Math.sin(frame / 5) : 0;
+  // Harness exoskeleton frame grows
+  const exoS = interpolate(frame, [fps * 5, fps * 7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  const worldOpacity = interpolate(frame, [fps * 5.5, fps * 6.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // World icons reach in, staggered
+  const worldIcons = [
+    { icon: "📄", label: "files" },
+    { icon: "⌘", label: "shell" },
+    { icon: "🌐", label: "web" },
+  ];
+  const iconStart = 8;
 
-  // Closing line reveals after the icons land, then holds through scene end.
-  const lineOpacity = interpolate(frame, [fps * 9, fps * 10.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const lineY = spring({ frame: frame - fps * 9, fps, config: { damping: 18 } });
+  // Bottom caption
+  const capOpacity = interpolate(frame, [fps * 13, fps * 14.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
     <AbsoluteFill>
-      <SceneBackground glow={theme.accentWarm} />
+      <SceneBackground glow={theme.accent} />
 
-      <CameraRig>
+      <CameraRig style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+        <SceneHeading kicker="the one-liner" accent={theme.accent}>
+          The model generates text. The harness decides what it can{" "}
+          <span style={gradientText("#c7d2fe", theme.accent)}>touch</span>
+        </SceneHeading>
 
-      <SceneHeading kicker="the core idea" accent={theme.accentWarm}>
-        What a harness actually <span style={gradientText("#fbbf24", theme.accentWarm)}>does</span>
-      </SceneHeading>
-
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 96 }}>
-
-        {/* Model */}
-        <div style={{ opacity: modelOpacity, transform: `scale(${modelScale})`, display: "flex", flexDirection: "column", alignItems: "center", gap: 20, position: "relative" }}>
-          <ModelCore size={180} pulse={pulse} fontSize={32} />
-          <div style={{ fontFamily: theme.fontSans, fontSize: 27, color: theme.textMuted }}>generates text</div>
-
-          {/* travelling bubble — dissolves into the gate */}
-          <div style={{
-            position: "absolute", left: 156, top: 58, opacity: bubbleOpacity,
-            transform: `translateX(${bubbleX}px) scale(${bubbleScale})`,
-            background: "linear-gradient(160deg, #1a1a22, #101015)",
-            border: `1px solid ${theme.accent}`, borderRadius: 17,
-            padding: "14px 26px", fontFamily: theme.fontMono, fontSize: 27, color: theme.text, whiteSpace: "nowrap",
-            boxShadow: `0 8px 30px ${theme.accent}55`,
-          }}>
-            "edit this file"
+        {/* LEFT — brain in a jar */}
+        <div style={{ position: "absolute", left: "50%", top: 360, transform: "translate(calc(-50% - 520px), -50%)", opacity: jarOpacity }}>
+          {/* glass dome */}
+          <div
+            style={{
+              position: "relative",
+              width: 300,
+              height: 320,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transform: `scale(${interpolate(jarS, [0, 1], [0.85, 1])})`,
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: "48% 48% 18% 18% / 60% 60% 12% 12%",
+                background: "linear-gradient(160deg, rgba(160,170,255,0.12), rgba(120,130,220,0.03))",
+                border: "2px solid rgba(180,190,255,0.30)",
+                boxShadow: "inset 0 0 70px rgba(180,190,255,0.12), 0 14px 50px rgba(0,0,0,0.45)",
+              }}
+            />
+            {/* jar base */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: -18,
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: 240,
+                height: 26,
+                borderRadius: 10,
+                background: "linear-gradient(180deg, rgba(120,130,200,0.35), rgba(40,44,70,0.5))",
+                border: "1px solid rgba(180,190,255,0.25)",
+              }}
+            />
+            <div style={{ transform: "scale(1)" }}>
+              <ModelCore size={170} label="MODEL" pulse={corePulse} fontSize={28} />
+            </div>
+          </div>
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: 24,
+              fontFamily: theme.fontMono,
+              fontSize: 26,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              color: theme.accent,
+            }}
+          >
+            thinks
           </div>
         </div>
 
-        {/* Gate */}
-        <div style={{
-          opacity: gateOpacity,
-          width: 38, height: 384, borderRadius: 19,
-          transform: `scaleY(${gateScaleY})`,
-          background: `linear-gradient(180deg, ${theme.accentWarm}, #b45309)`,
-          boxShadow: `0 0 ${26 + gatePulse * 66}px ${theme.accentWarm}`,
-          position: "relative",
-        }}>
-          <div style={{ position: "absolute", top: -56, left: "50%", transform: "translateX(-50%)", fontFamily: theme.fontMono, fontSize: 30, color: theme.accentWarm, whiteSpace: "nowrap", letterSpacing: 3 }}>
-            HARNESS
+        {/* ARROW */}
+        <div style={{ position: "absolute", left: "50%", top: 360, transform: "translate(calc(-50% - 230px), -50%)" }}>
+          <div style={{ display: "flex", alignItems: "center", width: 150 }}>
+            <div
+              style={{
+                height: 5,
+                width: `${arrow * 110}px`,
+                background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent}cc)`,
+                borderRadius: 3,
+                boxShadow: `0 0 16px ${theme.accent}88`,
+              }}
+            />
+            <div
+              style={{
+                width: 0,
+                height: 0,
+                borderTop: "13px solid transparent",
+                borderBottom: "13px solid transparent",
+                borderLeft: `20px solid ${theme.accent}`,
+                opacity: arrow > 0.85 ? 1 : 0,
+                filter: `drop-shadow(0 0 10px ${theme.accent}88)`,
+              }}
+            />
           </div>
         </div>
 
-        {/* World */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 30 }}>
-          <WorldIcon label="files" emoji="📄" opacity={worldOpacity} delay={fps * 5.5} frame={frame} fps={fps} />
-          <WorldIcon label="shell" emoji="⌨️" opacity={worldOpacity} delay={fps * 6} frame={frame} fps={fps} />
-          <WorldIcon label="web" emoji="🌐" opacity={worldOpacity} delay={fps * 6.5} frame={frame} fps={fps} />
+        {/* RIGHT — harness body / exoskeleton reaching world icons */}
+        <div style={{ position: "absolute", left: "50%", top: 360, transform: "translate(calc(-50% + 60px), -50%)", opacity: exoS }}>
+          {/* exoskeleton frame */}
+          <div
+            style={{
+              position: "relative",
+              width: 640,
+              padding: "30px 30px 30px 38px",
+              borderRadius: 22,
+              background: "linear-gradient(150deg, rgba(40,44,72,0.6), rgba(20,22,36,0.55))",
+              border: `2px solid ${theme.accent}55`,
+              boxShadow: `0 0 ${40 * exoS}px ${theme.accent}33, 0 18px 50px rgba(0,0,0,0.45)`,
+              transform: `scaleX(${interpolate(exoS, [0, 1], [0.9, 1])})`,
+              transformOrigin: "left center",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: theme.fontMono,
+                fontSize: 24,
+                letterSpacing: 3,
+                textTransform: "uppercase",
+                color: theme.accent,
+                marginBottom: 22,
+              }}
+            >
+              harness · the body
+            </div>
+            <div style={{ display: "flex", gap: 20, justifyContent: "space-between" }}>
+              {worldIcons.map((w, i) => {
+                const s = pop(frame, fps, fps * (iconStart + i * 1.3), { damping: 12, mass: 0.8 });
+                const op = interpolate(frame, [fps * (iconStart + i * 1.3), fps * (iconStart + i * 1.3 + 1)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      flex: 1,
+                      opacity: op,
+                      transform: `translateY(${(1 - s) * 16}px) scale(${interpolate(s, [0, 1], [0.85, 1])})`,
+                      padding: "22px 14px",
+                      borderRadius: 16,
+                      background: "linear-gradient(160deg, rgba(30,34,54,0.9), rgba(16,18,28,0.85))",
+                      border: `1px solid ${theme.border}`,
+                      textAlign: "center",
+                    }}
+                  >
+                    <div style={{ fontSize: 52, marginBottom: 10 }}>{w.icon}</div>
+                    <div style={{ fontFamily: theme.fontSans, fontSize: 28, fontWeight: 700, color: theme.text }}>{w.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div style={{
-        position: "absolute", bottom: 100, width: "100%", textAlign: "center",
-        opacity: lineOpacity, transform: `translateY(${(1 - lineY) * 18}px)`,
-        fontFamily: theme.fontSans, fontSize: 46, color: theme.text, lineHeight: 1.5,
-      }}>
-        The model generates text. The harness decides{" "}
-        <span style={{ ...gradientText("#fbbf24", theme.accentWarm), fontWeight: 800 }}>what it can touch.</span>
-      </div>
+        {/* Bottom caption */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 90,
+            width: "100%",
+            textAlign: "center",
+            opacity: capOpacity,
+            fontFamily: theme.fontMono,
+            fontSize: 34,
+            color: theme.textMuted,
+            letterSpacing: 1,
+          }}
+        >
+          model = <span style={{ color: theme.accent }}>brain</span> · harness ={" "}
+          <span style={{ color: theme.accentGreen }}>body</span>
+        </div>
       </CameraRig>
     </AbsoluteFill>
   );

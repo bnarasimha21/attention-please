@@ -1,8 +1,8 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, staticFile, Img } from "remotion";
 import { theme } from "../../../remotion-src/theme";
-import { SceneBackground, gradientText, CameraRig, pop } from "../motion";
+import { SceneBackground, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 9 — Like & Subscribe CTA
+// Scene 15 — Like & Subscribe CTA
 // Channel icon springs in → wordmark → an animated cursor taps the LIKE button
 // (fills + sparks), then the SUBSCRIBE button (turns to "Subscribed ✓" + bell
 // rings). Closes with "See you in the next one."
@@ -11,7 +11,7 @@ import { SceneBackground, gradientText, CameraRig, pop } from "../motion";
 const pressDip = (frame: number, t: number) =>
   interpolate(frame, [t - 4, t, t + 6], [0, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-export const Scene9CTA: React.FC = () => {
+export const Scene15CTA: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 

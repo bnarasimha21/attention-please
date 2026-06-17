@@ -3,3 +3,9 @@ node_modules/
 out/
 *.mp4
 *.mov
+# recorded audio + rendered media (kept locally, not in git)
+*.wav
+*.mp3
+*.aac
+*.m4a
+renders/
