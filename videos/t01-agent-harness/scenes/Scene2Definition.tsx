@@ -2,7 +2,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 2 — Definition [~23s / 690 frames]
+// Scene 2 - Definition [~23s / 690 frames]
 // The one-liner. Left: the model as a "brain in a jar" (glass dome over the core,
 // label "thinks"). An arrow → the harness "body" / exoskeleton grows on the right,
 // reaching three world icons: files, shell, web.
@@ -38,13 +38,13 @@ export const Scene2Definition: React.FC = () => {
       <SceneBackground glow={theme.accent} />
 
       <CameraRig style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-        <SceneHeading kicker="the one-liner" accent={theme.accent}>
+        <SceneHeading kicker="the one-liner" accent={theme.accent} size={46}>
           The model generates text. The harness decides what it can{" "}
           <span style={gradientText("#c7d2fe", theme.accent)}>touch</span>
         </SceneHeading>
 
-        {/* LEFT — brain in a jar */}
-        <div style={{ position: "absolute", left: "50%", top: 360, transform: "translate(calc(-50% - 520px), -50%)", opacity: jarOpacity }}>
+        {/* LEFT - brain in a jar */}
+        <div style={{ position: "absolute", left: "50%", top: 460, transform: "translate(calc(-50% - 520px), -50%)", opacity: jarOpacity }}>
           {/* glass dome */}
           <div
             style={{
@@ -101,7 +101,7 @@ export const Scene2Definition: React.FC = () => {
         </div>
 
         {/* ARROW */}
-        <div style={{ position: "absolute", left: "50%", top: 360, transform: "translate(calc(-50% - 230px), -50%)" }}>
+        <div style={{ position: "absolute", left: "50%", top: 460, transform: "translate(calc(-50% - 230px), -50%)" }}>
           <div style={{ display: "flex", alignItems: "center", width: 150 }}>
             <div
               style={{
@@ -126,8 +126,8 @@ export const Scene2Definition: React.FC = () => {
           </div>
         </div>
 
-        {/* RIGHT — harness body / exoskeleton reaching world icons */}
-        <div style={{ position: "absolute", left: "50%", top: 360, transform: "translate(calc(-50% + 60px), -50%)", opacity: exoS }}>
+        {/* RIGHT - harness body / exoskeleton reaching world icons */}
+        <div style={{ position: "absolute", left: "50%", top: 460, transform: "translate(calc(-50% + 60px), -50%)", opacity: exoS }}>
           {/* exoskeleton frame */}
           <div
             style={{

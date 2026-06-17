@@ -2,14 +2,14 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 5 — Tool calling
+// Scene 5 - Tool calling
 // Left→right flow: TOOLS menu card → MODEL emits a tool_use JSON card →
 // arrow to HARNESS (executes) → tool_result JSON card returns. Staggered.
 // Punchline: the model only ASKS; the harness has the keys.
 
 const TOOLS = [
   { name: "read_file", hint: "(path)" },
-  { name: "edit_file", hint: "(path, find, replace)" },
+  { name: "edit_file", hint: "(path, …)" },
   { name: "run_shell", hint: "(cmd)" },
   { name: "web_search", hint: "(query)" },
 ];
@@ -94,7 +94,7 @@ const CodeCard: React.FC<{
       {title}
     </div>
     {lines.map((line, li) => (
-      <div key={li} style={{ whiteSpace: "pre", fontSize: 26, lineHeight: 1.5 }}>
+      <div key={li} style={{ whiteSpace: "pre", fontSize: 23, lineHeight: 1.5 }}>
         {line.map((tok, ti) => (
           <span key={ti} style={{ color: tok.c }}>
             {tok.t}
@@ -201,7 +201,7 @@ export const Scene5ToolCalling: React.FC = () => {
           </div>
 
           {/* tool_use JSON card */}
-          <CodeCard lines={USE_LINES} enter={useIn} title="tool_use" titleColor={theme.accent} width={620} />
+          <CodeCard lines={USE_LINES} enter={useIn} title="tool_use" titleColor={theme.accent} width={720} />
         </div>
 
         {/* Bottom band: arrow → HARNESS → tool_result card */}
@@ -238,7 +238,7 @@ export const Scene5ToolCalling: React.FC = () => {
           </div>
 
           {/* tool_result card */}
-          <CodeCard lines={RESULT_LINES} enter={resultIn} title="tool_result" titleColor={theme.accentGreen} width={620} />
+          <CodeCard lines={RESULT_LINES} enter={resultIn} title="tool_result" titleColor={theme.accentGreen} width={720} />
         </div>
 
         {/* Caption */}
@@ -254,7 +254,7 @@ export const Scene5ToolCalling: React.FC = () => {
             color: theme.text,
           }}
         >
-          An intern with brilliant ideas and <span style={{ color: theme.accentWarm }}>zero keys</span> — it can only{" "}
+          An intern with brilliant ideas and <span style={{ color: theme.accentWarm }}>zero keys</span>. It can only{" "}
           <span style={{ color: theme.accentGreen }}>ask.</span>
         </div>
       </CameraRig>

@@ -131,7 +131,8 @@ export const SceneHeading: React.FC<{
   accent?: string;
   children: React.ReactNode;
   delay?: number;
-}> = ({ kicker, accent = theme.accent, children, delay = 0 }) => {
+  size?: number;
+}> = ({ kicker, accent = theme.accent, children, delay = 0, size = 62 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -171,7 +172,7 @@ export const SceneHeading: React.FC<{
       <div
         style={{
           fontFamily: theme.fontSans,
-          fontSize: 62,
+          fontSize: size,
           fontWeight: 800,
           color: theme.text,
           letterSpacing: -0.5,

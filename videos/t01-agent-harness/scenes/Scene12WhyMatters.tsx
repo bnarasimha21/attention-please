@@ -2,7 +2,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 12 — Why this matters (the thesis).
+// Scene 12 - Why this matters (the thesis).
 // Same MODEL core in a weak harness vs a strong harness → different outcomes.
 // Reuses the structure/animation from Scene7WhyMatters.
 // Closing line: "Model = commodity. Harness = the product."

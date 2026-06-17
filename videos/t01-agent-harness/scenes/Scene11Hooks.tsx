@@ -2,7 +2,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, gradientText, CameraRig, pop, EASE_OUT } from "../../../remotion-src/visuals";
 
-// Scene 11 — Hooks: your code, not the AI's.
+// Scene 11 - Hooks: your code, not the AI's.
 // A horizontal timeline with hook points firing in sequence. Hooks are solid,
 // deterministic boxes (distinct from the glowing LLM) that snap in with a check.
 // Caption: "Boring, reliable scaffolding wrapped around the smart model."
@@ -22,7 +22,7 @@ const HookBox: React.FC<{
         opacity: Math.min(1, appear * 1.5),
         transform: `scale(${scale})`,
         width: 300,
-        // solid, deterministic — flat surface, square-ish, no glow halo
+        // solid, deterministic - flat surface, square-ish, no glow halo
         background: "#0e1512",
         border: `2px solid ${GREEN}`,
         borderRadius: 12,
@@ -105,11 +105,11 @@ export const Scene11Hooks: React.FC = () => {
 
       <CameraRig>
         <SceneHeading kicker="guardrails" accent={GREEN}>
-          Hooks — <span style={gradientText("#a7f3d0", GREEN)}>your code</span>, not the AI's
+          Hooks: <span style={gradientText("#a7f3d0", GREEN)}>your code</span>, not the AI's
         </SceneHeading>
 
         {/* Timeline stage */}
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 110, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 56 }}>
+        <div style={{ position: "absolute", top: 210, left: 0, right: 0, bottom: 130, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 56 }}>
           {/* Rail with traveling pulse */}
           <div style={{ position: "relative", width: 1180, height: 10, display: "flex", alignItems: "center" }}>
             <div

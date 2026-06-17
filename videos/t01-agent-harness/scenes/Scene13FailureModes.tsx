@@ -2,13 +2,13 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 13 — Failure modes
+// Scene 13 - Failure modes
 // A row of 4 red glassy cards pops in one by one, each a way harnesses break.
 // Then a late green summary line reframes a great harness as the absence of
 // these problems.
 
 const CARDS = [
-  { icon: "💸", name: "Runaway loop",    desc: "no budget — burns money in circles" },
+  { icon: "💸", name: "Runaway loop",    desc: "no budget, burns money in circles" },
   { icon: "🧠", name: "Context rot",     desc: "window fills with junk, model gets dumber" },
   { icon: "🧰", name: "Tool sprawl",     desc: "50 vague tools it can't choose between" },
   { icon: "☠️", name: "Over-permission", desc: "auto-approve everything → one bad call" },
@@ -68,14 +68,15 @@ export const Scene13FailureModes: React.FC = () => {
                 key={card.name}
                 style={{
                   width: 360,
-                  height: 440,
+                  height: 408,
                   opacity,
                   transform: `translateY(${(1 - s) * 40}px) scale(${0.86 + s * 0.14})`,
                   borderRadius: 28,
-                  padding: "44px 32px",
+                  padding: "36px 32px",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
+                  justifyContent: "center",
                   textAlign: "center",
                   background: `linear-gradient(160deg, ${red}1c 0%, rgba(16,12,12,0.92) 60%)`,
                   border: `2px solid ${red}66`,

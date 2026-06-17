@@ -8,10 +8,10 @@ const angDist = (a: number, b: number) => {
   return Math.min(d, 360 - d);
 };
 
-// Scene 4 — The agentic loop (hero mechanism)
+// Scene 4 - The agentic loop (hero mechanism)
 // Phase A: type in the 5-line loop, hold readable.
 // Phase B: code slides to the upper-left, a circular loop diagram animates on
-// the right — a token rotates the ring lighting THINK / ACT / OBSERVE; a budget
+// the right - a token rotates the ring lighting THINK / ACT / OBSERVE; a budget
 // bar drains a little each lap.
 
 type Tok = { t: string; c: string };
@@ -136,14 +136,14 @@ export const Scene4Loop: React.FC = () => {
             left: codeLeft,
             transform: `scale(${codeScale})`,
             transformOrigin: "top left",
-            width: 820,
+            width: 940,
             padding: "30px 36px",
             borderRadius: 20,
             background: `linear-gradient(160deg, #15151c, ${theme.surface})`,
             border: `1px solid ${theme.border}`,
             boxShadow: `0 30px 80px rgba(0,0,0,0.55), inset 0 0 60px ${theme.accent}0d`,
             fontFamily: theme.fontMono,
-            fontSize: 28,
+            fontSize: 23,
             lineHeight: 1.55,
           }}
         >
@@ -324,7 +324,7 @@ export const Scene4Loop: React.FC = () => {
             color: theme.text,
           }}
         >
-          Think, act, observe — <span style={{ color: theme.accent }}>until the job's done.</span>
+          Think, act, observe. <span style={{ color: theme.accent }}>Until the job's done.</span>
         </div>
       </CameraRig>
     </AbsoluteFill>

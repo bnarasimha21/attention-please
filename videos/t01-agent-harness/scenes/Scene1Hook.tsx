@@ -2,10 +2,10 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 1 — Hook [~32s / 960 frames]
+// Scene 1 - Hook [~32s / 960 frames]
 // A lone glowing MODEL core appears. A bug "issue" card pops near it. The model
 // reaches for three tools, but they sit behind a translucent glass barrier,
-// struck through — "no hands". A dim dashed "harness" ring tease forms around the
+// struck through - "no hands". A dim dashed "harness" ring tease forms around the
 // core. Big closing line: "Everything that actually fixes it is the harness."
 
 export const Scene1Hook: React.FC = () => {
@@ -29,7 +29,7 @@ export const Scene1Hook: React.FC = () => {
     { icon: "⌘", label: "take action" },
   ];
   const glassOpacity = interpolate(frame, [fps * 6.8, fps * 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  // "reach" — the core nudges toward the tools then is rebuffed
+  // "reach" - the core nudges toward the tools then is rebuffed
   const reach = interpolate(frame, [fps * 8.5, fps * 9.5, fps * 10.5], [0, 14, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const strikeS = pop(frame, fps, fps * 10.5, { damping: 13 });
   const noHandsOpacity = interpolate(frame, [fps * 11, fps * 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -91,13 +91,13 @@ export const Scene1Hook: React.FC = () => {
           </div>
         </div>
 
-        {/* Issue card — upper left of core */}
+        {/* Issue card - upper left of core */}
         <div
           style={{
             position: "absolute",
             left: "50%",
-            top: 150,
-            transform: `translate(calc(-50% - 430px), ${(1 - issueS) * 18}px) scale(${interpolate(issueS, [0, 1], [0.85, 1])})`,
+            top: 380,
+            transform: `translate(calc(-50% - 430px), calc(-50% + ${(1 - issueS) * 18}px)) scale(${interpolate(issueS, [0, 1], [0.85, 1])})`,
             opacity: issueOpacity,
             width: 420,
             padding: "22px 26px",
@@ -116,7 +116,7 @@ export const Scene1Hook: React.FC = () => {
           </div>
         </div>
 
-        {/* Tools behind glass — right of core */}
+        {/* Tools behind glass - right of core */}
         <div
           style={{
             position: "absolute",

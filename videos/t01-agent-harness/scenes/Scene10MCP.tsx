@@ -2,11 +2,11 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, gradientText, CameraRig, pop, EASE_OUT } from "../../../remotion-src/visuals";
 
-// Scene 10 — MCP: USB for AI
+// Scene 10 - MCP: USB for AI
 // A central HOST (the harness) connects via a labeled "MCP protocol" bus to
 // three server cards that pop in (GitHub, Postgres, Browser). Each card exposes
 // tools the same standard way, with a USB/plug motif on every connection.
-// Caption: "Write a server once — any agent can plug in."
+// Caption: "Write a server once - any agent can plug in."
 
 const BLUE = theme.tokenColors[4]; // blue
 
@@ -112,7 +112,7 @@ export const Scene10MCP: React.FC = () => {
 
       <CameraRig>
         <SceneHeading kicker="the ecosystem" accent={BLUE}>
-          MCP — <span style={gradientText("#bfdbfe", BLUE)}>USB for AI</span>
+          MCP: <span style={gradientText("#bfdbfe", BLUE)}>USB for AI</span>
         </SceneHeading>
 
         {/* Stage */}
@@ -221,7 +221,7 @@ export const Scene10MCP: React.FC = () => {
             color: theme.text,
           }}
         >
-          Write a server <span style={{ color: BLUE }}>once</span> — any agent can plug in.
+          Write a server <span style={{ color: BLUE }}>once</span>. Any agent can plug in.
         </div>
       </CameraRig>
     </AbsoluteFill>

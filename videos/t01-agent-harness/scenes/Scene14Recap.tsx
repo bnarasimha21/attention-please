@@ -2,7 +2,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, ModelCore, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 14 — Recap: the whole machine
+// Scene 14 - Recap: the whole machine
 // Central MODEL core, then concentric rings appear one by one with labels fanned
 // around the clock (reuses Scene4Layers' technique). All eight harness layers
 // assemble into the full diagram.

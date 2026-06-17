@@ -2,7 +2,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 8 — Every action hits a <gate>
+// Scene 8 - Every action hits a <gate>
 // Three action rows: action chip → CLASSIFIER node → verdict.
 //   read_file  → AUTO-APPROVE (green ✓ harmless)
 //   edit_file  → ASK YOU FIRST (amber ? changes state)

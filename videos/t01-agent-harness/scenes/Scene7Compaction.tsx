@@ -2,10 +2,10 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 7 — Editing its own <memory>
+// Scene 7 - Editing its own <memory>
 // A context window fills with message blocks toward a ~200K limit. A prompt-cache
 // badge locks the stable prefix (System + Tools). As it nears the limit, the
-// OLDEST turns collapse into one "summary" block — space freed — and it refills.
+// OLDEST turns collapse into one "summary" block - space freed - and it refills.
 // ~38s @ 30fps = 1140 frames. Glow: theme.accent.
 
 // The window holds 12 slots. First 2 are the cached prefix (System, Tools).
@@ -19,7 +19,7 @@ export const Scene7Compaction: React.FC = () => {
   const windowPop = pop(frame, fps, fps * 1, { damping: 12 });
   const windowScale = interpolate(windowPop, [0, 1], [0.85, 1]);
 
-  // Phase 1 — fill from prefix outward (2..11) over 2s..14s.
+  // Phase 1 - fill from prefix outward (2..11) over 2s..14s.
   const filled = Math.floor(
     interpolate(frame, [fps * 2, fps * 14], [2, SLOTS], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
   );
@@ -90,7 +90,7 @@ export const Scene7Compaction: React.FC = () => {
           {/* token counter + limit marker */}
           <div style={{ width: 1440, display: "flex", justifyContent: "space-between", alignItems: "flex-end", fontFamily: theme.fontMono }}>
             <div style={{ fontSize: 30, color: isFull ? theme.accentRed : theme.textMuted }}>
-              context window — <span style={{ color: theme.text }}>~{tokenCount}K</span> tokens
+              context window: <span style={{ color: theme.text }}>~{tokenCount}K</span> tokens
             </div>
             <div style={{ fontSize: 26, color: isFull ? theme.accentRed : theme.textMuted, opacity: 0.9 }}>
               limit <span style={{ color: isFull ? theme.accentRed : theme.text }}>~200K</span>
@@ -157,12 +157,12 @@ export const Scene7Compaction: React.FC = () => {
           <div style={{ height: 48, fontFamily: theme.fontSans, fontSize: 35, color: theme.text }}>
             {overflow && <span style={{ color: theme.accentRed }}>⚠ approaching ~200K…</span>}
             {compactT > 0 && compactT < 1 && <span style={{ color: theme.accent }}>collapsing oldest turns → summary</span>}
-            {compacted && refill > 0 && <span style={{ color: theme.accentGreen }}>✓ space freed — keeps going</span>}
+            {compacted && refill > 0 && <span style={{ color: theme.accentGreen }}>✓ space freed, keeps going</span>}
           </div>
         </div>
 
         <div style={{ position: "absolute", bottom: 88, width: "100%", textAlign: "center", opacity: lineOpacity, fontFamily: theme.fontSans, fontSize: 38, color: theme.text }}>
-          It rewrites its own <span style={{ color: theme.accent }}>memory</span> as it goes — and you never see it.
+          It rewrites its own <span style={{ color: theme.accent }}>memory</span> as it goes, and you never see it.
         </div>
       </CameraRig>
     </AbsoluteFill>

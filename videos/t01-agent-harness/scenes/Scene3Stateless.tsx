@@ -2,7 +2,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 3 — Stateless [~30s / 900 frames]
+// Scene 3 - Stateless [~30s / 900 frames]
 // The model has amnesia. A pure-function box: tokens → [ MODEL ] → tokens.
 // Same input sent twice → same output (two identical mini-runs). Then an amnesia
 // beat: a chat thread where each reply re-reads the WHOLE thread from scratch
@@ -49,7 +49,7 @@ export const Scene3Stateless: React.FC = () => {
         style={{
           opacity: op,
           transform: `translateY(${(1 - s) * 18}px) scale(${interpolate(s, [0, 1], [0.9, 1])})`,
-          width: 360,
+          width: 300,
           padding: "22px 24px",
           borderRadius: 16,
           background: "linear-gradient(160deg, rgba(28,32,52,0.9), rgba(16,18,28,0.85))",
@@ -128,11 +128,11 @@ export const Scene3Stateless: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            left: "50%",
-            top: 470,
+            left: "29%",
+            top: 500,
             transform: "translateX(-50%)",
             display: "flex",
-            gap: 60,
+            gap: 40,
             alignItems: "flex-start",
           }}
         >
@@ -149,8 +149,8 @@ export const Scene3Stateless: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            left: "50%",
-            top: 760,
+            left: "29%",
+            top: 720,
             transform: "translateX(-50%)",
             opacity: sameOpacity,
             fontFamily: theme.fontMono,
@@ -163,13 +163,13 @@ export const Scene3Stateless: React.FC = () => {
           <span style={{ color: theme.accentRed }}>no memory of run #1</span>
         </div>
 
-        {/* Amnesia chat beat — appears on the right, overlapping timeline-wise */}
+        {/* Amnesia chat beat - appears on the right, overlapping timeline-wise */}
         <div
           style={{
             position: "absolute",
-            right: 130,
-            top: 470,
-            width: 520,
+            right: 120,
+            top: 500,
+            width: 480,
             opacity: interpolate(frame, [fps * threadStart, fps * (threadStart + 1)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
           }}
         >
@@ -267,8 +267,9 @@ export const Scene3Stateless: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            left: 130,
-            top: 800,
+            left: "50%",
+            top: 432,
+            transform: "translateX(-50%)",
             display: "flex",
             gap: 16,
           }}
@@ -312,7 +313,7 @@ export const Scene3Stateless: React.FC = () => {
             color: theme.textMuted,
           }}
         >
-          No memory, no hands — that's the whole reason the{" "}
+          No memory, no hands. That's the whole reason the{" "}
           <span style={{ color: theme.accent }}>harness</span> exists.
         </div>
       </CameraRig>

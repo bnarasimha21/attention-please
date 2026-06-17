@@ -2,7 +2,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 6 — Context assembly
+// Scene 6 - Context assembly
 // A CONTEXT WINDOW container; labeled blocks slide+pop in, stacking up:
 // System prompt · Tools · Files · History · Latest result. A recurring
 // "↻ rebuilt from scratch (stateless)" indicator. Tag pointing to the full
@@ -25,7 +25,7 @@ export const Scene6ContextAssembly: React.FC = () => {
   const boxIn = interpolate(boxPop, [0, 1], [0, 1]);
   const boxScale = interpolate(boxPop, [0, 1], [0.9, 1]);
 
-  // recurring "rebuilt" indicator — gentle pulse, plus a spin on the ↻ glyph
+  // recurring "rebuilt" indicator - gentle pulse, plus a spin on the ↻ glyph
   const rebuiltIn = interpolate(frame, [fps * 9, fps * 10.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const rebuiltPulse = 0.7 + 0.3 * Math.sin(frame / 18);
   const spin = (frame * 2.2) % 360;
@@ -43,7 +43,7 @@ export const Scene6ContextAssembly: React.FC = () => {
           Context, <span style={gradientText("#fde68a", theme.accentWarm)}>&lt;rebuilt&gt;</span> every turn
         </SceneHeading>
 
-        {/* CONTEXT WINDOW container — pinned in the safe band */}
+        {/* CONTEXT WINDOW container - pinned in the safe band */}
         <div
           style={{
             position: "absolute",
@@ -148,7 +148,7 @@ export const Scene6ContextAssembly: React.FC = () => {
             color: theme.text,
           }}
         >
-          The harness is the model's <span style={{ color: theme.accentWarm }}>working memory</span> — assembled by hand.
+          The harness is the model's <span style={{ color: theme.accentWarm }}>working memory</span>, assembled by hand.
         </div>
       </CameraRig>
     </AbsoluteFill>

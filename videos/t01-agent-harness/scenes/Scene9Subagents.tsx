@@ -2,7 +2,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remo
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, gradientText, CameraRig, pop, ModelCore } from "../../../remotion-src/visuals";
 
-// Scene 9 — Spin off a <subagent>
+// Scene 9 - Spin off a <subagent>
 // MAIN ModelCore (left) buds off a SUB ModelCore (right) with its OWN fresh
 // window. The SUB window fills with MESSY work chips while MAIN stays clean;
 // only one clean "→ 3 findings" summary chip crosses back. Then 3 SUB orbs
@@ -92,12 +92,12 @@ export const Scene9Subagents: React.FC = () => {
 
         {!showParallel ? (
           // MAIN | SUB side-by-side
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 90, display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 70 }}>
+          <div style={{ position: "absolute", top: 200, left: 0, right: 0, bottom: 120, display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 70 }}>
             {/* MAIN side: core + clean window */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, transform: `scale(${mainScale})` }}>
               <ModelCore size={140} label="MAIN" fontSize={28} pulse={0.3} />
               <Window
-                title="main context — clean"
+                title="main context · clean"
                 clean
                 titleColor={theme.textMuted}
                 chips={landed ? [{ label: "→ 3 findings", color: theme.accentGreen }] : []}
@@ -116,7 +116,7 @@ export const Scene9Subagents: React.FC = () => {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, opacity: budT, transform: `scale(${subScale})` }}>
               <ModelCore size={140} label="SUB" fontSize={30} pulse={0.5} />
               <Window
-                title="sub context — its own"
+                title="sub context · its own"
                 clean={false}
                 titleColor={VIOLET}
                 chips={MESSY.slice(0, subFilled)}
@@ -138,7 +138,7 @@ export const Scene9Subagents: React.FC = () => {
           </div>
         ) : (
           // 3 SUB orbs in parallel feeding one MAIN
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 90, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 50, opacity: parT }}>
+          <div style={{ position: "absolute", top: 200, left: 0, right: 0, bottom: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 50, opacity: parT }}>
             <ModelCore size={150} label="MAIN" fontSize={30} pulse={0.3} />
             <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 90 }}>
               {[0, 1, 2].map((i) => {

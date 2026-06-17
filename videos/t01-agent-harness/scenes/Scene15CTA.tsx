@@ -2,12 +2,11 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, staticFile,
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
 
-// Scene 15 — Like & Subscribe CTA
-// Channel icon springs in → wordmark → an animated cursor taps the LIKE button
-// (fills + sparks), then the SUBSCRIBE button (turns to "Subscribed ✓" + bell
-// rings). Closes with "See you in the next one."
+// Scene 15 - Like & Subscribe CTA (Distilled AI)
+// Channel icon springs in, wordmark + handle, then an animated cursor taps LIKE
+// (fills + sparks) and SUBSCRIBE (turns to "Subscribed" + bell). Timeline is
+// compressed to ~6.4s to match the trimmed narration (no long silent tail).
 
-// short press "dip" around frame t
 const pressDip = (frame: number, t: number) =>
   interpolate(frame, [t - 4, t, t + 6], [0, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
@@ -16,36 +15,34 @@ export const Scene15CTA: React.FC = () => {
   const { fps } = useVideoConfig();
 
   // icon + brand
-  const iconSpring = pop(frame, fps, fps * 0.4, { damping: 10 });
+  const iconSpring = pop(frame, fps, fps * 0.3, { damping: 10 });
   const iconGlow = 0.5 + 0.5 * Math.sin(frame / 9);
-  const brandT = interpolate(frame, [fps * 1.3, fps * 2.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const headlineT = interpolate(frame, [fps * 2.6, fps * 3.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const brandT = interpolate(frame, [fps * 0.9, fps * 1.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const headlineT = interpolate(frame, [fps * 1.8, fps * 2.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // buttons appear
-  const likeIn = pop(frame, fps, fps * 3.6, { damping: 11 });
-  const subIn = pop(frame, fps, fps * 4.1, { damping: 11 });
+  const likeIn = pop(frame, fps, fps * 2.4, { damping: 11 });
+  const subIn = pop(frame, fps, fps * 2.8, { damping: 11 });
 
-  // click moments
-  const likeClick = fps * 6.0;
-  const subClick = fps * 8.6;
+  // click moments (compressed)
+  const likeClick = fps * 3.7;
+  const subClick = fps * 5.1;
   const likePressed = frame > likeClick;
   const subPressed = frame > subClick;
   const likeFill = interpolate(frame, [likeClick - 2, likeClick + 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const subFill = interpolate(frame, [subClick - 2, subClick + 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // animated cursor: enters → like → subscribe
-  const cx = interpolate(frame, [fps * 4.4, fps * 5.9, fps * 7.2, fps * 8.5], [1340, 720, 720, 1135], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const cy = interpolate(frame, [fps * 4.4, fps * 5.9, fps * 7.2, fps * 8.5], [980, 712, 712, 712], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // animated cursor: enters, taps like, taps subscribe
+  const cx = interpolate(frame, [fps * 2.6, fps * 3.6, fps * 4.4, fps * 5.0], [1340, 720, 720, 1135], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const cy = interpolate(frame, [fps * 2.6, fps * 3.6, fps * 4.4, fps * 5.0], [980, 712, 712, 712], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const cursorClickDip = Math.max(pressDip(frame, likeClick), pressDip(frame, subClick));
 
-  // bell ring wiggle after subscribe
   const bellWiggle = subPressed ? Math.sin((frame - subClick) / 1.6) * interpolate(frame, [subClick, subClick + fps * 1.4], [18, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 0;
 
-  // sparks on like
   const sparks = Array.from({ length: 8 });
   const sparkT = interpolate(frame, [likeClick, likeClick + fps * 0.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  const closeT = interpolate(frame, [fps * 10.2, fps * 11.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const closeT = interpolate(frame, [fps * 5.8, fps * 6.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   const likeDip = pressDip(frame, likeClick);
   const subDip = pressDip(frame, subClick);
@@ -69,19 +66,19 @@ export const Scene15CTA: React.FC = () => {
         </div>
       </div>
 
-      {/* Wordmark */}
+      {/* Wordmark + handle */}
       <div style={{ position: "absolute", top: 360, textAlign: "center", opacity: brandT, transform: `translateY(${(1 - brandT) * 18}px)` }}>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 64, fontWeight: 800, color: theme.text, letterSpacing: 2 }}>
-          Attention<span style={gradientText("#fbbf24", theme.accentWarm)}> Please</span>
+        <div style={{ fontFamily: theme.fontSans, fontSize: 64, fontWeight: 800, color: theme.text, letterSpacing: 1 }}>
+          Distilled<span style={gradientText("#fbbf24", theme.accentWarm)}> AI</span>
         </div>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 26, color: theme.textMuted, marginTop: 8 }}>
-          AI concepts, animated clearly
+        <div style={{ fontFamily: theme.fontMono, fontSize: 28, color: theme.accentWarm, marginTop: 10, letterSpacing: 1 }}>
+          @DistilledAI-t3w
         </div>
       </div>
 
       {/* Headline */}
-      <div style={{ position: "absolute", top: 510, textAlign: "center", opacity: headlineT, transform: `translateY(${(1 - headlineT) * 16}px)`, fontFamily: theme.fontSans, fontSize: 40, fontWeight: 700, color: theme.text }}>
-        If this made something click —
+      <div style={{ position: "absolute", top: 512, textAlign: "center", opacity: headlineT, transform: `translateY(${(1 - headlineT) * 16}px)`, fontFamily: theme.fontSans, fontSize: 40, fontWeight: 700, color: theme.text }}>
+        Found this useful?
       </div>
 
       {/* Buttons */}
@@ -101,7 +98,6 @@ export const Scene15CTA: React.FC = () => {
         }}>
           <span style={{ fontSize: 46, transform: `rotate(${-likeFill * 8}deg)`, display: "inline-block" }}>👍</span>
           <span style={{ fontFamily: theme.fontSans, fontSize: 38, fontWeight: 800, color: theme.text }}>Like</span>
-          {/* sparks */}
           {sparkT > 0 && sparkT < 1 && sparks.map((_, i) => {
             const ang = (i / sparks.length) * Math.PI * 2;
             const d = sparkT * 70;
@@ -146,7 +142,6 @@ export const Scene15CTA: React.FC = () => {
         <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
           <path d="M4 2 L4 19 L9 14.5 L12.5 22 L15.5 20.5 L12 13.5 L18.5 13 Z" fill="#ffffff" stroke="#0a0a0a" strokeWidth="1.2" strokeLinejoin="round" />
         </svg>
-        {/* click ripple */}
         {cursorClickDip > 0.2 && (
           <div style={{
             position: "absolute", left: -10, top: -10, width: 40, height: 40, borderRadius: 20,
