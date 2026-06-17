@@ -296,7 +296,7 @@ export const Scene4Loop: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 188,
+            bottom: 250,
             width: "100%",
             display: "flex",
             flexDirection: "column",
@@ -315,7 +315,7 @@ export const Scene4Loop: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 100,
+            bottom: 175,
             width: "100%",
             textAlign: "center",
             opacity: captionOpacity,

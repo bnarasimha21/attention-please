@@ -203,7 +203,7 @@ export const Scene1Hook: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 150,
+            bottom: 235,
             width: "100%",
             textAlign: "center",
             opacity: closeOpacity,
@@ -225,7 +225,7 @@ export const Scene1Hook: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 96,
+            bottom: 175,
             width: "100%",
             textAlign: "center",
             opacity: teaseOpacity * 0.7,

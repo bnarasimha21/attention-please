@@ -185,7 +185,7 @@ export const Scene2Definition: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 90,
+            bottom: 175,
             width: "100%",
             textAlign: "center",
             opacity: capOpacity,

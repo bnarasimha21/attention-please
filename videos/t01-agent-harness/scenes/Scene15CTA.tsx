@@ -72,7 +72,7 @@ export const Scene15CTA: React.FC = () => {
           Distilled<span style={gradientText("#fbbf24", theme.accentWarm)}> AI</span>
         </div>
         <div style={{ fontFamily: theme.fontMono, fontSize: 28, color: theme.accentWarm, marginTop: 10, letterSpacing: 1 }}>
-          @DistilledAI-t3w
+          @The_Distilled_AI
         </div>
       </div>
 
@@ -153,7 +153,7 @@ export const Scene15CTA: React.FC = () => {
 
       {/* Closing line */}
       <div style={{
-        position: "absolute", bottom: 90, width: "100%", textAlign: "center",
+        position: "absolute", bottom: 175, width: "100%", textAlign: "center",
         opacity: closeT, transform: `translateY(${(1 - closeT) * 14}px)`,
         fontFamily: theme.fontSans, fontSize: 34, color: theme.textMuted,
       }}>

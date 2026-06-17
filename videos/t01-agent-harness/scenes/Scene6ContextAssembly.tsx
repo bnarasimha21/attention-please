@@ -139,7 +139,7 @@ export const Scene6ContextAssembly: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 70,
+            bottom: 175,
             width: "100%",
             textAlign: "center",
             opacity: captionOpacity,

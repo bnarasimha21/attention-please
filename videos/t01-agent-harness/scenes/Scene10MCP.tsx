@@ -116,7 +116,7 @@ export const Scene10MCP: React.FC = () => {
         </SceneHeading>
 
         {/* Stage */}
-        <div style={{ position: "absolute", top: 320, left: 0, right: 0, bottom: 130, display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 0 }}>
+        <div style={{ position: "absolute", top: 240, left: 0, right: 0, bottom: 220, display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 0 }}>
           {/* Host node */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, width: 360, opacity: Math.min(1, hostS * 1.5), transform: `scale(${hostScale})` }}>
             <div
@@ -211,7 +211,7 @@ export const Scene10MCP: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 80,
+            bottom: 175,
             width: "100%",
             textAlign: "center",
             opacity: capOpacity,

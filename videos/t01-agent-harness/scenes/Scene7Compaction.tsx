@@ -161,7 +161,7 @@ export const Scene7Compaction: React.FC = () => {
           </div>
         </div>
 
-        <div style={{ position: "absolute", bottom: 88, width: "100%", textAlign: "center", opacity: lineOpacity, fontFamily: theme.fontSans, fontSize: 38, color: theme.text }}>
+        <div style={{ position: "absolute", bottom: 175, width: "100%", textAlign: "center", opacity: lineOpacity, fontFamily: theme.fontSans, fontSize: 38, color: theme.text }}>
           It rewrites its own <span style={{ color: theme.accent }}>memory</span> as it goes, and you never see it.
         </div>
       </CameraRig>

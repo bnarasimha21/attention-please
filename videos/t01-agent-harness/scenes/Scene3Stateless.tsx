@@ -303,7 +303,7 @@ export const Scene3Stateless: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 88,
+            bottom: 175,
             width: "100%",
             textAlign: "center",
             opacity: capOpacity,

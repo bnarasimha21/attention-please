@@ -117,7 +117,7 @@ export const Scene13FailureModes: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 78,
+            bottom: 175,
             width: "100%",
             textAlign: "center",
             opacity: sumT,

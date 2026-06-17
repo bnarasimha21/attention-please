@@ -158,7 +158,7 @@ export const Scene9Subagents: React.FC = () => {
           </div>
         )}
 
-        <div style={{ position: "absolute", bottom: 90, width: "100%", textAlign: "center", opacity: lineOpacity, fontFamily: theme.fontSans, fontSize: 38, color: theme.text }}>
+        <div style={{ position: "absolute", bottom: 175, width: "100%", textAlign: "center", opacity: lineOpacity, fontFamily: theme.fontSans, fontSize: 38, color: theme.text }}>
           Noise <span style={{ color: VIOLET }}>quarantined.</span> The main thread stays <span style={{ color: theme.accentGreen }}>sharp.</span>
         </div>
       </CameraRig>

@@ -97,7 +97,7 @@ export const Scene8Permissions: React.FC = () => {
           })}
         </div>
 
-        <div style={{ position: "absolute", bottom: 100, width: "100%", textAlign: "center", fontFamily: theme.fontSans }}>
+        <div style={{ position: "absolute", bottom: 175, width: "100%", textAlign: "center", fontFamily: theme.fontSans }}>
           <div style={{
             fontSize: 38, color: theme.text,
             opacity: interpolate(frame, [fps * 14, fps * 15.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),

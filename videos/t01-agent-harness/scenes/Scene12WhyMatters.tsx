@@ -107,7 +107,7 @@ export const Scene12WhyMatters: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 80,
+            bottom: 175,
             width: "100%",
             textAlign: "center",
             opacity: lineOpacity,
