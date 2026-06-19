@@ -1,0 +1,168 @@
+1
+00:00:00,000 --> 00:00:02,640
+ Here is the one that surprises people.
+
+2
+00:00:02,640 --> 00:00:06,000
+ A longer conversation makes the model dumber.
+
+3
+00:00:06,000 --> 00:00:10,000
+ The model re-reads the entire context every single turn.
+
+4
+00:00:10,000 --> 00:00:13,280
+ Early in a task, the context is tight.
+
+5
+00:00:13,280 --> 00:00:15,600
+ System prompt, tools, the goal.
+
+6
+00:00:15,600 --> 00:00:17,760
+ But tool results pile up fast.
+
+7
+00:00:17,760 --> 00:00:20,880
+ A grep that returned 800 lines.
+
+8
+00:00:20,880 --> 00:00:24,120
+ A file read that was only partially relevant.
+
+9
+00:00:24,120 --> 00:00:27,600
+ A failed attempt that's now just noise.
+
+10
+00:00:27,600 --> 00:00:31,000
+ By turn 30, the model is wading through thousands of tokens
+
+11
+00:00:31,000 --> 00:00:35,200
+ of junk to find the three lines that actually matter.
+
+12
+00:00:35,200 --> 00:00:37,240
+ This is context rot.
+
+13
+00:00:37,240 --> 00:00:39,600
+ And it causes real regressions.
+
+14
+00:00:39,600 --> 00:00:42,080
+ The model starts losing the thread,
+
+15
+00:00:42,080 --> 00:00:44,400
+ contradicting its earlier decisions,
+
+16
+00:00:44,400 --> 00:00:47,880
+ forgetting things it knew 10 turns ago.
+
+17
+00:00:47,880 --> 00:00:50,240
+ The fix is context engineering.
+
+18
+00:00:50,240 --> 00:00:52,760
+ You don't dump everything into the prompt.
+
+19
+00:00:52,760 --> 00:00:54,120
+ You curate it.
+
+20
+00:00:54,120 --> 00:00:57,240
+ Summaries instead of raw tool output.
+
+21
+00:00:57,240 --> 00:01:01,360
+ Truncated file reads with the relevant section highlighted.
+
+22
+00:01:01,360 --> 00:01:06,000
+ Compaction that preserves decisions, not transcripts.
+
+23
+00:01:06,000 --> 00:01:08,760
+ Curation has a deeper move than trimming.
+
+24
+00:01:08,760 --> 00:01:11,120
+ Get the junk out of the window entirely.
+
+25
+00:01:11,120 --> 00:01:12,840
+ Offload to a subagent.
+
+26
+00:01:12,840 --> 00:01:15,800
+ Let a helper burn 30,000 tokens reading
+
+27
+00:01:15,800 --> 00:01:19,360
+ and hand back a 2,000 token summary.
+
+28
+00:01:19,360 --> 00:01:21,960
+ The noise never touches the main thread.
+
+29
+00:01:21,960 --> 00:01:23,640
+ Write to a memory file.
+
+30
+00:01:23,640 --> 00:01:26,320
+ Notes on disk, the agent re-reads.
+
+31
+00:01:26,320 --> 00:01:28,840
+ So state outlives the window.
+
+32
+00:01:28,840 --> 00:01:30,320
+ And mind the middle.
+
+33
+00:01:30,320 --> 00:01:32,720
+ Models reliably lose what's buried
+
+34
+00:01:32,720 --> 00:01:34,800
+ in the middle of a long context.
+
+35
+00:01:34,800 --> 00:01:38,920
+ It's a U-shaped curve, sharp at the start and end,
+
+36
+00:01:38,920 --> 00:01:42,560
+ weak in between, and a bigger window doesn't fix it.
+
+37
+00:01:42,560 --> 00:01:45,520
+ Put what matters at the edges.
+
+38
+00:01:45,520 --> 00:01:48,520
+ Think of the harness as the model's working memory.
+
+39
+00:01:48,520 --> 00:01:51,360
+ Treat it like RAM, not a hard drive.
+
+40
+00:01:51,360 --> 00:01:54,640
+ Keep only what the model needs right now.
+
+41
+00:01:54,640 --> 00:01:56,400
+ Everything else is noise.
+
+42
+00:01:56,400 --> 00:01:59,840
+ And noise costs you IQ points per turn.
+

@@ -1,16 +1,18 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, staticFile, Img } from "remotion";
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
+import { Sfx } from "../../../remotion-src/sfx";
 
-// Scene 15 - Like & Subscribe CTA (Distilled AI)
+// Scene 9 - Like & Subscribe CTA (Distilled AI)
 // Channel icon springs in, wordmark + handle, then an animated cursor taps LIKE
 // (fills + sparks) and SUBSCRIBE (turns to "Subscribed" + bell). Timeline is
-// compressed to ~6.4s to match the trimmed narration (no long silent tail).
+// compressed to ~6.4s of action; the scene then holds. Closing line teases the
+// next videos (generic — no specific topic promised).
 
 const pressDip = (frame: number, t: number) =>
   interpolate(frame, [t - 4, t, t + 6], [0, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-export const Scene15CTA: React.FC = () => {
+export const Scene9CTA: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -50,6 +52,10 @@ export const Scene15CTA: React.FC = () => {
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.accentWarm} />
+      {/* SFX: pop on the Like tap, success when Subscribed, stinger to close */}
+      <Sfx name="pop" at={likeClick} volume={0.4} />
+      <Sfx name="success" at={subClick} volume={0.4} />
+      <Sfx name="stinger" at={fps * 6.3} volume={0.4} />
 
       <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
 
@@ -151,13 +157,14 @@ export const Scene15CTA: React.FC = () => {
         )}
       </div>
 
-      {/* Closing line */}
+      {/* Closing line — generic teaser, no specific next-video promise */}
       <div style={{
-        position: "absolute", bottom: 175, width: "100%", textAlign: "center",
+        position: "absolute", bottom: 200, width: "100%", textAlign: "center",
         opacity: closeT, transform: `translateY(${(1 - closeT) * 14}px)`,
-        fontFamily: theme.fontSans, fontSize: 34, color: theme.textMuted,
+        fontFamily: theme.fontSans, fontSize: 32, color: theme.textMuted,
+        padding: "0 200px", lineHeight: 1.4,
       }}>
-        See you in the <span style={{ color: theme.accentWarm, fontWeight: 700 }}>next one.</span>
+        More deep dives on <span style={{ color: theme.accentWarm, fontWeight: 700 }}>building agents that actually work</span> — dropping soon.
       </div>
       </CameraRig>
     </AbsoluteFill>

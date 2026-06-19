@@ -1,0 +1,36 @@
+1
+00:00:00,000 --> 00:00:03,680
+ Notice what all four fixes have in common.
+
+2
+00:00:03,680 --> 00:00:10,960
+ They are defaults, a harness that does nothing will loop forever, rot its own context, drown
+
+3
+00:00:10,960 --> 00:00:15,800
+ the model in tools, and let it run free with no guardrails.
+
+4
+00:00:15,800 --> 00:00:19,840
+ Every single fix is something you have to deliberately add.
+
+5
+00:00:19,840 --> 00:00:21,920
+ That's the mindset shift.
+
+6
+00:00:21,920 --> 00:00:26,020
+ Building an agent isn't just picking the right model and plugging in tools.
+
+7
+00:00:26,020 --> 00:00:31,680
+ It's designing the constraints, the budgets, the curated context, the short menus and the
+
+8
+00:00:31,680 --> 00:00:38,120
+ permission tiers that keep a capable but directionless system actually useful.
+
+9
+00:00:38,120 --> 00:00:43,640
+ The model thinks the harness makes sure it doesn't think itself into a corner.
+

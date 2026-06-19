@@ -1,0 +1,120 @@
+1
+00:00:00,000 --> 00:00:04,640
+ More tools feels like more power, it's not.
+
+2
+00:00:04,640 --> 00:00:10,480
+ When you hand a model 50 tools, you have given it a decision problem on every turn.
+
+3
+00:00:10,480 --> 00:00:16,560
+ Which tool fits here, read file or get file contents, search code base or grep files.
+
+4
+00:00:16,560 --> 00:00:23,000
+ The names blur, the descriptions overlap and the model makes bad picks or hedges, calling
+
+5
+00:00:23,000 --> 00:00:25,800
+ two tools where one would do.
+
+6
+00:00:25,800 --> 00:00:29,480
+ Tools Prawl also inflates the context directly.
+
+7
+00:00:29,480 --> 00:00:34,920
+ Every tool definition, name, description, typed parameters, costs tokens before the
+
+8
+00:00:34,920 --> 00:00:37,440
+ model writes a single character.
+
+9
+00:00:37,440 --> 00:00:43,080
+ 50 tools can burn 8000 tokens on tool schemas alone.
+
+10
+00:00:43,080 --> 00:00:44,080
+ The fix?
+
+11
+00:00:44,080 --> 00:00:46,200
+ Fewer, sharper tools.
+
+12
+00:00:46,200 --> 00:00:49,920
+ Each tool should do one thing with an unmistakable name.
+
+13
+00:00:49,920 --> 00:00:55,160
+ If two tools are overlapping descriptions, merge them or delete them.
+
+14
+00:00:55,160 --> 00:01:01,360
+ Cloud Code ships around 15 core tools, not as a limitation, but as a deliberate design
+
+15
+00:01:01,360 --> 00:01:02,360
+ choice.
+
+16
+00:01:02,360 --> 00:01:06,720
+ The model picks faster and picks better when the menu is short.
+
+17
+00:01:06,720 --> 00:01:13,200
+ A good rule of thumb, if you can't describe what a tool does in 5 words, it's too vague
+
+18
+00:01:13,200 --> 00:01:14,600
+ to be useful.
+
+19
+00:01:14,600 --> 00:01:18,280
+ But there is a sharper move than trimming the list by hand.
+
+20
+00:01:18,280 --> 00:01:20,240
+ Low tools on demand.
+
+21
+00:01:20,240 --> 00:01:26,520
+ Keep the big catalog, just expose the 3 to 5 relevant tools each turn, in Anthropics own
+
+22
+00:01:26,520 --> 00:01:29,640
+ testing that took 58 tools.
+
+23
+00:01:29,640 --> 00:01:37,560
+ 55,000 tokens before you type a word, down to about 3,000 and lifted tool selection accuracy
+
+24
+00:01:37,560 --> 00:01:41,200
+ from 49 to 74%.
+
+25
+00:01:41,200 --> 00:01:43,600
+ Same model, shorter menu.
+
+26
+00:01:43,600 --> 00:01:46,720
+ One level further with Code Mode.
+
+27
+00:01:46,720 --> 00:01:52,520
+ Let the model write code that calls the tools and filters the results before they ever hit
+
+28
+00:01:52,520 --> 00:01:53,880
+ the context.
+
+29
+00:01:53,880 --> 00:02:02,080
+ Anthropic measured a 37% token cut on complex tasks that fixes tool sprawl and context rot
+
+30
+00:02:02,080 --> 00:02:03,240
+ in one stroke.
+
