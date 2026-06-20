@@ -71,9 +71,18 @@ Register each composition in `remotion-src/Root.tsx`. Script in `scripts/tNN-*.m
   sub-labels/footnotes ≥22px, card titles ≥36px, hero numbers 80px+. Size up when unsure.
 - **Fill the frame** — no empty lower-third/dead space; scale/distribute to fill 1920×1080.
 - **Align** everything (vertical + horizontal): shared baselines/centers, nothing off-axis.
-- **Breathing room** — fill, but don't cram; deliberate padding between elements.
+- **Breathing room** — fill, but don't cram; deliberate padding between elements. Aim for an EVEN vertical rhythm (roughly equal gaps heading → hero → caption); never bunch at the top with an empty bottom. Narsi flags "cramped vertically."
 - **Subtitle-safe bottom band** (step 10) — keep the bottom ~165px clear.
+- **Readable text** — muted/secondary text must be legible on the dark bg: `theme.textMuted` ≈ #b4b4b4, `theme.textDim` ≈ #8c8c8c (never #888/#444). No near-invisible grey.
+- **Punchlines stand alone, BIG** — a scene's closing line lands as the ONLY thing on screen (fade the prior phase OUT first), vertically centered, hero-sized (~60–84px). Not a small caption at the bottom of an empty frame.
 - Clean vector + emoji + CSS-motion aesthetic; avoid stock photos (logos on chips OK).
+
+## Get scene animations right the FIRST time (these caused many back-and-forth iterations — bake them in up front)
+- **ENGAGEMENT — never let the screen go static while the VO is talking.** The single biggest watch-time killer. Every phase must have continuous motion or a live beat for its whole narration span. Do NOT let an animation "finish" early and then hold a frozen frame for many seconds: keep counters ticking, meters drifting/pulsing, elements revealing one-at-a-time, or add a live sub-beat. If the VO describes something ("can I undo it in 30 seconds?", "the smartest stop is progress"), animate THAT thing live (a 30s timer, tests flipping red) rather than holding a static diagram. Even punchline holds get subtle motion (gentle pulse/drift). Rule of thumb: if a frame and the frame ~1.5s later look identical while the VO is still talking, it's a dead spot — fix it.
+- **NO OVERLAPS at ANY frame — including phase handoffs.** Verify mid-phase AND at the boundaries. When a new phase/punchline enters, FADE THE PRIOR PHASE OUT so they don't collide. Use a tight ~0.4s offset cross at boundaries (outgoing fades out as incoming fades in, overlapping only at ≤~40% opacity) — this avoids BOTH a jumble (two things at full opacity) AND an empty gap (a near-blank frame mid-transition).
+- **Don't oversize boxes.** Size cards/boxes to their content + padding; an over-tall box collides with the caption/footnote below it. Reduce box height rather than letting things overlap.
+- **Guard against NaN.** Keep `interpolate` inputs and any array indices finite — clamp time-derived indices to ≥ 0 (e.g. `Math.max(0, …)`) so frames before a phase starts don't produce a negative index → undefined → NaN → render crash.
+- **Verify THOROUGHLY with stills** before declaring done: sample every phase AND every phase boundary of each scene (not just one mid-phase frame), and actually open/inspect the images. A subagent that only checks safe frames will miss the early/boundary breakage.
 
 ## Snippets
 

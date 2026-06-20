@@ -79,6 +79,34 @@ export const Scene3RunawayLoop: React.FC = () => {
   const panelOpacity = 1 - punchScrim;
   const modeColor = guarded ? theme.accentGreen : theme.accentRed;
 
+  // ---- LIVE BEATS (99-124s) — keeps the frame moving while VO continues ----
+  // Beat A: PROGRESS CHECK (99-115s) — tests red pulses, file unchanged, the
+  //         agent halts at iteration 3. Beat B: cost climb (115-124s).
+  const liveSec = Math.max(0, frame / S); // clamp ≥ 0 (NaN guard)
+  const beatAIn = interpolate(frame, [99 * S, 100 * S], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // hand off beat A -> beat B around 114-115s
+  const beatBIn = interpolate(frame, [114 * S, 115 * S], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const beatAOpacity = beatAIn * (1 - beatBIn);
+
+  // red ❌ pulse (tests still red) + "no progress" pulse — continuous sine
+  const redPulse = 0.55 + 0.45 * Math.sin(liveSec * 4.2);
+  const noProgPulse = 0.5 + 0.5 * Math.sin(liveSec * 3.1 + 1.0);
+  // iteration counter ramps 1->3 over 103-110s, then HALTS on 3 with a flash
+  const iterRamp = interpolate(frame, [103 * S, 110 * S], [1, 3], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const liveIter = Math.max(1, Math.min(3, Math.round(iterRamp)));
+  const haltedLive = frame >= 110 * S;
+  const haltFlash = pop(frame, fps, 110 * S, { damping: 12, stiffness: 160 });
+  const haltGlow = haltedLive ? 0.6 + 0.4 * Math.max(0, Math.sin((liveSec - 110) * 6)) : 0;
+
+  // Beat B: cost = context × iterations, climbing to "catastrophically expensive"
+  const costRamp = interpolate(frame, [115 * S, 123 * S], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const costEase = Math.pow(Math.max(0, costRamp), 2.3); // accelerate into the spike
+  const liveCtx = Math.round(2_000 + 30_000 * costEase);     // context length climbing
+  const liveCostIters = Math.max(1, Math.round(3 + 9 * costEase)); // iterations multiplying
+  const liveCost = (liveCtx * liveCostIters) / 1000; // $ figure (climbs fast)
+  const costSpike = costEase > 0.62; // "catastrophically expensive" zone
+  const spikePulse = costSpike ? 0.6 + 0.4 * Math.sin(liveSec * 9) : 0;
+
   // naive iteration ticks (spread across the long naive run, quickening to the blowup)
   const TICKS = [7, 10, 13, 16, 19, 22, 25, 27, 29, 31, 32.5, 34];
 
@@ -288,6 +316,80 @@ export const Scene3RunawayLoop: React.FC = () => {
             }}>
               The smartest stop isn't a counter - <span style={{ color: theme.accentGreen }}>it's progress.</span>
             </div>
+
+            {/* ===== LIVE BEAT A — progress check (99-115s) ===== */}
+            {beatAOpacity > 0.001 && (
+              <div style={{
+                position: "absolute", top: 500, left: "50%", transform: "translateX(-50%)",
+                opacity: beatAOpacity, display: "flex", alignItems: "center", gap: 18,
+                padding: "16px 30px", borderRadius: 16, fontFamily: theme.fontMono,
+                background: `linear-gradient(160deg, ${theme.surface}, #100e0a)`,
+                border: `1px solid ${haltedLive ? theme.accentRed + "99" : theme.border}`,
+                boxShadow: haltGlow > 0 ? `0 0 ${22 * haltGlow}px ${theme.accentRed}66` : "none",
+              }}>
+                <span style={{ fontSize: 22, color: theme.textDim, letterSpacing: 2, textTransform: "uppercase" }}>progress check</span>
+                {/* tests: red, pulsing */}
+                <span style={{
+                  fontSize: 26, fontWeight: 800, color: theme.accentRed, opacity: 0.45 + redPulse * 0.55,
+                }}>
+                  tests <span style={{ transform: `scale(${0.92 + redPulse * 0.18})`, display: "inline-block" }}>❌</span> red
+                </span>
+                <span style={{ color: theme.textDim, fontSize: 22 }}>·</span>
+                {/* file: unchanged */}
+                <span style={{ fontSize: 26, fontWeight: 700, color: theme.textMuted }}>
+                  file <span style={{ color: theme.accentWarm, opacity: 0.55 + noProgPulse * 0.45 }}>unchanged</span>
+                </span>
+                <span style={{ color: theme.textDim, fontSize: 22 }}>·</span>
+                {/* iteration counter halting at 3 */}
+                <span style={{
+                  fontSize: 26, fontWeight: 800, color: haltedLive ? theme.accentRed : theme.text,
+                  transform: `scale(${haltedLive ? 1 + haltFlash * 0.12 : 1})`, display: "inline-block",
+                }}>
+                  iter <span style={{ fontSize: 30 }}>{liveIter}</span>
+                </span>
+                {haltedLive && (
+                  <span style={{
+                    fontSize: 24, fontWeight: 800, color: theme.accentRed, letterSpacing: 1,
+                    opacity: 0.5 + haltGlow * 0.5, transform: `scale(${0.9 + haltFlash * 0.1})`, display: "inline-block",
+                  }}>
+                    ⏹ STOP · no progress
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* ===== LIVE BEAT B — cost = context × iterations (115-124s) ===== */}
+            {beatBIn > 0.001 && (
+              <div style={{
+                position: "absolute", top: 500, left: "50%", transform: "translateX(-50%)",
+                opacity: beatBIn, display: "flex", alignItems: "center", gap: 16,
+                padding: "16px 32px", borderRadius: 16, fontFamily: theme.fontMono,
+                background: `linear-gradient(160deg, ${theme.surface}, #100e0a)`,
+                border: `1px solid ${costSpike ? theme.accentRed : theme.border}`,
+                boxShadow: costSpike ? `0 0 ${20 + spikePulse * 22}px ${theme.accentRed}66` : "none",
+              }}>
+                <span style={{ fontSize: 22, color: theme.textDim, letterSpacing: 1, textTransform: "uppercase" }}>cost</span>
+                <span style={{ fontSize: 26, color: theme.textMuted }}>=</span>
+                <span style={{ fontSize: 26, color: theme.accent, fontWeight: 700 }}>{liveCtx.toLocaleString()} ctx</span>
+                <span style={{ fontSize: 26, color: theme.textMuted }}>×</span>
+                <span style={{ fontSize: 26, color: theme.accentWarm, fontWeight: 700 }}>{liveCostIters} iters</span>
+                <span style={{ fontSize: 26, color: theme.textMuted }}>=</span>
+                <span style={{
+                  fontSize: 34, fontWeight: 800, color: costSpike ? theme.accentRed : theme.text,
+                  transform: `scale(${costSpike ? 1 + spikePulse * 0.08 : 1})`, display: "inline-block",
+                }}>
+                  ${liveCost.toFixed(0)}
+                </span>
+                {costSpike && (
+                  <span style={{
+                    fontSize: 22, fontWeight: 800, color: theme.accentRed, letterSpacing: 1,
+                    opacity: 0.5 + spikePulse * 0.5,
+                  }}>
+                    ⚠ catastrophic
+                  </span>
+                )}
+              </div>
+            )}
           </AbsoluteFill>
         )}
       </CameraRig>

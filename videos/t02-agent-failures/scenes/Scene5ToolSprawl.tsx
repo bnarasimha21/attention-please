@@ -111,6 +111,28 @@ export const Scene5ToolSprawl: React.FC = () => {
   // hesitation reads as a believable "~14s of indecision", not 45s)
   const timerSecs = Math.max(0, (Math.min(frame, wrongPick) - timerStart) / fps) * 0.3;
 
+  // ===== LIVE BEAT (NAIVE) - schema tokens accumulate (~26-42s) =====
+  // After the wrong pick the grid would sit frozen while the VO explains the
+  // token overhead. Keep it alive: tools light up one-by-one across the grid as
+  // each tool definition is "counted", and a running token tally climbs toward
+  // ~55K (≈1.1K/tool) - matching "every tool definition costs tokens... 50 tools
+  // burn ~8000 tokens on schemas alone."
+  const tallyStart = fps * 25.8; // "Tool sprawl also inflates the context directly."
+  const tallyEnd = fps * 42.0;   // hands off to the collapse at 43s
+  const tallyOn = frame > tallyStart && frame < collapseStart;
+  // fraction of the count revealed (clamped >=0; freezes at 1 after tallyEnd)
+  const tallyProg = Math.max(0, Math.min(1, (frame - tallyStart) / (tallyEnd - tallyStart)));
+  // tools counted so far (sweeps through all 50 cells in order)
+  const toolsCounted = Math.min(VAGUE.length, Math.floor(tallyProg * VAGUE.length));
+  // running token total: ~1.1K per tool -> ~55K at full sweep
+  const tokensAccrued = Math.round(toolsCounted * 1.1);
+  // the cell currently being counted (its glow front)
+  const countFront = tallyProg * VAGUE.length;
+  // gentle "+tokens" pop each time a new tool lands (drives the +1.1K flash)
+  const lastLand = tallyStart + (toolsCounted / VAGUE.length) * (tallyEnd - tallyStart);
+  const landPulse = Math.max(0, 1 - (frame - lastLand) / (fps * 0.45));
+  const tallyIn = interpolate(frame, [tallyStart, tallyStart + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
   // FIX
   const fixIn = interpolate(frame, [fixStart - fps * 0.3, fixStart + fps * 0.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const searchPop = pop(frame, fps, fixStart + fps * 0.5, { damping: 12 });
@@ -120,6 +142,52 @@ export const Scene5ToolSprawl: React.FC = () => {
   const tokenVal = interpolate(frame, [counterStart, counterEnd], [55, 3], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const accVal = interpolate(frame, [counterStart, counterEnd], [49, 74], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const codePop = pop(frame, fps, codeStart, { damping: 11 });
+
+  // counters now FADE IN at counterStart so the 64-88s band stays free for the
+  // live beats below; the 88-101s count animation itself is untouched.
+  const counterIn = interpolate(frame, [counterStart - fps * 0.5, counterStart + fps * 0.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+  // ===== LIVE BEAT 1 - "describe in 5 words" check (~66-74s) =====
+  // A small live word-counter inspects a tool description: a vague one (>5 words)
+  // counts up to a red ✗, then it swaps to a sharp one (<=5 words) that lands a
+  // green ✓. Keeps moving through the otherwise-static "5-word rule" VO.
+  const fiveStart = fps * 66.2;
+  const fiveEnd = fps * 74.4;
+  const fiveOn = frame > fiveStart - fps * 0.4 && frame < fiveEnd + fps * 0.6;
+  const fiveIn = interpolate(frame, [fiveStart - fps * 0.4, fiveStart + fps * 0.3], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const fiveOut = interpolate(frame, [fiveEnd, fiveEnd + fps * 0.6], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // two examples: a vague description (8 words, fails) then a sharp one (4 words, passes)
+  const VAGUE_DESC = ["get", "the", "contents", "of", "a", "file", "by", "path"]; // 8 words -> ✗
+  const SHARP_DESC = ["read", "a", "file", "path"]; // 4 words -> ✓
+  const swapAt = (fiveStart + fiveEnd) / 2; // halfway: swap vague -> sharp
+  const showVague = frame < swapAt;
+  const exWords = showVague ? VAGUE_DESC : SHARP_DESC;
+  const exName = showVague ? "fetch_file" : "read_file";
+  // word-counter ticks up across ~1.6s within each example phase (clamped >=0)
+  const phaseStart = showVague ? fiveStart + fps * 0.3 : swapAt + fps * 0.2;
+  const wordProg = Math.max(0, Math.min(exWords.length, (frame - phaseStart) / (fps * 0.22)));
+  const wordsShown = Math.floor(wordProg);
+  const wordCount = Math.min(exWords.length, wordsShown);
+  const tooMany = exWords.length > 5;
+  // verdict stamps once the count is fully revealed
+  const verdictAt = phaseStart + exWords.length * (fps * 0.22) + fps * 0.25;
+  const verdictPop = pop(frame, fps, verdictAt, { damping: 12, stiffness: 200 });
+  const verdictShown = frame > verdictAt;
+
+  // ===== LIVE BEAT 2 - "load on demand" alive (~78-88s) =====
+  // Re-trigger the tool_search pulse and pull the 3-5 lit tools out of the greyed
+  // catalogue one-by-one, on a loop, building toward the counters at 88s.
+  const loadStart = fps * 78.0;
+  const loadOn = frame > loadStart && frame < counterStart;
+  // continuous pulse on the tool_search pill
+  const reSearchPulse = loadOn ? 0.5 + 0.5 * Math.sin((frame - loadStart) / 4.5) : 0;
+  // each lit tool "refreshes" on a staggered loop: a brief brighten that sweeps
+  // top-to-bottom every ~1.5s, so the column shimmers as if re-pulled each turn.
+  // starts at ~75s (bridging the 5-word check) and runs until the counters take over.
+  const shimmerStart = fps * 75.0;
+  const shimmerOn = frame > shimmerStart && frame < counterStart;
+  const sweepPeriod = fps * 1.5;
+  const sweepPhase = shimmerOn ? ((frame - shimmerStart) % sweepPeriod) / sweepPeriod : -1; // 0..1, -1 = off
   const capT = interpolate(frame, [fps * 114, fps * 115], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }); // "...fixes tool sprawl and context rot"
   const capOut = interpolate(frame, [punchStart - fps * 0.5, punchStart], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const punchT = interpolate(frame, [punchStart, punchStart + fps * 0.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -166,15 +234,20 @@ export const Scene5ToolSprawl: React.FC = () => {
               const isActive = cursorOn && (i === fromCell || i === toCell);
               const pairGlow = isActive ? 0.5 + 0.5 * Math.sin((frame - cursorStart) / 5) : 0;
               const flashThis = i === WRONG_IDX ? wrongFlash : 0;
+              // live beat: each tool "lights up" as it's counted; a brighter glow
+              // front sweeps the cell currently being tallied, settling to a faint
+              // "counted" tint behind it (clamped >=0).
+              const counted = tallyOn && i < toolsCounted;
+              const countGlow = tallyOn ? Math.max(0, 1 - Math.abs(countFront - i) * 0.9) : 0;
               return (
                 <div key={name} style={{
                   position: "absolute", left: x, top: y, width: CELL_W, height: CELL_H,
-                  transform: `scale(${0.6 + s * 0.4})`, opacity: s,
+                  transform: `scale(${0.6 + s * 0.4 + countGlow * 0.05})`, opacity: s,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   borderRadius: 10,
-                  background: `linear-gradient(160deg, ${theme.accent}14, rgba(17,17,22,0.92))`,
-                  border: `1px solid ${flashThis > 0.1 ? red : isPair ? `${warm}aa` : theme.border}`,
-                  boxShadow: flashThis > 0.1 ? `0 0 ${flashThis * 30}px ${red}aa` : isPair ? `0 0 ${10 + pairGlow * 24}px ${warm}66` : "0 6px 16px rgba(0,0,0,0.4)",
+                  background: `linear-gradient(160deg, ${theme.accent}${counted || countGlow > 0.1 ? "2e" : "14"}, rgba(17,17,22,0.92))`,
+                  border: `1px solid ${flashThis > 0.1 ? red : countGlow > 0.2 ? `${red}cc` : counted ? `${warm}88` : isPair ? `${warm}aa` : theme.border}`,
+                  boxShadow: flashThis > 0.1 ? `0 0 ${flashThis * 30}px ${red}aa` : countGlow > 0.1 ? `0 0 ${10 + countGlow * 28}px ${red}88` : counted ? `0 0 10px ${warm}44` : isPair ? `0 0 ${10 + pairGlow * 24}px ${warm}66` : "0 6px 16px rgba(0,0,0,0.4)",
                   fontFamily: theme.fontMono, fontSize: 17, color: theme.textMuted,
                   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", padding: "0 8px",
                 }}>
@@ -199,6 +272,18 @@ export const Scene5ToolSprawl: React.FC = () => {
           <div style={{ fontFamily: theme.fontMono, fontSize: 24, color: theme.textDim, letterSpacing: 2 }}>DECIDING…</div>
           <div style={{ fontFamily: theme.fontMono, fontSize: 58, fontWeight: 800, color: frame >= wrongPick ? red : warm }}>{timerSecs.toFixed(1)}s</div>
         </div>
+
+        {/* live schema-token tally (NAIVE) - climbs as tools are counted (~26-42s) */}
+        {tallyOn && (
+          <div style={{ position: "absolute", top: 250, left: 150, textAlign: "left", opacity: tallyIn * crowdExit }}>
+            <div style={{ fontFamily: theme.fontMono, fontSize: 22, color: theme.textDim, letterSpacing: 2 }}>SCHEMA TOKENS</div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+              <div style={{ fontFamily: theme.fontMono, fontSize: 58, fontWeight: 800, color: red }}>{tokensAccrued}K</div>
+              <div style={{ fontFamily: theme.fontMono, fontSize: 26, fontWeight: 700, color: warm, opacity: landPulse, transform: `translateY(${(1 - landPulse) * 6}px)` }}>+1.1K</div>
+            </div>
+            <div style={{ fontFamily: theme.fontMono, fontSize: 20, color: theme.textMuted, marginTop: 2 }}>{toolsCounted}/50 tool defs counted</div>
+          </div>
+        )}
 
         {/* sprawl overhead + wrong-pick verdict */}
         <div style={{ position: "absolute", bottom: 210, width: "100%", textAlign: "center", opacity: interpolate(frame, [fps * 3, fps * 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) * crowdExit }}>
@@ -225,7 +310,7 @@ export const Scene5ToolSprawl: React.FC = () => {
               <div style={{ position: "absolute", bottom: -36, width: "100%", left: 0, textAlign: "center", fontFamily: theme.fontMono, fontSize: 24, color: theme.textMuted }}>full catalogue (deferred)</div>
             </div>
 
-            <div style={{ transform: `scale(${0.6 + searchPop * 0.4})`, padding: "16px 26px", borderRadius: 999, background: `${theme.accent}1f`, border: `1px solid ${theme.accent}88`, fontFamily: theme.fontMono, fontSize: 26, fontWeight: 700, color: theme.accent, boxShadow: `0 0 26px ${theme.accent}55`, whiteSpace: "nowrap" }}>
+            <div style={{ transform: `scale(${0.6 + searchPop * 0.4 + reSearchPulse * 0.05})`, padding: "16px 26px", borderRadius: 999, background: `${theme.accent}${reSearchPulse > 0.5 ? "2e" : "1f"}`, border: `1px solid ${theme.accent}88`, fontFamily: theme.fontMono, fontSize: 26, fontWeight: 700, color: theme.accent, boxShadow: `0 0 ${26 + reSearchPulse * 30}px ${theme.accent}${reSearchPulse > 0.4 ? "88" : "55"}`, whiteSpace: "nowrap" }}>
               🔎 tool_search →
             </div>
 
@@ -233,8 +318,13 @@ export const Scene5ToolSprawl: React.FC = () => {
               {SHARP.map((t, i) => {
                 const r = interpolate(litReveal, [i / SHARP.length, (i + 1) / SHARP.length], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
                 const chosen = i === 0;
+                // beat 2: a top-to-bottom "re-pull" shimmer sweeps each tool in turn,
+                // peaking when the sweep front passes this row (clamped >=0).
+                const rowCenter = (i + 0.5) / SHARP.length;
+                const sweepHit = sweepPhase < 0 ? 0 : Math.max(0, 1 - Math.abs(sweepPhase - rowCenter) * 6);
+                const litExtra = sweepHit * 22;
                 return (
-                  <div key={t.name} style={{ width: 300, height: 52, opacity: r, transform: `translateX(${(1 - r) * 24}px)`, borderRadius: 12, display: "flex", alignItems: "center", paddingLeft: 18, gap: 12, background: `linear-gradient(160deg, ${green}1f, rgba(12,16,14,0.92))`, border: `${chosen && pickRing > 0.1 ? 2 : 1}px solid ${green}${chosen && pickRing > 0.1 ? "" : "88"}`, boxShadow: `0 0 ${chosen ? 18 + pickRing * 26 : 18}px ${green}${chosen ? "aa" : "44"}`, fontFamily: theme.fontMono, fontSize: 25, fontWeight: 700, color: green }}>
+                  <div key={t.name} style={{ width: 300, height: 52, opacity: r, transform: `translateX(${(1 - r) * 24}px) scale(${1 + sweepHit * 0.03})`, borderRadius: 12, display: "flex", alignItems: "center", paddingLeft: 18, gap: 12, background: `linear-gradient(160deg, ${green}${chosen ? "1f" : "1f"}, rgba(12,16,14,0.92))`, border: `${chosen && pickRing > 0.1 ? 2 : 1}px solid ${green}${chosen && pickRing > 0.1 ? "" : "88"}`, boxShadow: `0 0 ${(chosen ? 18 + pickRing * 26 : 18) + litExtra}px ${green}${chosen ? "aa" : "44"}`, fontFamily: theme.fontMono, fontSize: 25, fontWeight: 700, color: green }}>
                     <span style={{ fontSize: 22 }}>🔧</span>{t.name}
                     {chosen && pickRing > 0.4 && <span style={{ marginLeft: "auto", marginRight: 14, fontSize: 24, color: green }}>✓</span>}
                   </div>
@@ -251,8 +341,40 @@ export const Scene5ToolSprawl: React.FC = () => {
             </div>
           </div>
 
+          {/* ===== LIVE BEAT 1 - "describe in 5 words" check (~66-74s) ===== */}
+          {/* sits in the band the counters use later; fully gone before they fade in at 88s */}
+          {fiveOn && (
+            <div style={{ position: "absolute", top: 588, left: 0, right: 0, display: "flex", justifyContent: "center", opacity: fiveIn * fiveOut, zIndex: 30 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 22, padding: "18px 30px", borderRadius: 18, background: "rgba(17,17,22,0.92)", border: `1px solid ${(verdictShown && tooMany) ? red : verdictShown ? green : theme.border}`, boxShadow: `0 0 ${verdictShown ? 26 : 14}px ${(verdictShown && tooMany) ? `${red}66` : verdictShown ? `${green}66` : "rgba(0,0,0,0.4)"}` }}>
+                <div style={{ fontFamily: theme.fontMono, fontSize: 23, fontWeight: 700, color: theme.accent, whiteSpace: "nowrap" }}>{exName}</div>
+                <div style={{ width: 1, height: 38, background: theme.border }} />
+                <div style={{ display: "flex", gap: 8, flexWrap: "nowrap" }}>
+                  {exWords.map((w, wi) => (
+                    <span key={wi} style={{ fontFamily: theme.fontSans, fontSize: 24, fontWeight: 600, color: wi < wordCount ? theme.text : theme.textDim, opacity: wi < wordCount ? 1 : 0.25, transform: `translateY(${wi < wordCount ? 0 : 4}px)` }}>{w}</span>
+                  ))}
+                </div>
+                <div style={{ fontFamily: theme.fontMono, fontSize: 26, fontWeight: 800, color: tooMany ? warm : green, whiteSpace: "nowrap" }}>{wordCount}/5</div>
+                {verdictShown && (
+                  <div style={{ transform: `scale(${0.4 + verdictPop * 0.6})`, fontFamily: theme.fontSans, fontSize: 30, fontWeight: 800, color: tooMany ? red : green, whiteSpace: "nowrap" }}>
+                    {tooMany ? "✗ too vague" : "✓ sharp"}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ===== LIVE BEAT 2 caption - "loaded on demand each turn" (~78-88s) ===== */}
+          {loadOn && (
+            <div style={{ position: "absolute", top: 596, left: 0, right: 0, textAlign: "center", opacity: interpolate(frame, [loadStart, loadStart + fps * 0.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }), zIndex: 30 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 14, padding: "12px 26px", borderRadius: 999, background: `${theme.accent}${reSearchPulse > 0.5 ? "22" : "14"}`, border: `1px solid ${theme.accent}66`, fontFamily: theme.fontMono, fontSize: 24, fontWeight: 700, color: theme.accent, boxShadow: `0 0 ${12 + reSearchPulse * 22}px ${theme.accent}44` }}>
+                <span style={{ transform: `scale(${1 + reSearchPulse * 0.12})`, display: "inline-block" }}>🔎</span>
+                re-querying the catalogue · 3–5 tools each turn
+              </div>
+            </div>
+          )}
+
           {/* hero counters - compact so number + label + was-line fit snugly inside */}
-          <div style={{ position: "absolute", top: 522, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 64 }}>
+          <div style={{ position: "absolute", top: 522, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 64, opacity: counterIn }}>
             {[
               { val: `${Math.round(tokenVal)}K`, label: "schema tokens up-front", was: "was 55K" },
               { val: `${Math.round(accVal)}%`, label: "tool-selection accuracy", was: "was 49%" },
@@ -265,7 +387,7 @@ export const Scene5ToolSprawl: React.FC = () => {
             ))}
           </div>
           {/* boxes span ~y522 -> ~677; footnote sits clearly below with a gap */}
-          <div style={{ position: "absolute", top: 700, width: "100%", textAlign: "center", fontFamily: theme.fontMono, fontSize: 22, color: theme.textDim }}>
+          <div style={{ position: "absolute", top: 700, width: "100%", textAlign: "center", fontFamily: theme.fontMono, fontSize: 22, color: theme.textDim, opacity: counterIn }}>
             * Anthropic internal eval (Tool Search Tool)
           </div>
 

@@ -95,6 +95,37 @@ export const Scene4ContextRot: React.FC = () => {
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
+  // ===== LIVE "curating…" inset (~49–58.5s): bridges the static gap between the
+  // sub-heading and the first fix card. Raw tool output (long red lines) is
+  // visibly CURATED into short green summaries / truncated reads, tied to
+  // "you curate it / summaries instead of raw tool output / truncated file reads".
+  // Fades fully OUT before Compaction (F[0]=59s) lands, so it never overlaps the card.
+  const curIn = interpolate(frame, [fps * 48.6, fps * 49.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT });
+  const curOut = interpolate(frame, [fps * 57.8, fps * 58.8], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const curOp = curIn * curOut;
+  // continuous local time inside the inset window - NaN-guarded, never < 0.
+  const curT = Math.max(0, (frame - fps * 49.6) / fps);
+  // five raw rows curate one-by-one across the window (each row: long red → short green).
+  const CUR_ROWS = Array.from({ length: 5 }, (_, k) => {
+    // staggered: row k starts curating at ~49.8 + k*1.5s, over ~1.2s.
+    const t = interpolate(frame, [fps * (49.8 + k * 1.5), fps * (51.0 + k * 1.5)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT });
+    // raw width shrinks 560→150 as it collapses into a summary; hue red→green.
+    const w = 560 - t * 410;
+    const col = interpolateColors(t, [0, 1], [red, green]);
+    // a soft live shimmer travels along not-yet-curated rows so nothing sits dead.
+    const shimmer = 0.5 + 0.5 * Math.sin(curT * 3.2 - k * 0.8);
+    return { t, w: Math.max(0, w), col, shimmer };
+  });
+  // a running "curated" counter ticks up as rows collapse (live number motion).
+  const curatedCount = Math.min(5, Math.floor(CUR_ROWS.reduce((n, r) => n + (r.t > 0.85 ? 1 : 0), 0)));
+
+  // subtle "trying to recover" shimmer on the 50% meter during the static window
+  // (~48–59s), so the bottomed bar pulses instead of looking frozen. It formally
+  // recovers when the cards land (accuracy stays 50 here). NaN-guarded.
+  const recoverT = Math.max(0, (frame - fps * 48) / fps);
+  const recoverWin = interpolate(frame, [fps * 48, fps * 48.6, fps * 58, fps * 58.8], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const accShimmer = recoverWin * (0.5 + 0.5 * Math.sin(recoverT * 4.4));
+
   // sub-agent bubble (inside fix card 2)
   const p2 = F[1];
   const subRead = interpolate(frame, [p2 + fps * 0.2, p2 + fps * 1.0], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -108,6 +139,31 @@ export const Scene4ContextRot: React.FC = () => {
   // punchline
   const punchT = interpolate(frame, [fps * 106, fps * 107.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const punchPop = pop(frame, fps, fps * 106, { damping: 13 });
+
+  // ===== LIVE FINALE MOTION (106–120s): keep the hold frame breathing =====
+  // continuous time since the hero settled - NaN-guarded, never < 0.
+  const breatheT = Math.max(0, (frame - fps * 107.5) / fps);
+  // gentle out-of-phase breathing for the RAM (green) / hard drive (red) words.
+  const ramBreath = 1 + 0.018 * Math.sin(breatheT * 1.7);
+  const ramGlow = 14 + 10 * (0.5 + 0.5 * Math.sin(breatheT * 1.7));
+  const hddBreath = 1 + 0.018 * Math.sin(breatheT * 1.7 + Math.PI);
+  const hddGlow = 14 + 10 * (0.5 + 0.5 * Math.sin(breatheT * 1.7 + Math.PI));
+
+  // IQ / noise beat (~114–120s): "everything else is noise · noise costs IQ".
+  const iqIn = interpolate(frame, [fps * 113.6, fps * 114.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // IQ ticks DOWN 100 → 88 as noise accumulates (116.4–119.0s), then settles.
+  const iqValue = interpolate(frame, [fps * 116.4, fps * 119.0], [100, 88], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // faint drifting noise specks accumulate over the same window, then hold.
+  const noiseT = Math.max(0, (frame - fps * 114.6) / fps);
+  const noiseFill = interpolate(frame, [fps * 114.6, fps * 119.0], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const SPECKS = Array.from({ length: 14 }, (_, k) => {
+    const seed = k * 12.9898;
+    const bx = 14 + ((Math.sin(seed) * 43758.5453) % 1 + 1) % 1 * 100; // 14..114 %-ish, deterministic
+    const phase = (Math.cos(seed) * 0.5 + 0.5) * Math.PI * 2;
+    const visible = noiseFill > (k / 14) ? 1 : 0;
+    const drift = Math.sin(noiseT * 1.3 + phase) * 4;
+    return { bx, drift, visible };
+  });
 
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
@@ -142,7 +198,7 @@ export const Scene4ContextRot: React.FC = () => {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
             <div style={{ width: 880, height: 40, borderRadius: 20, background: theme.surface, border: `1px solid ${theme.border}`, overflow: "hidden" }}>
-              <div style={{ width: `${accuracy}%`, height: "100%", background: `linear-gradient(90deg, ${accColor}, ${accColor}aa)`, boxShadow: `0 0 22px ${accColor}`, transition: "none" }} />
+              <div style={{ width: `${accuracy}%`, height: "100%", background: `linear-gradient(90deg, ${accColor}, ${accColor}aa)`, boxShadow: `0 0 ${22 + accShimmer * 26}px ${accColor}`, opacity: 1 - accShimmer * 0.12, transition: "none" }} />
             </div>
             <div style={{ fontFamily: theme.fontMono, fontSize: 76, fontWeight: 800, color: accColor, width: 180 }}>
               {Math.round(accuracy)}%
@@ -193,6 +249,53 @@ export const Scene4ContextRot: React.FC = () => {
         {/* fix sub-heading */}
         <div style={{ position: "absolute", top: 378, width: "100%", textAlign: "center", opacity: fixOp, fontFamily: theme.fontSans, fontSize: 34, fontWeight: 700, color: theme.text }}>
           Get the junk <span style={{ color: green, fontWeight: 800 }}>out of the window</span> - watch the IQ come back.
+        </div>
+
+        {/* ===== LIVE "curating…" inset (~49–58.5s) — bridges the static gap ===== */}
+        {/* Sits in the empty band below the sub-heading and above the (later) cards. */}
+        <div
+          style={{
+            position: "absolute",
+            top: 470,
+            left: 0,
+            right: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 16,
+            opacity: curOp,
+            pointerEvents: "none",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 14, fontFamily: theme.fontMono, fontSize: 24, letterSpacing: 1, color: theme.textMuted, textTransform: "uppercase" }}>
+            <span style={{ width: 9, height: 9, borderRadius: "50%", background: green, boxShadow: `0 0 ${8 + 8 * (0.5 + 0.5 * Math.sin(curT * 4))}px ${green}` }} />
+            curating context
+            <span style={{ color: green, fontWeight: 800 }}>{curatedCount}/5</span>
+          </div>
+
+          {CUR_ROWS.map((r, k) => (
+            <div key={k} style={{ display: "flex", alignItems: "center", gap: 20, width: 920 }}>
+              {/* raw tool output → curated summary, collapsing left-to-right */}
+              <div style={{ width: 600, height: 26, display: "flex", alignItems: "center" }}>
+                <div
+                  style={{
+                    width: r.w,
+                    height: 16,
+                    borderRadius: 5,
+                    background: `linear-gradient(90deg, ${r.col}, ${r.col}55)`,
+                    boxShadow: `0 0 ${8 + r.shimmer * (1 - r.t) * 14}px ${r.col}55`,
+                    opacity: 0.85 + r.shimmer * (1 - r.t) * 0.15,
+                  }}
+                />
+                {/* truncation marker that stays after collapse */}
+                <span style={{ marginLeft: 12, fontFamily: theme.fontMono, fontSize: 18, color: green, opacity: r.t }}>summary</span>
+              </div>
+              <span style={{ fontSize: 26, color: green, opacity: r.t }}>✓</span>
+              <span style={{ fontFamily: theme.fontMono, fontSize: 20, color: theme.textDim, opacity: r.t }}>
+                {k % 2 === 0 ? "raw tool output → summary" : "truncated read · relevant section"}
+              </span>
+            </div>
+          ))}
         </div>
 
         {/* ===== FIX cards row ===== */}
@@ -345,11 +448,63 @@ export const Scene4ContextRot: React.FC = () => {
           }}
         >
           <div style={{ fontFamily: theme.fontSans, fontSize: 80, fontWeight: 800, color: theme.text, lineHeight: 1.1 }}>
-            Treat context like <span style={{ color: green, fontWeight: 800 }}>RAM</span>,<br />
-            not a <span style={{ color: red, fontWeight: 800 }}>hard drive</span>.
+            Treat context like{" "}
+            <span style={{ color: green, fontWeight: 800, display: "inline-block", transform: `scale(${ramBreath})`, textShadow: `0 0 ${ramGlow}px ${green}aa` }}>RAM</span>,<br />
+            not a{" "}
+            <span style={{ color: red, fontWeight: 800, display: "inline-block", transform: `scale(${hddBreath})`, textShadow: `0 0 ${hddGlow}px ${red}aa` }}>hard drive</span>.
           </div>
           <div style={{ fontFamily: theme.fontSans, fontSize: 40, fontWeight: 600, color: theme.textMuted }}>
             Keep only what's needed now.
+          </div>
+        </div>
+
+        {/* ===== LIVE sub-element: noise costs IQ points per turn (~114–120s) ===== */}
+        <div
+          style={{
+            position: "absolute",
+            top: 742,
+            left: 0,
+            right: 0,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 26,
+            opacity: iqIn,
+          }}
+        >
+          {/* drifting noise specks accumulating */}
+          <div style={{ position: "relative", width: 230, height: 86 }}>
+            {SPECKS.map((sp, k) => (
+              <div
+                key={k}
+                style={{
+                  position: "absolute",
+                  left: `${sp.bx}%`,
+                  top: `${18 + (k % 5) * 13}px`,
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: red,
+                  opacity: sp.visible * 0.55,
+                  transform: `translateY(${sp.drift}px)`,
+                  boxShadow: `0 0 8px ${red}88`,
+                }}
+              />
+            ))}
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: theme.fontMono, fontSize: 20, letterSpacing: 1, color: theme.textDim, textTransform: "uppercase" }}>
+              noise
+            </div>
+          </div>
+
+          <div style={{ fontSize: 30, color: theme.textMuted }}>→</div>
+
+          {/* IQ meter ticking down */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+            <span style={{ fontFamily: theme.fontMono, fontSize: 24, letterSpacing: 2, color: theme.textMuted, textTransform: "uppercase" }}>IQ</span>
+            <span style={{ fontFamily: theme.fontMono, fontSize: 64, fontWeight: 800, color: interpolateColors(iqValue, [88, 100], [red, green]), textShadow: `0 0 16px ${interpolateColors(iqValue, [88, 100], [red, green])}66` }}>
+              {Math.round(iqValue)}
+            </span>
+            <span style={{ fontFamily: theme.fontMono, fontSize: 26, fontWeight: 800, color: red, opacity: noiseFill }}>▼</span>
           </div>
         </div>
       </CameraRig>

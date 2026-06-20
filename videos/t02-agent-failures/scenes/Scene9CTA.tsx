@@ -59,31 +59,18 @@ export const Scene9CTA: React.FC = () => {
 
       <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
 
-      {/* Channel icon */}
-      <div style={{
-        position: "absolute", top: 150,
-        transform: `scale(${0.6 + iconSpring * 0.4})`,
-      }}>
-        <div style={{
-          width: 180, height: 180, borderRadius: 40, overflow: "hidden",
-          boxShadow: `0 0 ${50 + iconGlow * 60}px ${theme.accentWarm}aa, 0 24px 70px rgba(0,0,0,0.6)`,
-        }}>
-          <Img src={staticFile("icon.png")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        </div>
-      </div>
-
-      {/* Wordmark + handle */}
-      <div style={{ position: "absolute", top: 360, textAlign: "center", opacity: brandT, transform: `translateY(${(1 - brandT) * 18}px)` }}>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 64, fontWeight: 800, color: theme.text, letterSpacing: 1 }}>
+      {/* Wordmark + handle (logo removed) */}
+      <div style={{ position: "absolute", top: 300, textAlign: "center", opacity: brandT, transform: `translateY(${(1 - brandT) * 18}px)` }}>
+        <div style={{ fontFamily: theme.fontSans, fontSize: 76, fontWeight: 800, color: theme.text, letterSpacing: 1 }}>
           Distilled<span style={gradientText("#fbbf24", theme.accentWarm)}> AI</span>
         </div>
-        <div style={{ fontFamily: theme.fontMono, fontSize: 28, color: theme.accentWarm, marginTop: 10, letterSpacing: 1 }}>
+        <div style={{ fontFamily: theme.fontMono, fontSize: 30, color: theme.accentWarm, marginTop: 12, letterSpacing: 1 }}>
           @Distilled_AI_Studio
         </div>
       </div>
 
       {/* Headline */}
-      <div style={{ position: "absolute", top: 512, textAlign: "center", opacity: headlineT, transform: `translateY(${(1 - headlineT) * 16}px)`, fontFamily: theme.fontSans, fontSize: 40, fontWeight: 700, color: theme.text }}>
+      <div style={{ position: "absolute", top: 470, textAlign: "center", opacity: headlineT, transform: `translateY(${(1 - headlineT) * 16}px)`, fontFamily: theme.fontSans, fontSize: 42, fontWeight: 700, color: theme.text }}>
         Found this useful?
       </div>
 

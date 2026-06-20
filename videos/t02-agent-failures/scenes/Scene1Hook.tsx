@@ -24,8 +24,17 @@ export const Scene1Hook: React.FC = () => {
   // ease-out so it sprints early then crawls to the final value
   const eased = 1 - Math.pow(1 - t, 2.2);
 
-  const iterations = Math.round(eased * 312);
-  const cost = eased * 40.17;
+  // base frozen readout
+  const baseIterations = Math.round(eased * 312);
+  const baseCost = eased * 40.17;
+
+  // ---- live creep after the freeze: it's STILL running, still billing ----
+  // iterations tick +1 every ~0.65s; cost inches up a few cents per tick.
+  // "changes" stays 0 (the whole point).
+  const secsSinceFreeze = Math.max(0, (frame - climbEnd) / fps);
+  const creepTicks = Math.floor(secsSinceFreeze / 0.65); // +1 iteration every 0.65s
+  const iterations = baseIterations + Math.max(0, creepTicks);
+  const cost = baseCost + Math.max(0, creepTicks * 0.04); // ~4c per iteration
   const changes = 0;
 
   // card entrance
@@ -39,6 +48,9 @@ export const Scene1Hook: React.FC = () => {
   // pulsing red urgency once it freezes
   const frozen = frame >= climbEnd;
   const freezePulse = frozen ? 0.5 + 0.5 * Math.sin((frame - climbEnd) / 7) : 0;
+
+  // continuous throb for the "STILL running" indicator dot (0..1), faster beat
+  const runDotThrob = frozen ? 0.5 + 0.5 * Math.sin((frame - climbEnd) / 4.5) : 0;
 
   // gut-punch line reveals as it freezes
   const punchT = interpolate(frame, [climbEnd, climbEnd + fps * 0.8], [0, 1], {
@@ -120,9 +132,23 @@ export const Scene1Hook: React.FC = () => {
             {[theme.accentRed, theme.accentWarm, theme.accentGreen].map((c) => (
               <div key={c} style={{ width: 13, height: 13, borderRadius: "50%", background: c, opacity: 0.85 }} />
             ))}
+            {/* live throbbing indicator dot once frozen — it's STILL running */}
+            {frozen && (
+              <div
+                style={{
+                  marginLeft: 18,
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  background: red,
+                  opacity: 0.55 + 0.45 * runDotThrob,
+                  boxShadow: `0 0 ${8 + runDotThrob * 22}px ${red}`,
+                }}
+              />
+            )}
             <div
               style={{
-                marginLeft: 18,
+                marginLeft: frozen ? 12 : 18,
                 fontFamily: theme.fontMono,
                 fontSize: 28,
                 color: running ? theme.accentWarm : red,

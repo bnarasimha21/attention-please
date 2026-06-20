@@ -71,10 +71,55 @@ export const Scene6OverPermission: React.FC = () => {
   const punchT = interpolate(frame, [fps * 144.35, fps * 145.0], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const punchPop = pop(frame, fps, fps * 144.35, { damping: 13, stiffness: 130 });
 
+  // ---- "irreversible test" live beat (fills the static gap ~59-77s while the
+  // gate lanes sit resolved). Three staged pops timed to the VO, with continuous
+  // motion (pulsing countdown ring) so the frame never freezes. ----
+  // Beat opacity: fades in ~60.6s, holds, fades out with g1 (~77.8-78.2s).
+  const testT = interpolate(
+    frame,
+    [fps * 60.6, fps * 61.4, fps * 77.8, fps * 78.2],
+    [0, 1, 1, 0],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  );
+  // 30s countdown ring, animated 62.0-68.0s (VO "can I undo it in 30 seconds?").
+  const countStart = 62.0, countEnd = 68.0;
+  const countProg = interpolate(frame, [fps * countStart, fps * countEnd], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const secsLeft = Math.max(0, Math.ceil(30 * (1 - countProg))); // 30 -> 0, never negative
+  const countIn = pop(frame, fps, fps * 61.6, { damping: 14, stiffness: 150 });
+  const ringPulse = 1 + Math.sin(Math.max(0, frame - fps * 62.0) / 3.2) * 0.04; // continuous subtle pulse
+  // "answer = no -> GATE" amber stamp slams in ~68.7s.
+  const gatePop = pop(frame, fps, fps * 68.7, { damping: 12, stiffness: 150 });
+  const gateIn = interpolate(frame, [fps * 68.7, fps * 69.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // "can't undo at all -> HARD BLOCK" red stamp slams down ~72.6s.
+  const blockPop = pop(frame, fps, fps * 72.6, { damping: 11, stiffness: 160 });
+  const blockIn = interpolate(frame, [fps * 72.6, fps * 73.1], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // stamp slam rotation/scale (settle from oversized + tilted to flat).
+  const blockTilt = interpolate(blockPop, [0, 1], [-9, -4]);
+
   // catastrophe overlay inside the naive phase (after the 3 lethal actions stream in)
   const boom = interpolate(frame, [fps * 24.5, fps * 25.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const shake = boom > 0 && frame < fps * 31 ? Math.sin(frame / 1.3) * (1 - boom) * 10 : 0;
   const replayT = interpolate(frame, [fps * 28.0, fps * 29.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+  // ---- BRIDGE live motion ("two more layers", ~78-86s) ----
+  // Two teaser chips pop in one at a time, a request token slips PAST the gate
+  // toward them, and the chips carry a gentle always-on pulse so nothing freezes.
+  const bridgeChipPop = [
+    pop(frame, fps, fps * 80.0, { damping: 13, stiffness: 150 }), // ① Sandbox
+    pop(frame, fps, fps * 82.5, { damping: 13, stiffness: 150 }), // ② Undo
+  ];
+  const bridgeChipIn = [
+    interpolate(frame, [fps * 80.0, fps * 80.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
+    interpolate(frame, [fps * 82.5, fps * 82.9], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
+  ];
+  // a token that slips THROUGH the gate gap: left -> right, ~80-85s, continuous.
+  const slipProg = interpolate(frame, [fps * 80.0, fps * 85.0], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const slipX = interpolate(slipProg, [0, 1], [-360, 360]);
+  const slipOp = interpolate(slipProg, [0, 0.06, 0.9, 1], [0, 1, 1, 0]);
+  // gate "leak" flares as the token passes the gap (~mid travel).
+  const slipFlare = Math.max(0, 1 - Math.abs(slipProg - 0.5) * 6); // 0..1 peak at center
+  // gentle perpetual pulse (always slight motion on the chips).
+  const bridgePulse = 1 + Math.sin(Math.max(0, frame - fps * 78.0) / 5.5) * 0.025;
 
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
@@ -220,9 +265,9 @@ export const Scene6OverPermission: React.FC = () => {
             <div style={{ fontFamily: theme.fontMono, fontSize: 28, color: theme.textMuted, marginTop: 18 }}>
               0 prompts {"·"} 0 guardrails {"·"} 1 disaster
             </div>
-            {/* replay hint */}
+            {/* transition into the fix */}
             <div style={{ opacity: replayT, marginTop: 38, fontFamily: theme.fontMono, fontSize: 26, fontWeight: 700, color: theme.text }}>
-              {"↺"} replay <span style={{ color: green }}>WITH guards</span>
+              the fix {"→"} <span style={{ color: green }}>a three-tier gate</span>
             </div>
           </div>
         </div>
@@ -272,8 +317,137 @@ export const Scene6OverPermission: React.FC = () => {
               );
             })}
           </div>
-          <Caption>Destructive calls hit a <span style={{ color: red, fontWeight: 800 }}>wall</span> - not your database.</Caption>
+          <div style={{ opacity: 1 - testT }}>
+            <Caption>Destructive calls hit a <span style={{ color: red, fontWeight: 800 }}>wall</span> - not your database.</Caption>
+          </div>
         </GuardFrame>
+
+        {/* ---- GUARD 1 live "irreversible test" beat (fills ~60-78s static gap) ---- */}
+        {/* Anchored in the lower safe band (top 718 .. ends ~880, clear of y895). */}
+        <div
+          style={{
+            position: "absolute",
+            top: 718,
+            left: 0,
+            right: 0,
+            opacity: testT,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 46,
+            zIndex: 22,
+            pointerEvents: "none",
+          }}
+        >
+          {/* (1) the irreversible question + 30s countdown ring */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 26,
+              opacity: countIn,
+              transform: `translateY(${(1 - countIn) * 14}px)`,
+            }}
+          >
+            {/* countdown ring */}
+            <div style={{ position: "relative", width: 118, height: 118, transform: `scale(${ringPulse})` }}>
+              <svg width={118} height={118} viewBox="0 0 118 118" style={{ transform: "rotate(-90deg)" }}>
+                <circle cx={59} cy={59} r={52} fill="none" stroke={`${theme.border}`} strokeWidth={8} />
+                <circle
+                  cx={59}
+                  cy={59}
+                  r={52}
+                  fill="none"
+                  stroke={secsLeft <= 0 ? red : amber}
+                  strokeWidth={8}
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 52}
+                  strokeDashoffset={2 * Math.PI * 52 * Math.max(0, Math.min(1, countProg))}
+                  style={{ filter: `drop-shadow(0 0 10px ${secsLeft <= 0 ? red : amber}aa)` }}
+                />
+              </svg>
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: theme.fontMono,
+                  fontSize: 40,
+                  fontWeight: 800,
+                  color: secsLeft <= 0 ? red : theme.text,
+                }}
+              >
+                {secsLeft}
+              </div>
+            </div>
+            <div style={{ fontFamily: theme.fontSans, fontSize: 32, fontWeight: 700, color: theme.text, maxWidth: 360, lineHeight: 1.25 }}>
+              Can I undo it in <span style={{ color: amber, fontWeight: 800 }}>30 seconds?</span>
+            </div>
+          </div>
+
+          {/* (2) answer = no -> GATE  (amber badge) */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+              opacity: gateIn,
+              transform: `translateY(${(1 - gatePop) * -22}px) scale(${interpolate(gatePop, [0, 1], [1.18, 1])})`,
+            }}
+          >
+            <div style={{ fontFamily: theme.fontMono, fontSize: 19, fontWeight: 700, color: theme.textDim, letterSpacing: 1 }}>no →</div>
+            <div
+              style={{
+                padding: "12px 26px",
+                borderRadius: 12,
+                background: `${amber}22`,
+                border: `2.5px solid ${amber}`,
+                boxShadow: `0 0 ${18 + gatePop * 16}px ${amber}77`,
+                fontFamily: theme.fontSans,
+                fontSize: 34,
+                fontWeight: 900,
+                letterSpacing: 1,
+                color: amber,
+              }}
+            >
+              GATE
+            </div>
+          </div>
+
+          {/* (3) can't undo at all -> HARD BLOCK  (red slam stamp) */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+              opacity: blockIn,
+              transform: `translateY(${(1 - blockPop) * -28}px) rotate(${blockTilt}deg) scale(${interpolate(blockPop, [0, 1], [1.32, 1])})`,
+            }}
+          >
+            <div style={{ fontFamily: theme.fontMono, fontSize: 19, fontWeight: 700, color: theme.textDim, letterSpacing: 1 }}>can't undo →</div>
+            <div
+              style={{
+                padding: "12px 26px",
+                borderRadius: 12,
+                background: `${red}22`,
+                border: `3px solid ${red}`,
+                boxShadow: `0 0 ${22 + blockPop * 22}px ${red}99`,
+                fontFamily: theme.fontSans,
+                fontSize: 34,
+                fontWeight: 900,
+                letterSpacing: 1,
+                color: red,
+                whiteSpace: "nowrap",
+              }}
+            >
+              HARD BLOCK
+            </div>
+          </div>
+        </div>
 
         {/* ============================ BRIDGE - "two more layers" (VO 77.6-85.7) ============================ */}
         <div
@@ -298,8 +472,41 @@ export const Scene6OverPermission: React.FC = () => {
             Two more layers decide what happens when it{" "}
             <span style={gradientText("#fca5a5", red)}>slips through</span>.
           </div>
-          <div style={{ display: "flex", gap: 30, marginTop: 48 }}>
-            {[{ n: "①", t: "Sandbox" }, { n: "②", t: "Undo" }].map((c) => (
+
+          {/* live "something slips through the gate" visual: a request token
+              slides left -> right and leaks past a gap in the gate. */}
+          <div style={{ position: "relative", width: 760, height: 92, marginTop: 30 }}>
+            {/* the gate: two posts with a gap in the middle */}
+            <div style={{ position: "absolute", left: 380 - 6 - 70, top: 8, width: 6, height: 76, borderRadius: 3, background: `${amber}aa`, boxShadow: `0 0 ${10 + slipFlare * 26}px ${red}` }} />
+            <div style={{ position: "absolute", left: 380 + 70, top: 8, width: 6, height: 76, borderRadius: 3, background: `${amber}aa`, boxShadow: `0 0 ${10 + slipFlare * 26}px ${red}` }} />
+            {/* the gap leak flare */}
+            <div style={{ position: "absolute", left: 380, top: 46, width: 130, height: 60, transform: "translate(-50%,-50%)", borderRadius: "50%", background: `radial-gradient(circle, ${red}55, transparent 70%)`, opacity: slipFlare * 0.9 }} />
+            {/* the slipping request token */}
+            <div
+              style={{
+                position: "absolute",
+                left: 380 + slipX,
+                top: 46,
+                transform: "translate(-50%,-50%)",
+                opacity: slipOp,
+                padding: "9px 20px",
+                borderRadius: 999,
+                background: "#15151c",
+                border: `2px solid ${red}`,
+                boxShadow: `0 0 16px ${red}aa`,
+                fontFamily: theme.fontMono,
+                fontSize: 22,
+                fontWeight: 700,
+                color: red,
+                whiteSpace: "nowrap",
+              }}
+            >
+              request
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 30, marginTop: 30 }}>
+            {[{ n: "①", t: "Sandbox" }, { n: "②", t: "Undo" }].map((c, i) => (
               <span
                 key={c.t}
                 style={{
@@ -314,6 +521,9 @@ export const Scene6OverPermission: React.FC = () => {
                   color: theme.textMuted,
                   background: "rgba(20,20,26,0.6)",
                   border: `1.5px solid ${theme.border}`,
+                  opacity: bridgeChipIn[i],
+                  transform: `translateY(${(1 - bridgeChipPop[i]) * 22}px) scale(${interpolate(bridgeChipPop[i], [0, 1], [0.7, 1]) * bridgePulse})`,
+                  boxShadow: `0 0 ${12 + bridgeChipPop[i] * 10}px ${green}33`,
                 }}
               >
                 <span style={{ color: green, fontSize: 32 }}>{c.n}</span>
