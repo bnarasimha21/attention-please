@@ -504,27 +504,9 @@ permission tiers that keep a capable but directionless system actually useful.
 00:10:07.187 --> 00:10:12.707
 The model thinks the harness makes sure it doesn't think itself into a corner.
 
-00:10:13.067 --> 00:10:19.867
-4 failure modes - 4 fixes Runaway loop - Hard iteration budgets and
-
-00:10:19.867 --> 00:10:24.827
-stall detection Context rot - curate the prompt, don't just
-
-00:10:24.827 --> 00:10:30.027
-append Tool sprawl - fewer, sharper tools with unmistakable
-
-00:10:30.027 --> 00:10:35.267
-names Over permission - read auto, write gate, destroy
-
-00:10:35.267 --> 00:10:39.627
-block If your agent is behaving strangely, odds
-
-00:10:39.627 --> 00:10:44.507
-are it's one of those four Now you know exactly where to look
-
-00:10:44.967 --> 00:10:51.027
+00:10:13.067 --> 00:10:19.127
 If this clicked hit like and subscribe. There is more where this came from plenty
 
-00:10:51.027 --> 00:10:57.867
+00:10:19.127 --> 00:10:25.967
 more deep dives on building agents that actually work. See you in the next one.
 

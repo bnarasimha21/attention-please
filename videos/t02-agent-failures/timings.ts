@@ -3,7 +3,7 @@
 // Per-scene clips: public/audio/t02-agent-failures/sNN.m4a, wired in T02F.tsx.
 //
 // Trimmed clip lengths (s, silence-trimmed): s01 28.54 s02 25.51 s03 123.41
-//   s04 119.97 s05 123.45 s06 147.59 s07 43.89 s08 31.79 s09 11.16 (~10:59 narration).
+//   s04 119.97 s05 123.45 s06 147.59 s07 43.89 s09 11.16 (~10:27 narration; s08 recap removed).
 // Raw originals in public/audio/t02-agent-failures/raw/. Global speed-up applied
 // to the FINAL render (VO recorded ~137wpm, deliberately slow).
 // Scene animations are timed to the Whisper transcripts (videos/.../captions/)
@@ -25,10 +25,11 @@ export const TIMINGS = {
   scene5: { start: 0, duration: 3725 }, // 123.45s — Tool sprawl hesitation→instant
   scene6: { start: 0, duration: 4449 }, // 147.59s — Over-permission catastrophe-prevented
   scene7: { start: 0, duration: 1338 }, // 43.89s — Unifying principle
-  scene8: { start: 0, duration: 975 },  // 31.79s — Recap 2x2
+  // scene8 (Recap 2x2) removed — trimmed for length; CTA follows the unifying principle.
   scene9: { start: 0, duration: 420 },  // 11.16s clip; CTA cursor choreography runs ~14s
 };
 
-// Sum of scene durations minus the 8 overlapping crossfades.
+// Sum of scene durations minus the overlapping crossfades (one per gap between scenes).
 export const TOTAL_FRAMES =
-  Object.values(TIMINGS).reduce((s, t) => s + t.duration, 0) - 8 * XFADE;
+  Object.values(TIMINGS).reduce((s, t) => s + t.duration, 0) -
+  (Object.keys(TIMINGS).length - 1) * XFADE;

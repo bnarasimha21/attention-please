@@ -5,8 +5,8 @@ export const theme = {
   surface: "#111111",
   border: "#222222",
   text: "#ffffff",
-  textMuted: "#888888",
-  textDim: "#444444",
+  textMuted: "#b4b4b4",
+  textDim: "#8c8c8c",
   accent: "#818cf8",       // indigo — primary highlight
   accentWarm: "#f59e0b",   // amber — for warnings / gotchas
   accentGreen: "#34d399",  // green — for correct / good

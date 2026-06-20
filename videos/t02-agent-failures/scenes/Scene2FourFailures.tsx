@@ -71,7 +71,7 @@ export const Scene2FourFailures: React.FC = () => {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             });
-            // dim slightly after landing — "coming up"
+            // dim slightly after landing - "coming up"
             const dim = interpolate(frame, [start + fps * 0.9, start + fps * 1.8], [1, 0.62], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
@@ -82,7 +82,7 @@ export const Scene2FourFailures: React.FC = () => {
                 key={card.name}
                 style={{
                   width: 396,
-                  height: 520,
+                  height: 420,
                   opacity: opacity * dim,
                   transform: `translateY(${(1 - s) * 44}px) scale(${0.86 + s * 0.14})`,
                   borderRadius: 30,

@@ -6,7 +6,7 @@ import { Sfx } from "../../../remotion-src/sfx";
 // Scene 7 - The unifying principle
 // The four failure cards flip from red (the problem) to green (the fix), one by
 // one, each revealing its guard layer. Then the thesis: every fix is a default
-// you must deliberately add — a naive harness does none of them.
+// you must deliberately add - a naive harness does none of them.
 
 const CARDS = [
   { icon: "💸", name: "Runaway loop",    fix: "iteration budget + stall detection",   more: "+ cap tokens · time · stop on no-progress" },
@@ -23,7 +23,7 @@ export const Scene7Unifying: React.FC = () => {
   const green = theme.accentGreen;
 
   // each card flips red->green as the VO names the four ("loop forever, rot its
-  // context, drown the model in tools, run free") — anchored to the transcript.
+  // context, drown the model in tools, run free") - anchored to the transcript.
   const flipStart = (i: number) => fps * 5 + i * fps * 3; // 5 / 8 / 11 / 14s
 
   const thesisT = interpolate(frame, [fps * 20, fps * 22], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });

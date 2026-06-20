@@ -6,12 +6,12 @@ import { Sfx } from "../../../remotion-src/sfx";
 // Scene 3 - Failure 1: Runaway Loop  (BREAK -> FIX demonstration)
 // Timed to the s03 narration transcript (whisper). Phases (seconds):
 // Phase 0 (0-6):     title + "no natural stop" ("agentic loop has no stopping condition").
-// Phase 1 (6-35):    NAIVE run — iterations/meters climb; cost math; blowup/panic ~30-35
+// Phase 1 (6-35):    NAIVE run - iterations/meters climb; cost math; blowup/panic ~30-35
 //                    ("happily loop until your credit card does").
 // Phase 2 (35-37):   "replay WITH guards" wipe ("the fix has two parts").
-// Phase 3 (37-69):   GUARDED run — iterations settle to 3 (iteration-limit narration
+// Phase 3 (37-69):   GUARDED run - iterations settle to 3 (iteration-limit narration
 //                    37-54); stall chip @56, no-progress @60, HALT @63 (stall narration).
-// Phase 4 (69-124):  punchline — three meters fill (69-84), framework chips (~85-99),
+// Phase 4 (69-124):  punchline - three meters fill (69-84), framework chips (~85-99),
 //                    "smartest stop is progress" caption (~99), holds through close.
 
 const METERS = [
@@ -32,7 +32,7 @@ export const Scene3RunawayLoop: React.FC = () => {
   const { fps } = useVideoConfig();
   const S = fps;
 
-  // ---- phase boundaries (frames) — re-paced to the ~124.7s narration (s03) ----
+  // ---- phase boundaries (frames) - re-paced to the ~124.7s narration (s03) ----
   const tIntro = 6 * S;
   const tBlow = 30 * S;       // late-naive blowup: panic pulse + "NO STOP" status
   const tNaiveEnd = 35 * S;
@@ -123,7 +123,7 @@ export const Scene3RunawayLoop: React.FC = () => {
           <div style={{ opacity: panelOpacity }}>
             {/* mode badge + readouts row */}
             <div style={{
-              position: "absolute", top: 210, left: 0, right: 0,
+              position: "absolute", top: 236, left: 0, right: 0,
               display: "flex", justifyContent: "center", alignItems: "center", gap: 28,
             }}>
               <div style={{
@@ -137,7 +137,7 @@ export const Scene3RunawayLoop: React.FC = () => {
 
             {/* big readouts: iterations · cost · changes */}
             <div style={{
-              position: "absolute", top: 300, left: 0, right: 0,
+              position: "absolute", top: 320, left: 0, right: 0,
               display: "flex", justifyContent: "center", gap: 100, fontFamily: theme.fontMono,
             }}>
               {[
@@ -184,11 +184,11 @@ export const Scene3RunawayLoop: React.FC = () => {
 
             {/* status line under meters */}
             <div style={{
-              position: "absolute", top: 655, width: "100%", textAlign: "center", fontFamily: theme.fontMono,
+              position: "absolute", top: 680, width: "100%", textAlign: "center", fontFamily: theme.fontMono,
             }}>
               {!guarded ? (
                 <span style={{ fontSize: 38, fontWeight: 800, color: theme.accentRed, opacity: 0.6 + panic * 0.4 }}>
-                  {frame > tBlow ? "✗ NO STOP — still running, still billing" : "burning tokens in circles…"}
+                  {frame > tBlow ? "✗ NO STOP - still running, still billing" : "burning tokens in circles…"}
                 </span>
               ) : (
                 <span style={{ fontSize: 34, color: theme.textMuted }}>
@@ -200,7 +200,7 @@ export const Scene3RunawayLoop: React.FC = () => {
             {/* guarded: guard chips + halt banner */}
             {guarded && (
               <>
-                <div style={{ position: "absolute", top: 720, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 22 }}>
+                <div style={{ position: "absolute", top: 742, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 22 }}>
                   {GUARDS.map((g) => {
                     const lit = g.fires && frame >= g.fireAt * S;
                     const c = lit ? theme.accentGreen : theme.textDim;
@@ -217,14 +217,14 @@ export const Scene3RunawayLoop: React.FC = () => {
                 </div>
                 {halted && (
                   <div style={{
-                    position: "absolute", top: 795, left: "50%",
+                    position: "absolute", top: 832, left: "50%",
                     transform: `translateX(-50%) scale(${0.9 + stallPop * 0.1})`, opacity: stallPop,
-                    padding: "22px 44px", borderRadius: 16, textAlign: "center",
+                    padding: "12px 44px", borderRadius: 16, textAlign: "center",
                     background: `linear-gradient(160deg, ${theme.accentGreen}1f, rgba(10,18,12,0.95))`,
                     border: `2px solid ${theme.accentGreen}`, boxShadow: `0 0 34px ${theme.accentGreen}55`,
                     fontFamily: theme.fontMono, fontSize: 33, fontWeight: 800, color: theme.accentGreen, letterSpacing: 1,
                   }}>
-                    ⏸ HALTED at iter 3 — asked the human
+                    ⏸ HALTED at iter 3 - asked the human
                   </div>
                 )}
               </>
@@ -241,7 +241,7 @@ export const Scene3RunawayLoop: React.FC = () => {
               transform: `translateY(-50%) scale(${0.9 + wipePop * 0.1})`, opacity: wipeBell,
               fontFamily: theme.fontSans, fontSize: 52, fontWeight: 800, color: theme.text,
             }}>
-              ↺ Replay — now <span style={{ color: theme.accentGreen }}>WITH guards</span>
+              ↺ Replay - now <span style={{ color: theme.accentGreen }}>WITH guards</span>
             </div>
           </AbsoluteFill>
         )}
@@ -286,7 +286,7 @@ export const Scene3RunawayLoop: React.FC = () => {
               position: "absolute", top: 780, width: "100%", textAlign: "center",
               opacity: punchCapT, fontFamily: theme.fontSans, fontSize: 40, fontWeight: 700, color: theme.text, padding: "0 160px",
             }}>
-              The smartest stop isn't a counter — <span style={{ color: theme.accentGreen }}>it's progress.</span>
+              The smartest stop isn't a counter - <span style={{ color: theme.accentGreen }}>it's progress.</span>
             </div>
           </AbsoluteFill>
         )}

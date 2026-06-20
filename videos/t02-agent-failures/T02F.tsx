@@ -9,7 +9,6 @@ import { Scene4ContextRot } from "./scenes/Scene4ContextRot";
 import { Scene5ToolSprawl } from "./scenes/Scene5ToolSprawl";
 import { Scene6OverPermission } from "./scenes/Scene6OverPermission";
 import { Scene7Unifying } from "./scenes/Scene7Unifying";
-import { Scene8Recap } from "./scenes/Scene8Recap";
 import { Scene9CTA } from "./scenes/Scene9CTA";
 
 // Trending 02 (agent series, part 2) — 4 Ways Your AI Agent Fails (And How to
@@ -31,7 +30,6 @@ export const T02F: React.FC = () => {
     { C: Scene5ToolSprawl, duration: TIMINGS.scene5.duration, audio: "s05.m4a" },
     { C: Scene6OverPermission, duration: TIMINGS.scene6.duration, audio: "s06.m4a" },
     { C: Scene7Unifying, duration: TIMINGS.scene7.duration, audio: "s07.m4a" },
-    { C: Scene8Recap, duration: TIMINGS.scene8.duration, audio: "s08.m4a" },
     { C: Scene9CTA, duration: TIMINGS.scene9.duration, audio: "s09.m4a" },
   ];
 

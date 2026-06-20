@@ -47,13 +47,13 @@ export const Scene1Hook: React.FC = () => {
   });
   const punchPop = pop(frame, fps, climbEnd, { damping: 14 });
 
-  // kicker thesis line — VO "not a model problem ... the harness failed to prevent" (~15.5s)
+  // kicker thesis line - VO "not a model problem ... the harness failed to prevent" (~15.5s)
   const kickT = interpolate(frame, [fps * 15.5, fps * 16.5], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // tease line — VO "four ways a harness can go wrong" (~23.3s)
+  // tease line - VO "four ways a harness can go wrong" (~23.3s)
   const teaseT = interpolate(frame, [fps * 23.3, fps * 24.3], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",

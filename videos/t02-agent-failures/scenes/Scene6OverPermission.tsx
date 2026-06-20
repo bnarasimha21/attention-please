@@ -35,10 +35,12 @@ const LANES = [
 ] as const;
 
 // Lethal-trifecta circles: private data, untrusted content, exfiltration (cut).
+// Circles are 220x220; bottom circle ends at top 190 + 220 = 410, clear of the
+// caption line below the 420-tall container.
 const VENN = [
-  { label: "private\ndata", c: theme.accent, left: 40, top: 20, sev: false },
-  { label: "untrusted\ncontent", c: amber, left: 280, top: 20, sev: false },
-  { label: "exfiltration", c: red, left: 160, top: 230, sev: true },
+  { label: "private\ndata", c: theme.accent, left: 30, top: 0, sev: false },
+  { label: "untrusted\ncontent", c: amber, left: 240, top: 0, sev: false },
+  { label: "exfiltration", c: red, left: 135, top: 190, sev: true },
 ];
 
 export const Scene6OverPermission: React.FC = () => {
@@ -59,14 +61,15 @@ export const Scene6OverPermission: React.FC = () => {
   const g1 = seg(30.8, 78.2, 0.35);  // three-tier gate (VO: read 31-38, write 38-47, destroy 47-59, irreversible test 59-77)
   const bridge = seg(78.05, 86.0, 0.35); // "two more layers" beat (VO "tiers only decide… two more layers" 77.6-85.7)
   // Offset crosses: the incoming phase starts fading IN ~0.15s before the outgoing
-  // finishes fading OUT, with 0.35s fades — so the overlap happens only at LOW
+  // finishes fading OUT, with 0.35s fades - so the overlap happens only at LOW
   // opacity (both ≤~0.4), no frame is empty, and the co-located captions never both
   // sit at full opacity (which is what read as a jumble).
   const g2 = seg(85.85, 106.4, 0.35); // sandbox ("sandbox it" @86; 84% @96-102)
   const g3 = seg(106.25, 135.4, 0.35); // trifecta ("lethal trifecta" @112; "break one leg" @126-135)
-  const g4 = seg(135.25, 146.6, 0.35); // undo ("keep an undo, plan then apply" @135.6-147)
-  const punchT = interpolate(frame, [fps * 146.45, fps * 147.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const punchPop = pop(frame, fps, fps * 146.45, { damping: 13, stiffness: 130 });
+  const g4 = seg(135.25, 144.5, 0.35); // undo ("keep an undo, plan then apply" @135.6-147); fades out ~144.15-144.5s
+  // punchline: deliberate finale - fades IN ~144.35s (offset-cross with g4's fade-out) and HOLDS to scene end (~148.3s)
+  const punchT = interpolate(frame, [fps * 144.35, fps * 145.0], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const punchPop = pop(frame, fps, fps * 144.35, { damping: 13, stiffness: 130 });
 
   // catastrophe overlay inside the naive phase (after the 3 lethal actions stream in)
   const boom = interpolate(frame, [fps * 24.5, fps * 25.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -90,7 +93,7 @@ export const Scene6OverPermission: React.FC = () => {
       <Sfx name="block" at={fps * 127.0} volume={0.55} />
       <Sfx name="whoosh" at={fps * 135.0} volume={0.35} />
       <Sfx name="success" at={fps * 140.0} volume={0.45} />
-      <Sfx name="stinger" at={fps * 146.7} volume={0.45} />
+      <Sfx name="stinger" at={fps * 144.6} volume={0.45} />
 
       <CameraRig>
         {/* persistent heading */}
@@ -117,7 +120,7 @@ export const Scene6OverPermission: React.FC = () => {
           The most dangerous failure is the <span style={{ color: red, fontWeight: 700 }}>quiet</span> one.
         </div>
 
-        {/* ============================ PHASE 1 — NAIVE CATASTROPHE ============================ */}
+        {/* ============================ PHASE 1 - NAIVE CATASTROPHE ============================ */}
         <div style={{ position: "absolute", inset: 0, opacity: naive, transform: `translateX(${shake}px)` }}>
           {/* auto-approve banner */}
           <div
@@ -224,7 +227,7 @@ export const Scene6OverPermission: React.FC = () => {
           </div>
         </div>
 
-        {/* ============================ GUARD 1 — THREE-TIER GATE ============================ */}
+        {/* ============================ GUARD 1 - THREE-TIER GATE ============================ */}
         <GuardFrame opacity={g1} title="1 · The three-tier gate" titleColor={red}>
           <div style={{ display: "flex", flexDirection: "column", gap: 38, marginTop: 8 }}>
             {LANES.map((lane, i) => {
@@ -269,10 +272,10 @@ export const Scene6OverPermission: React.FC = () => {
               );
             })}
           </div>
-          <Caption>Destructive calls hit a <span style={{ color: red, fontWeight: 800 }}>wall</span> — not your database.</Caption>
+          <Caption>Destructive calls hit a <span style={{ color: red, fontWeight: 800 }}>wall</span> - not your database.</Caption>
         </GuardFrame>
 
-        {/* ============================ BRIDGE — "two more layers" (VO 77.6-85.7) ============================ */}
+        {/* ============================ BRIDGE - "two more layers" (VO 77.6-85.7) ============================ */}
         <div
           style={{
             position: "absolute",
@@ -320,7 +323,7 @@ export const Scene6OverPermission: React.FC = () => {
           </div>
         </div>
 
-        {/* ============================ GUARD 2 — SANDBOX ============================ */}
+        {/* ============================ GUARD 2 - SANDBOX ============================ */}
         <GuardFrame opacity={g2} title="2 · Sandbox the agent" titleColor={red}>
           <div style={{ position: "relative", width: 820, height: 440, margin: "0 auto", borderRadius: 24, border: `2px dashed ${red}88`, background: "rgba(0,0,0,0.35)", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: 20, left: 28, fontFamily: theme.fontMono, fontSize: 22, color: theme.textMuted, letterSpacing: 2 }}>SANDBOX</div>
@@ -347,30 +350,30 @@ export const Scene6OverPermission: React.FC = () => {
           <Caption>Even an allowed action <span style={{ color: green, fontWeight: 800 }}>can't escape the box.</span></Caption>
         </GuardFrame>
 
-        {/* ============================ GUARD 3 — LETHAL TRIFECTA ============================ */}
-        <GuardFrame opacity={g3} title="3 · The lethal trifecta" titleColor={red} subtitle="— Simon Willison">
+        {/* ============================ GUARD 3 - LETHAL TRIFECTA ============================ */}
+        <GuardFrame opacity={g3} title="3 · The lethal trifecta" titleColor={red}>
           {(() => {
             const flash = interpolate(frame, [fps * 115.5, fps * 117.0, fps * 118.0], [0, 1, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             const sever = interpolate(frame, [fps * 127.0, fps * 130.0], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             return (
               <>
-                <div style={{ position: "relative", width: 560, height: 500, margin: "0 auto" }}>
+                <div style={{ position: "relative", width: 490, height: 420, margin: "0 auto" }}>
                   {/* center game-over glow */}
-                  <div style={{ position: "absolute", left: 290, top: 220, width: 116, height: 116, borderRadius: "50%", transform: "translate(-50%,-50%)", background: red, opacity: flash * (1 - sever) * 0.9, boxShadow: `0 0 ${44 + flash * 60}px ${red}` }} />
+                  <div style={{ position: "absolute", left: 245, top: 190, width: 100, height: 100, borderRadius: "50%", transform: "translate(-50%,-50%)", background: red, opacity: flash * (1 - sever) * 0.9, boxShadow: `0 0 ${44 + flash * 60}px ${red}` }} />
                   {VENN.map((v, i) => {
                     const cut = v.sev ? sever : 0;
                     return (
-                      <div key={i} style={{ position: "absolute", left: v.left, top: v.top, width: 260, height: 260, borderRadius: "50%", border: `3px solid ${v.c}`, background: `${v.c}22`, mixBlendMode: "screen", transform: `translate(${cut * 260}px, ${cut * -70}px)`, opacity: 1 - cut * 0.85 }} />
+                      <div key={i} style={{ position: "absolute", left: v.left, top: v.top, width: 220, height: 220, borderRadius: "50%", border: `3px solid ${v.c}`, background: `${v.c}22`, mixBlendMode: "screen", transform: `translate(${cut * 260}px, ${cut * -70}px)`, opacity: 1 - cut * 0.85 }} />
                     );
                   })}
                   {VENN.map((v, i) => {
                     const cut = v.sev ? sever : 0;
                     return (
-                      <div key={`l${i}`} style={{ position: "absolute", left: v.left + 130, top: v.top + 130, width: 200, transform: `translate(calc(-50% + ${cut * 260}px), calc(-50% + ${cut * -70}px))`, textAlign: "center", whiteSpace: "pre-line", fontFamily: theme.fontMono, fontSize: 26, fontWeight: 700, color: v.c, opacity: 1 - cut * 0.85, lineHeight: 1.2 }}>{v.label}</div>
+                      <div key={`l${i}`} style={{ position: "absolute", left: v.left + 110, top: v.top + 110, width: 200, transform: `translate(calc(-50% + ${cut * 260}px), calc(-50% + ${cut * -70}px))`, textAlign: "center", whiteSpace: "pre-line", fontFamily: theme.fontMono, fontSize: 26, fontWeight: 700, color: v.c, opacity: 1 - cut * 0.85, lineHeight: 1.2 }}>{v.label}</div>
                     );
                   })}
                 </div>
-                <div style={{ marginTop: 18, textAlign: "center", fontFamily: theme.fontSans, fontSize: 32, fontWeight: 700, color: theme.text }}>
+                <div style={{ marginTop: 44, textAlign: "center", fontFamily: theme.fontSans, fontSize: 32, fontWeight: 700, color: theme.text }}>
                   All three <span style={{ color: red }}>{"→"} game over.</span>{" "}
                   <span style={{ color: green, opacity: sever }}>Exfil cut {"→"} safe.</span>
                 </div>
@@ -380,7 +383,7 @@ export const Scene6OverPermission: React.FC = () => {
           <Caption>Break <span style={{ color: green, fontWeight: 800 }}>one leg</span> and the hijack falls apart.</Caption>
         </GuardFrame>
 
-        {/* ============================ GUARD 4 — KEEP AN UNDO ============================ */}
+        {/* ============================ GUARD 4 - KEEP AN UNDO ============================ */}
         <GuardFrame opacity={g4} title="4 · Keep an undo" titleColor={green}>
           <div style={{ width: 780, margin: "0 auto", padding: "30px 36px", borderRadius: 18, border: `1px solid ${theme.border}`, background: "rgba(0,0,0,0.4)", fontFamily: theme.fontMono, fontSize: 30, textAlign: "left", lineHeight: 1.7 }}>
             <div style={{ color: green }}>+ apply reviewed change</div>
@@ -399,21 +402,26 @@ export const Scene6OverPermission: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            bottom: 205,
-            width: "100%",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
             textAlign: "center",
             opacity: punchT,
             transform: `translateY(${(1 - punchPop) * 18}px)`,
             fontFamily: theme.fontSans,
-            fontSize: 38,
+            fontSize: 60,
             fontWeight: 800,
+            lineHeight: 1.22,
             color: theme.text,
             zIndex: 40,
-            padding: "0 120px",
+            padding: "0 80px",
           }}
         >
-          <span style={{ color: red }}>Contain the blast radius.</span>{" "}
-          <span style={{ color: amber }}>Break the trifecta.</span>{" "}
+          <span style={{ color: red }}>Contain the blast radius.</span>
+          <span style={{ color: amber }}>Break the trifecta.</span>
           <span style={{ color: green }}>Keep an undo.</span>
         </div>
       </CameraRig>

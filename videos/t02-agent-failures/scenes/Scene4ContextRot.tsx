@@ -3,12 +3,12 @@ import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, SceneHeading, gradientText, CameraRig, pop, EASE_OUT } from "../../../remotion-src/visuals";
 import { Sfx } from "../../../remotion-src/sfx";
 
-// Scene 4 — Failure 2: Context Rot (break → fix demonstration)
+// Scene 4 - Failure 2: Context Rot (break → fix demonstration)
 // HERO: a persistent MODEL ACCURACY meter.
 //  - NAIVE (~4–50s): context fills with junk turn by turn (tokens → ~146K) and
 //    the accuracy meter SINKS 95% → ~50%. "junk in → IQ down."
 //  - FIX (~56–101s): four fixes apply one by one, each visibly RECOVERING the
-//    meter — compaction, sub-agent isolation (30K→2K), memory file, reorder to
+//    meter - compaction, sub-agent isolation (30K→2K), memory file, reorder to
 //    the edges (lost-in-the-middle). Meter climbs back to ~91%.
 //  - Punchline (~110s): treat context like RAM, not a hard drive.
 // Re-paced to the s04 narration clip (~121.5s / 3645 frames).
@@ -64,12 +64,16 @@ export const Scene4ContextRot: React.FC = () => {
   // naive → fix handoff: the naive stack fully fades OUT before the fix layer
   // fades IN (no ghosting/overlap), around "the fix is context engineering" (~47.9s).
   const naiveOp = interpolate(frame, [fps * 46.5, fps * 47.8], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT });
-  const fixOp = interpolate(frame, [fps * 48.2, fps * 49.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT });
+  const fixIn = interpolate(frame, [fps * 48.2, fps * 49.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT });
+  // fix layer fades OUT as the punchline hero enters (~105.5–107s), so nothing
+  // sits behind the centered punchline.
+  const fixOut = interpolate(frame, [fps * 105.5, fps * 107], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const fixOp = fixIn * fixOut;
 
-  // rows land turn by turn (naive) — synced to the junk piling up (~4–37s)
+  // rows land turn by turn (naive) - synced to the junk piling up (~4–37s)
   const rowStart = (i: number) => fps * 4 + i * fps * 5.5;
 
-  // fix landing frames — synced to each fix's narration:
+  // fix landing frames - synced to each fix's narration:
   // compaction ~59s, sub-agent ~74s, memory file ~84s, lost-in-the-middle ~92s
   const F = [fps * 59, fps * 74, fps * 84, fps * 92];
 
@@ -126,8 +130,8 @@ export const Scene4ContextRot: React.FC = () => {
           Context <span style={gradientText("#fcd34d", warm)}>Rot</span>
         </SceneHeading>
 
-        {/* ===== HERO meter (persists across naive + fix) ===== */}
-        <div style={{ position: "absolute", top: 226, left: 0, right: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+        {/* ===== HERO meter (persists across naive + fix; clears for punchline) ===== */}
+        <div style={{ position: "absolute", top: 226, left: 0, right: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 14, opacity: fixOut }}>
           <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
             <span style={{ fontFamily: theme.fontMono, fontSize: 28, letterSpacing: 2, color: theme.textMuted, textTransform: "uppercase" }}>
               Model accuracy
@@ -187,15 +191,15 @@ export const Scene4ContextRot: React.FC = () => {
         </div>
 
         {/* fix sub-heading */}
-        <div style={{ position: "absolute", top: 356, width: "100%", textAlign: "center", opacity: fixOp, fontFamily: theme.fontSans, fontSize: 34, fontWeight: 700, color: theme.text }}>
-          Get the junk <span style={{ color: green, fontWeight: 800 }}>out of the window</span> — watch the IQ come back.
+        <div style={{ position: "absolute", top: 378, width: "100%", textAlign: "center", opacity: fixOp, fontFamily: theme.fontSans, fontSize: 34, fontWeight: 700, color: theme.text }}>
+          Get the junk <span style={{ color: green, fontWeight: 800 }}>out of the window</span> - watch the IQ come back.
         </div>
 
         {/* ===== FIX cards row ===== */}
         <div
           style={{
             position: "absolute",
-            top: 424,
+            top: 449,
             left: 0,
             right: 0,
             display: "flex",
@@ -321,24 +325,32 @@ export const Scene4ContextRot: React.FC = () => {
           })}
         </div>
 
-        {/* punchline */}
+        {/* punchline - big centered hero, alone */}
         <div
           style={{
             position: "absolute",
-            bottom: 200,
-            width: "100%",
+            top: 380,
+            height: 240,
+            left: 0,
+            right: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 28,
             textAlign: "center",
             opacity: punchT,
-            transform: `translateY(${(1 - punchPop) * 16}px)`,
-            fontFamily: theme.fontSans,
-            fontSize: 34,
-            fontWeight: 600,
-            color: theme.text,
+            transform: `translateY(${(1 - punchPop) * 20}px)`,
             padding: "0 120px",
           }}
         >
-          Treat context like <span style={{ color: green, fontWeight: 800 }}>RAM</span>, not a{" "}
-          <span style={{ color: red, fontWeight: 800 }}>hard drive</span> — keep only what's needed now.
+          <div style={{ fontFamily: theme.fontSans, fontSize: 80, fontWeight: 800, color: theme.text, lineHeight: 1.1 }}>
+            Treat context like <span style={{ color: green, fontWeight: 800 }}>RAM</span>,<br />
+            not a <span style={{ color: red, fontWeight: 800 }}>hard drive</span>.
+          </div>
+          <div style={{ fontFamily: theme.fontSans, fontSize: 40, fontWeight: 600, color: theme.textMuted }}>
+            Keep only what's needed now.
+          </div>
         </div>
       </CameraRig>
     </AbsoluteFill>

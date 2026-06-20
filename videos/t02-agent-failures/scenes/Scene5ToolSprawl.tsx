@@ -58,7 +58,7 @@ export const Scene5ToolSprawl: React.FC = () => {
   const warm = theme.accentWarm;
   const red = theme.accentRed;
 
-  // ---- phase clock (seconds) — re-paced to the 124.9s narration clip ----
+  // ---- phase clock (seconds) - re-paced to the 124.9s narration clip ----
   // NAIVE (crowd + long hesitation) ~1->57s, FIX (search->pick->counters->code) ~60->108s,
   // punchline holds 116->end. Entrances stay snappy; the extra time goes to dwell.
   // Re-timed to the narration transcript (captions/s05): hesitation+overhead to
@@ -80,13 +80,31 @@ export const Scene5ToolSprawl: React.FC = () => {
     extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT,
   });
 
-  // cursor bounces between chip 0 and chip 1 (the two look-alike read tools)
-  const bounce = (Math.sin((frame - cursorStart) / 9) + 1) / 2; // 0..1 (slower over the long hesitation)
-  const p0 = cellPos(0);
-  const p1 = cellPos(1);
+  // cursor HESITATES across several look-alike tools (the indecision: "which of
+  // all these do I pick?"). It wanders among 5 crowded read/get-file cells, then
+  // commits to the wrong look-alike (idx 4, "open_file") at the wrong-pick beat.
+  const HESITATE = [0, 2, 1, 3, 4]; // cells the "?" visits, in order; ends on the over-pick
+  const WRONG_IDX = 4;              // the wrong look-alike it finally lands on
   const cursorOn = frame > cursorStart && frame < collapseStart;
-  const naiveCx = interpolate(bounce, [0, 1], [p0.x + CELL_W * 0.5, p1.x + CELL_W * 0.5]);
-  const naiveCy = p0.y + CELL_H * 0.5;
+  // step through the list ~every 1.6s; ease between targets so motion stays smooth
+  const HOP = fps * 1.6;
+  const hopRaw = (frame - cursorStart) / HOP;          // fractional hop progress
+  const settleHop = (wrongPick - cursorStart) / HOP;   // hop index where it locks on the wrong pick
+  const hop = Math.max(0, Math.min(hopRaw, settleHop)); // clamp >=0 (avoid negative index before cursorStart); freeze on wrong cell from wrongPick on
+  const segIdx = Math.floor(hop);
+  const fromCell = frame >= wrongPick ? WRONG_IDX : HESITATE[segIdx % HESITATE.length];
+  const toCell = frame >= wrongPick ? WRONG_IDX : HESITATE[(segIdx + 1) % HESITATE.length];
+  // ease-in-out the fractional part for a "wandering, can't-commit" feel
+  const tRaw = hop - segIdx;
+  const segT = tRaw < 0.5 ? 2 * tRaw * tRaw : 1 - Math.pow(-2 * tRaw + 2, 2) / 2;
+  const pa = cellPos(fromCell);
+  const pb = cellPos(toCell);
+  const p0 = cellPos(0); // (kept for downstream layout refs)
+  const naiveCx = interpolate(segT, [0, 1], [pa.x + CELL_W * 0.5, pb.x + CELL_W * 0.5]);
+  const naiveCyRaw = interpolate(segT, [0, 1], [pa.y + CELL_H * 0.5, pb.y + CELL_H * 0.5]);
+  const naiveCy = naiveCyRaw;
+  // current top-of-cell for the ring/"?" (follows whichever row the "?" is over)
+  const ringTop = interpolate(segT, [0, 1], [pa.y, pb.y]);
   const wrongFlash = interpolate(frame, [wrongPick, wrongPick + 6, wrongPick + fps * 0.9], [0, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // deciding timer climbs, freezes at the wrong pick (scaled so the long
@@ -137,15 +155,17 @@ export const Scene5ToolSprawl: React.FC = () => {
           More tools feels like more power. <span style={{ color: red, fontWeight: 800 }}>It's not.</span>
         </div>
 
-        {/* ================= NAIVE — crowded vague tools + hesitating cursor ================= */}
+        {/* ================= NAIVE - crowded vague tools + hesitating cursor ================= */}
         <div style={{ position: "absolute", top: 312, left: "50%", transform: `translateX(-50%) scale(${interpolate(crowdExit, [0, 1], [0.72, 1])})`, transformOrigin: "top center", width: GRID_W, opacity: crowdExit }}>
           <div style={{ position: "relative", width: GRID_W, height: 5 * (CELL_H + GAP_Y) }}>
             {VAGUE.map((name, i) => {
               const { x, y } = cellPos(i);
               const s = pop(frame, fps, crowdStart + i * 0.9, { damping: 13, stiffness: 160 });
-              const isPair = i === 0 || i === 1;
-              const pairGlow = cursorOn && isPair ? 0.5 + 0.5 * Math.sin((frame - cursorStart) / 9 + (i === 0 ? 0 : Math.PI)) : 0;
-              const flashThis = isPair ? wrongFlash : 0;
+              const isPair = HESITATE.includes(i);
+              // glow the cell the "?" is currently over / heading toward
+              const isActive = cursorOn && (i === fromCell || i === toCell);
+              const pairGlow = isActive ? 0.5 + 0.5 * Math.sin((frame - cursorStart) / 5) : 0;
+              const flashThis = i === WRONG_IDX ? wrongFlash : 0;
               return (
                 <div key={name} style={{
                   position: "absolute", left: x, top: y, width: CELL_W, height: CELL_H,
@@ -163,11 +183,11 @@ export const Scene5ToolSprawl: React.FC = () => {
               );
             })}
 
-            {/* "which one?" ring bouncing between the two read tools */}
+            {/* "which one?" ring wandering across several look-alike tools */}
             {cursorOn && (
               <>
-                <div style={{ position: "absolute", left: naiveCx - CELL_W / 2 - 4, top: p0.y - 4, width: CELL_W + 8, height: CELL_H + 8, borderRadius: 12, border: `2px solid ${warm}`, boxShadow: `0 0 24px ${warm}aa` }} />
-                <div style={{ position: "absolute", left: naiveCx - 11, top: p0.y - 54, fontFamily: theme.fontMono, fontSize: 40, fontWeight: 800, color: warm }}>?</div>
+                <div style={{ position: "absolute", left: naiveCx - CELL_W / 2 - 4, top: ringTop - 4, width: CELL_W + 8, height: CELL_H + 8, borderRadius: 12, border: `2px solid ${warm}`, boxShadow: `0 0 24px ${warm}aa` }} />
+                <div style={{ position: "absolute", left: naiveCx - 11, top: ringTop - 54, fontFamily: theme.fontMono, fontSize: 40, fontWeight: 800, color: warm }}>?</div>
                 <Cursor x={naiveCx + 8} y={naiveCy + 6} tint={wrongFlash > 0.1 ? red : "#ffffff"} />
               </>
             )}
@@ -183,17 +203,17 @@ export const Scene5ToolSprawl: React.FC = () => {
         {/* sprawl overhead + wrong-pick verdict */}
         <div style={{ position: "absolute", bottom: 210, width: "100%", textAlign: "center", opacity: interpolate(frame, [fps * 3, fps * 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) * crowdExit }}>
           <div style={{ fontFamily: theme.fontMono, fontSize: 26, color: red, fontWeight: 700 }}>
-            50 tools ≈ 55K tokens of schema — before the model writes a char
+            50 tools ≈ 55K tokens of schema - before the model writes a char
           </div>
           <div style={{ fontFamily: theme.fontSans, fontSize: 28, fontWeight: 700, color: red, marginTop: 12, opacity: wrongFlash > 0 || frame > wrongPick ? 1 : 0 }}>
             ✗ picked the wrong look-alike.
           </div>
         </div>
 
-        {/* ================= FIX — load on demand, instant pick ================= */}
+        {/* ================= FIX - load on demand, instant pick ================= */}
         <div style={{ position: "absolute", inset: 0, opacity: fixIn, pointerEvents: "none" }}>
-          <div style={{ position: "absolute", top: 198, width: "100%", textAlign: "center", fontFamily: theme.fontSans, fontSize: 32, fontWeight: 700, color: theme.text }}>
-            Fewer & sharper — <span style={gradientText("#c7d2fe", theme.accent)}>better still, loaded on demand</span>
+          <div style={{ position: "absolute", top: 216, width: "100%", textAlign: "center", fontFamily: theme.fontSans, fontSize: 32, fontWeight: 700, color: theme.text }}>
+            Fewer & sharper - <span style={gradientText("#c7d2fe", theme.accent)}>better still, loaded on demand</span>
           </div>
 
           {/* catalogue -> tool_search -> 3-5 lit tools */}
@@ -231,31 +251,32 @@ export const Scene5ToolSprawl: React.FC = () => {
             </div>
           </div>
 
-          {/* hero counters */}
-          <div style={{ position: "absolute", top: 540, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 64 }}>
+          {/* hero counters - compact so number + label + was-line fit snugly inside */}
+          <div style={{ position: "absolute", top: 522, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 64 }}>
             {[
               { val: `${Math.round(tokenVal)}K`, label: "schema tokens up-front", was: "was 55K" },
               { val: `${Math.round(accVal)}%`, label: "tool-selection accuracy", was: "was 49%" },
             ].map((c) => (
-              <div key={c.label} style={{ width: 440, padding: "26px 32px", borderRadius: 22, textAlign: "center", background: `linear-gradient(160deg, ${green}14, rgba(12,16,14,0.92))`, border: `1px solid ${green}55`, boxShadow: "0 18px 50px rgba(0,0,0,0.5)" }}>
-                <div style={{ fontFamily: theme.fontMono, fontSize: 84, fontWeight: 800, color: green }}>{c.val}</div>
-                <div style={{ fontFamily: theme.fontSans, fontSize: 27, color: theme.text, marginTop: 6 }}>{c.label}</div>
-                <div style={{ fontFamily: theme.fontMono, fontSize: 23, color: theme.textDim, marginTop: 4 }}>{c.was}</div>
+              <div key={c.label} style={{ width: 420, padding: "16px 28px 18px", borderRadius: 20, textAlign: "center", background: `linear-gradient(160deg, ${green}14, rgba(12,16,14,0.92))`, border: `1px solid ${green}55`, boxShadow: "0 16px 44px rgba(0,0,0,0.5)" }}>
+                <div style={{ fontFamily: theme.fontMono, fontSize: 70, fontWeight: 800, color: green, lineHeight: 1 }}>{c.val}</div>
+                <div style={{ fontFamily: theme.fontSans, fontSize: 25, color: theme.text, marginTop: 8 }}>{c.label}</div>
+                <div style={{ fontFamily: theme.fontMono, fontSize: 21, color: theme.textDim, marginTop: 4 }}>{c.was}</div>
               </div>
             ))}
           </div>
-          <div style={{ position: "absolute", top: 736, width: "100%", textAlign: "center", fontFamily: theme.fontMono, fontSize: 22, color: theme.textDim }}>
+          {/* boxes span ~y522 -> ~677; footnote sits clearly below with a gap */}
+          <div style={{ position: "absolute", top: 700, width: "100%", textAlign: "center", fontFamily: theme.fontMono, fontSize: 22, color: theme.textDim }}>
             * Anthropic internal eval (Tool Search Tool)
           </div>
 
-          {/* code mode chip */}
-          <div style={{ position: "absolute", bottom: 248, width: "100%", display: "flex", justifyContent: "center", opacity: codePop }}>
-            <div style={{ transform: `scale(${0.7 + codePop * 0.3})`, display: "flex", alignItems: "center", gap: 18, padding: "18px 30px", borderRadius: 16, background: `linear-gradient(160deg, ${theme.accent}1f, rgba(17,17,22,0.95))`, border: `1px solid ${theme.accent}88`, boxShadow: `0 0 28px ${theme.accent}44`, fontFamily: theme.fontMono, fontSize: 26, fontWeight: 700, color: theme.text }}>
-              <span>{"</>"} code mode — call tools in code, filter before context</span>
+          {/* code mode chip - own row, gaps above and below */}
+          <div style={{ position: "absolute", top: 748, width: "100%", display: "flex", justifyContent: "center", opacity: codePop }}>
+            <div style={{ transform: `scale(${0.7 + codePop * 0.3})`, display: "flex", alignItems: "center", gap: 18, padding: "16px 28px", borderRadius: 16, background: `linear-gradient(160deg, ${theme.accent}1f, rgba(17,17,22,0.95))`, border: `1px solid ${theme.accent}88`, boxShadow: `0 0 28px ${theme.accent}44`, fontFamily: theme.fontMono, fontSize: 26, fontWeight: 700, color: theme.text }}>
+              <span>{"</>"} code mode - call tools in code, filter before context</span>
               <span style={{ padding: "8px 16px", borderRadius: 999, background: green, color: theme.bg, fontWeight: 800, fontSize: 24 }}>−37% tokens</span>
             </div>
           </div>
-          <div style={{ position: "absolute", bottom: 192, width: "100%", textAlign: "center", opacity: capT * capOut, fontFamily: theme.fontSans, fontSize: 28, fontWeight: 700, color: theme.text }}>
+          <div style={{ position: "absolute", top: 838, width: "100%", textAlign: "center", opacity: capT * capOut, fontFamily: theme.fontSans, fontSize: 28, fontWeight: 700, color: theme.text }}>
             Fixes tool sprawl <span style={{ color: green }}>and</span> context rot.
           </div>
         </div>
