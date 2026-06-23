@@ -1,8 +1,8 @@
 # Trending 03, Agentic Retrieval: how AI agents find the RIGHT context
 
 **Title:** How AI Agents Find the RIGHT Information (Agentic Retrieval Explained)
-**Duration target:** ~7:00 final (after the global speed-up). NOTE: current draft is ~1,530 narration words ≈ ~9–10 min at 145–155 wpm — it runs LONG and needs a ~300-word trim (Scene 4 is the most overloaded) to hit target.
-**Word count:** ~1,530 words (current draft; ~300 over target)
+**Duration target:** ~7:00 final. Trimmed draft is ~1,270 narration words ≈ ~7:30–8:00 at 160–165 wpm; the final global speed-up (skill Step 11) pulls it toward ~7:00.
+**Word count:** ~1,270 words (trimmed from ~1,530)
 **NOTE on timestamps:** the `[m:ss–m:ss]` ranges in each scene header are PRE-RECORD ESTIMATES only. Actual durations get re-derived from the recorded audio (skill Step 7) — do not size animations off these literal numbers.
 **Topic:** How agents pull the *right* context into a tiny window on demand — classic RAG, why semantic search alone isn't enough (hybrid), the upgrade to agentic / multi-step retrieval, just-in-time retrieval as a tool, memory retrieval, and the RAG-vs-long-context verdict.
 **Audience:** **Intermediate-to-advanced** developers who've seen t01 (the harness) and t02 (the four failure modes). Assume they already know basic RAG (embed → retrieve → generate) and what a context window is — do NOT teach RAG 101. Go straight to the advanced techniques that separate a toy retriever from a production one. This video is the *opposite* skill to t02's "context rot": getting the RIGHT stuff IN. Net-new vs t01/t02 — t02 only covered *tool* selection; this is document/knowledge/memory retrieval.
@@ -24,115 +24,109 @@
 ### SCENE 1 — Hook [0:00–0:33]
 [Friendly, energetic, pull them in fast]
 
-Okay so here's a problem that sounds simple, but is actually one of the hardest things in AI right now.
+Okay, here's a problem that sounds simple but is one of the hardest things in AI right now.
 
-You've got an agent. And you point it at your entire codebase, or your company's whole knowledge base. Millions of tokens. Way, way more than fits in its context window.
+You point an agent at your whole codebase, or your company's entire knowledge base. Millions of tokens, way more than fits in its context window. Then you ask one question, and the answer lives in maybe three sentences, buried somewhere in all of that.
 
-Now you ask it one question. And the answer lives in like three sentences, buried somewhere in all of that.
-
-So how does the agent *find* those three sentences? Because if it just dumps everything in, it chokes, it gets slow, and it gets dumber. We covered that in the last video. The real skill is the opposite. It's pulling in *only* the right stuff, exactly when it's needed. That's retrieval, and the way we do it just got a massive upgrade. Let me show you.
+So how does the agent *find* those three sentences? Because if it dumps everything in, it chokes, it slows down, and it gets dumber. We covered that last time. The real skill is the opposite, pulling in *only* the right stuff, exactly when it's needed. That's retrieval, and it just got a massive upgrade. Let me show you.
 
 ---
 
 ### SCENE 2 — The core problem [0:33–1:15]
 [Set it up clearly]
 
-So let's frame this properly, because it's the whole game.
+Let's frame this, because it's the whole game.
 
-Your context window is tiny. The world of information the agent might need is enormous. And you can't just preload all of it, for two reasons. One, it doesn't fit. And two, even if it did, burying the answer in a mountain of irrelevant stuff makes the model perform *worse*, not better.
+Your context window is tiny. The information the agent might need is enormous. And you can't preload all of it. First, it doesn't fit. And second, even if it did, burying the answer in a mountain of junk makes the model *worse*, not better.
 
-So you need a different approach. You let the model reach out and *grab* the exact piece of information it needs, at the moment it needs it, and nothing else. That's it. That's all retrieval is. Going and getting the right context on demand.
+So instead, you let the model reach out and grab the exact piece it needs, the moment it needs it, and nothing else. That's all retrieval is. The right context, on demand.
 
-Now, you know the basic version of this. It's RAG. But the gap between a toy RAG demo and retrieval that actually holds up in production? That gap is huge. So that's what the rest of this video is. The upgrades that close it. And it starts in a place most people completely ignore.
+Now, you know the basic version. It's RAG. But the gap between a toy RAG demo and retrieval that holds up in production is huge. Closing that gap is the rest of this video. And it starts somewhere most people ignore.
 
 ---
 
 ### SCENE 3 — Index it right: chunking + contextual retrieval [1:15–2:20]
 [Assume they know RAG; go deep on the layer tutorials skip]
 
-Now, you already know the basic loop. Embed your docs, embed the query, grab the nearest chunks. So let's skip right past that, because the thing that actually decides whether your retrieval is any good happens way earlier, at indexing time. And this is the part most setups quietly get wrong.
+You already know the basic loop. Embed your docs, embed the query, grab the nearest chunks. So let's skip that, because what actually decides whether retrieval works happens way earlier, at indexing time. And most setups get it wrong.
 
-It starts with chunking. The moment you chop a document into pieces, every chunk loses the context around it. A line like "the fee is fifty dollars" gets stored as a naked blob, with no idea it was sitting under "Section 4, Refunds." So later you retrieve it, and the model has no clue what it's even looking at. Chunk too big, you drag in noise. Too small, you shred the meaning. And this one decision basically sets a ceiling on how good your whole system can ever get.
+Start with chunking. The moment you chop a document up, every chunk loses the context around it. A line like "the fee is fifty dollars" gets stored as a naked blob, with no idea it lived under "Section 4, Refunds." Retrieve it later, and the model has no clue what it's looking at. Too big, you drag in noise. Too small, you shred the meaning. This one decision sets a ceiling on how good your system can ever get.
 
-So here's the upgrade the strong teams use. It's a technique Anthropic calls contextual retrieval. Before you embed each chunk, you have a cheap, fast model write a quick blurb describing where that chunk sits in the document, and you prepend it. So "the fee is fifty dollars" becomes "in the refund policy, the fee is fifty dollars." Same chunk, but now it carries its own context. And in Anthropic's own testing, that one change to your embeddings cut failed retrievals by about a third. And that's before you've even touched the search. Fix the index, and everything downstream gets easier.
+So here's the upgrade strong teams use. Anthropic calls it contextual retrieval. Before you embed a chunk, a cheap model writes a quick blurb on where it sits in the document, and prepends it. So "the fee is fifty dollars" becomes "in the refund policy, the fee is fifty dollars." Same chunk, now it carries its context. In Anthropic's own testing, that one change to your embeddings cut failed retrievals by about a third, before you've even touched the search. Fix the index, and everything downstream gets easier.
 
 ---
 
 ### SCENE 4 — Semantic search isn't enough: hybrid + rerank [2:20–3:35]
 [A "huh, interesting" beat]
 
-Alright, so your index is solid. Now for the search itself, and here's something that surprised me.
+Alright, your index is solid. Now the search itself, and here's something that surprised me.
 
-Semantic search is amazing at understanding what you *mean*. Ask for "how do I reset my password" and it'll find a doc titled "account recovery steps," even with zero matching words. Really powerful.
+Semantic search is great at understanding what you *mean*. Ask "how do I reset my password" and it finds a doc titled "account recovery steps," with zero matching words. Powerful. But it has a blind spot, exact terms. Error codes, product IDs, a function name. The meaning blurs those out, and on some 2026 benchmarks, plain keyword search actually *beat* vector search outright.
 
-But it has a blind spot. It's bad at exact terms. Error codes. Product IDs. A specific function name. A fiscal quarter. The meaning blurs those out. And on some 2026 benchmarks, plain old keyword search actually *beat* fancy vector search outright, because there the exact words matter.
+So the best systems use *both*. That's hybrid search. Run keyword and semantic together, merge the rankings. One catches the exact terms, the other catches the meaning.
 
-So what do the best systems do? They use *both*. It's called hybrid search. Run keyword search and semantic search together, then merge the rankings. One catches the exact terms, the other catches the meaning. And that combo reliably beats either one alone.
+Then one more layer, reranking. Hybrid pulls a wide net, say fifty candidates. A second, smarter model re-reads those fifty and re-sorts them, so the *best* three rise to the top. Wide net fast, then a specialist picks the winners.
 
-And there's one more trick stacked on top, called reranking. So check this out. You let hybrid search quickly pull a wide net, say the top fifty candidates. Then a second, smarter model re-reads just those fifty and re-sorts them, so the *best* three float right to the top. Cast a wide net fast, then let a specialist pick the winners.
-
-And here's the kicker. Stack all of it together, those contextual embeddings from a second ago, hybrid search, and a reranker, and in Anthropic's own testing, failed retrievals drop by about *two-thirds*. Same documents, same model, you're just finding the right stuff way more often. That's the modern retrieval stack right there.
+And here's the kicker. Stack all of it, those contextual embeddings, hybrid search, and a reranker, and in Anthropic's own testing, failed retrievals drop by about *two-thirds*. Same docs, same model, just finding the right stuff far more often. That's the modern retrieval stack.
 
 ---
 
 ### SCENE 5 — The upgrade: Agentic Retrieval [3:35–4:45]
 [This is the payoff — get excited]
 
-Okay, now here's where it gets really cool, and this is the big shift happening right now.
+Okay, now here's where it gets really cool, and it's the big shift happening right now.
 
-In classic RAG, retrieval happens *once*, before the model even starts thinking. But what if the model could drive the search itself? That's agentic retrieval, and it's basically the agent loop, pointed at search.
+In classic RAG, retrieval happens *once*, before the model even starts thinking. But what if the model drove the search itself? That's agentic retrieval, basically the agent loop, pointed at search.
 
-Watch what changes. The agent gets your question, and first it *reformulates* it into a better search query. If the question is complex, it breaks it into smaller sub-questions and searches for each one. Then, and this is the key part, it looks at what came back and *judges* it. "Do I actually have enough to answer? No? The answer mentions something I haven't looked up yet." So it searches *again*. Multi-step. It keeps going until it's got what it needs.
+Watch what changes. The agent takes your question and *reformulates* it into a better query. If it's complex, it splits it into sub-questions and searches each. Then, the key part, it looks at what came back and judges it. "Do I have enough? No, the answer mentions something I haven't looked up." So it searches *again*. And it keeps going until it's got what it needs.
 
-So instead of one blind grab, you get a little research loop. Ask a question that needs three hops to answer, and classic RAG face-plants, but an agentic retriever chains the hops together and nails it.
+So instead of one blind grab, you get a little research loop. Ask something that takes three hops to answer, and classic RAG face-plants, but an agentic retriever chains the hops and nails it.
 
-Now, real talk, this isn't free. All that searching and re-reading burns roughly three to ten times the tokens of classic RAG. So you use it where the question is genuinely hard, not for looking up one simple fact.
+Now, real talk, this isn't free. It burns roughly three to ten times the tokens of classic RAG. So you use it where the question is genuinely hard, not to look up one simple fact.
 
 ---
 
 ### SCENE 6 — Just-in-time + memory retrieval [4:45–5:35]
 [Keep the energy, "this is my favorite part"]
 
-And it gets better. The agent doesn't have to do all this up front. It can retrieve *mid-task*, the moment it hits something it doesn't know.
+And it gets better. The agent doesn't have to do this up front. It can retrieve *mid-task*, the moment it hits something it doesn't know.
 
-Think about how a coding agent works. It's editing a file, it hits a function it doesn't recognize, so right there in the middle of the loop it fires off a search, grabs *just* that function's definition, uses it, and moves on. Retrieval becomes a tool the agent calls whenever it has a gap. Just in time, not just in case.
+Think about a coding agent. It's editing a file, hits a function it doesn't recognize, and right there in the loop it fires off a search, grabs *just* that definition, and moves on. Retrieval becomes a tool the agent calls whenever it has a gap. Just in time, not just in case.
 
-And it's not only documents. This exact same machinery works on *memory*. All your past conversations, decisions, notes about the user. When something becomes relevant, the agent searches its own memory and pulls back the one thing that matters, out of thousands. Same idea. Find the needle, leave the haystack.
+And it's not only documents. The same machinery works on *memory*. Your past conversations, decisions, notes about the user. When something's relevant, the agent searches its own memory and pulls back the one thing that matters, out of thousands. Find the needle, leave the haystack.
 
 ---
 
 ### SCENE 7 — But didn't big context windows kill RAG? [5:35–6:20]
 [Address the obvious objection head-on]
 
-Now, a lot of you are thinking, "hold on, we've got million-token context windows now. Can't I just shove everything in and skip all this?"
+Now a lot of you are thinking, "we've got million-token windows now. Can't I just shove everything in and skip all this?"
 
-Great question, and the answer is mostly no. Here's why. Those huge windows are slow and expensive. One analysis clocked a long-context query at tens of seconds and pennies-to-dollars each, versus retrieval coming back in about a second for a tiny fraction of the cost. And even with a giant window, models still tend to *miss* facts buried in the middle. The effect is real, though how bad it gets depends on the model. So recall can sag well below the headline number on questions that need several facts at once.
+Mostly, no. Those huge windows are slow and expensive. One analysis clocked a long-context query at tens of seconds and pennies-to-dollars each, versus retrieval in about a second for a tiny fraction of the cost. And even with a giant window, models still miss facts buried in the middle. It's real, though how bad depends on the model.
 
-So the best teams aren't choosing. They use retrieval to *narrow* a million documents down to the handful that matter, and *then* let the big window reason over that clean, focused set. Retrieval and long context, working together.
+So the best teams don't choose. They use retrieval to *narrow* a million documents to the handful that matter, then let the big window reason over that focused set. Retrieval and long context, working together.
 
 ---
 
 ### SCENE 8 — Why this matters [6:20–6:50]
 [Land the big idea]
 
-So step back for a second, because this changes how you should think about building agents.
+So step back, because this changes how you build agents.
 
-We obsess over which model is smartest, and how big its memory is. But here's the mindset shift. An agent is only as good as the information it can actually *find* and bring into focus at the right moment. The smartest model in the world, looking at the wrong three paragraphs, just gives you a confident, wrong answer.
+We obsess over which model is smartest. But here's the mindset shift. An agent is only as good as what it can *find* and bring into focus at the right moment. The smartest model in the world, looking at the wrong three paragraphs, just gives you a confident, wrong answer.
 
-So really, retrieval is how the agent *sees*. It's the senses. And once you get that right, a normal model starts to feel brilliant, because every single time it answers, it's looking at exactly what it needs.
-
-That's the skill worth learning right now.
+So retrieval is how the agent *sees*. It's the senses. Get that right, and a normal model starts to feel brilliant, because every time it answers, it's looking at exactly what it needs. That's the skill worth learning right now.
 
 ---
 
 ### SCENE 9 — Recap + Like & Subscribe CTA [6:50–7:15 + CTA]
 [Warm, quick, classic recap]
 
-So just to recap how agents find the right context:
+So, quick recap of how agents find the right context.
 
-It starts at indexing. Contextual retrieval, so your chunks actually carry their meaning. Then hybrid search plus a reranker pulls and sorts the best results. Agentic retrieval lets the model run a real search loop, reformulating and going multi-step until it's got the answer. It pulls context just in time, mid-task, and it works on memory the same way. And big context windows don't replace any of this, they team up with it.
+It starts at indexing, contextual retrieval, so your chunks carry their meaning. Then hybrid search plus a reranker pulls and sorts the best results. Agentic retrieval lets the model run a real search loop, going multi-step until it's got the answer. It retrieves just in time, mid-task, and works on memory the same way. And big context windows don't replace any of this, they team up with it.
 
-If this helped it click, do me a favor and hit like and subscribe, it genuinely helps the channel, and there's a whole series on building agents that actually work. I'll see you in the next one.
+If this made it click, hit like and subscribe, it really helps the channel, and there's a whole series on building agents that actually work. See you in the next one.
 
 ---
 
