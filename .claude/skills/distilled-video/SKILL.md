@@ -17,6 +17,12 @@ Register each composition in `remotion-src/Root.tsx`. Script in `scripts/tNN-*.m
 
 1. **Create the video script** — `scripts/tNN-<slug>.md`: title, duration target,
    scene-by-scene narration + an animation guide + on-screen code blocks.
+   - **Pitch every script at INTERMEDIATE-TO-ADVANCED viewers** (Narsi's standing ask).
+     Assume the audience already knows the fundamentals of the topic — do NOT spend a scene
+     on "101" basics (e.g. don't teach "what is RAG / embed→retrieve→generate", "what is an
+     LLM", basic prompt structure). Acknowledge the basics in a line, then go straight to the
+     advanced, production-grade techniques, failure modes, tradeoffs, and real numbers that a
+     working practitioner doesn't already know. Depth over breadth.
 2. **Critique it** — adversarial pass for accuracy, clarity, pacing, hooks.
    - **ALWAYS run an INDEPENDENT critique before asking Narsi to review** (his standing
      ask). Spawn a SEPARATE critic subagent (not just your own self-check) to red-team the

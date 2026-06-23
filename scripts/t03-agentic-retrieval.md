@@ -1,10 +1,11 @@
 # Trending 03, Agentic Retrieval: how AI agents find the RIGHT context
 
 **Title:** How AI Agents Find the RIGHT Information (Agentic Retrieval Explained)
-**Duration target:** ~7:15 narration (+ ~14s Like/Subscribe CTA scene)
-**Word count:** ~1,060 words (~145 wpm)
+**Duration target:** ~7:00 final (after the global speed-up). NOTE: current draft is ~1,530 narration words ≈ ~9–10 min at 145–155 wpm — it runs LONG and needs a ~300-word trim (Scene 4 is the most overloaded) to hit target.
+**Word count:** ~1,530 words (current draft; ~300 over target)
+**NOTE on timestamps:** the `[m:ss–m:ss]` ranges in each scene header are PRE-RECORD ESTIMATES only. Actual durations get re-derived from the recorded audio (skill Step 7) — do not size animations off these literal numbers.
 **Topic:** How agents pull the *right* context into a tiny window on demand — classic RAG, why semantic search alone isn't enough (hybrid), the upgrade to agentic / multi-step retrieval, just-in-time retrieval as a tool, memory retrieval, and the RAG-vs-long-context verdict.
-**Audience:** Developers who've seen t01 (the harness) and t02 (the four failure modes). They know what a context window is and that stuffing it with junk causes rot. This video is the *opposite* skill: getting the RIGHT stuff IN. Net-new vs t01/t02 — t02 only covered *tool* selection; this is document/knowledge/memory retrieval.
+**Audience:** **Intermediate-to-advanced** developers who've seen t01 (the harness) and t02 (the four failure modes). Assume they already know basic RAG (embed → retrieve → generate) and what a context window is — do NOT teach RAG 101. Go straight to the advanced techniques that separate a toy retriever from a production one. This video is the *opposite* skill to t02's "context rot": getting the RIGHT stuff IN. Net-new vs t01/t02 — t02 only covered *tool* selection; this is document/knowledge/memory retrieval.
 **Track:** Trending
 **Voice:** Matthew Berman style — conversational, high-energy, accessible. Signpost constantly ("Okay so…", "here's where it gets really cool", "let me break this down"), talk straight to the viewer ("you"), build excitement honestly, define every term the second it appears, use analogies, be upfront about tradeoffs. Contractions, flowing spoken cadence — NOT terse literary one-liners.
 
@@ -42,35 +43,35 @@ Your context window is tiny. The world of information the agent might need is en
 
 So you need a different approach. You let the model reach out and *grab* the exact piece of information it needs, at the moment it needs it, and nothing else. That's it. That's all retrieval is. Going and getting the right context on demand.
 
-And the classic way to do this has a name you've definitely heard. It's called RAG. So let's break down how it actually works.
+Now, you know the basic version of this. It's RAG. But the gap between a toy RAG demo and retrieval that actually holds up in production? That gap is huge. So that's what the rest of this video is. The upgrades that close it. And it starts in a place most people completely ignore.
 
 ---
 
-### SCENE 3 — Classic RAG, how it works [1:15–2:20]
-[Teaching mode, make it simple, then the twist]
+### SCENE 3 — Index it right: chunking + contextual retrieval [1:15–2:20]
+[Assume they know RAG; go deep on the layer tutorials skip]
 
-RAG stands for retrieval-augmented generation, and honestly the idea is really simple.
+Now, you already know the basic loop. Embed your docs, embed the query, grab the nearest chunks. So let's skip right past that, because the thing that actually decides whether your retrieval is any good happens way earlier, at indexing time. And this is the part most setups quietly get wrong.
 
-Step one, you take all your documents and you chop them into chunks. And by the way, how you chop matters a lot. Chunk too big and you drag in noise, chunk too small and you lose the thread. Step two, you run each chunk through an embedding model, which turns the text into a list of numbers, a vector, that captures its *meaning*. You store all those vectors in a database.
+It starts with chunking. The moment you chop a document into pieces, every chunk loses the context around it. A line like "the fee is fifty dollars" gets stored as a naked blob, with no idea it was sitting under "Section 4, Refunds." So later you retrieve it, and the model has no clue what it's even looking at. Chunk too big, you drag in noise. Too small, you shred the meaning. And this one decision basically sets a ceiling on how good your whole system can ever get.
 
-Now a question comes in. You embed the question the same way, and you go find the chunks whose vectors are closest to it. Closest in meaning. You grab the top few, you paste them into the context, and the model answers using them. Retrieve, then generate. RAG.
-
-And for a long time, that was the answer. But here's the problem. Classic RAG takes one guess. One query, a fixed number of chunks, no thinking. And in production, by some reports, that one-shot guess fails to pull the right documents *around forty percent of the time*. That's almost *half*. So clearly, one blind grab isn't enough.
+So here's the upgrade the strong teams use. It's a technique Anthropic calls contextual retrieval. Before you embed each chunk, you have a cheap, fast model write a quick blurb describing where that chunk sits in the document, and you prepend it. So "the fee is fifty dollars" becomes "in the refund policy, the fee is fifty dollars." Same chunk, but now it carries its own context. And in Anthropic's own testing, that one change to your embeddings cut failed retrievals by about a third. And that's before you've even touched the search. Fix the index, and everything downstream gets easier.
 
 ---
 
 ### SCENE 4 — Semantic search isn't enough: hybrid + rerank [2:20–3:35]
 [A "huh, interesting" beat]
 
-So you might think, okay, just make the search smarter. And here's something that surprised me.
+Alright, so your index is solid. Now for the search itself, and here's something that surprised me.
 
-That meaning-based search, semantic search, is amazing at understanding what you *mean*. Ask for "how do I reset my password" and it'll find a doc titled "account recovery steps," even with zero matching words. Really powerful.
+Semantic search is amazing at understanding what you *mean*. Ask for "how do I reset my password" and it'll find a doc titled "account recovery steps," even with zero matching words. Really powerful.
 
-But it has a blind spot. It's bad at exact terms. Error codes. Product IDs. A specific function name. A fiscal quarter. The meaning blurs those out. And on some 2026 benchmarks, financial documents for instance, plain old keyword search actually *beat* fancy vector search, because there the exact words matter.
+But it has a blind spot. It's bad at exact terms. Error codes. Product IDs. A specific function name. A fiscal quarter. The meaning blurs those out. And on some 2026 benchmarks, plain old keyword search actually *beat* fancy vector search outright, because there the exact words matter.
 
 So what do the best systems do? They use *both*. It's called hybrid search. Run keyword search and semantic search together, then merge the rankings. One catches the exact terms, the other catches the meaning. And that combo reliably beats either one alone.
 
-And there's one more trick stacked on top, called reranking. So check this out. You let hybrid search quickly pull a wide net, say the top fifty candidates. Then a second, smarter model re-reads just those fifty and re-sorts them, so the *best* three float right to the top. Cast a wide net fast, then let a specialist pick the winners. Hybrid search plus a reranker, that's basically the modern retrieval stack right there.
+And there's one more trick stacked on top, called reranking. So check this out. You let hybrid search quickly pull a wide net, say the top fifty candidates. Then a second, smarter model re-reads just those fifty and re-sorts them, so the *best* three float right to the top. Cast a wide net fast, then let a specialist pick the winners.
+
+And here's the kicker. Stack all of it together, those contextual embeddings from a second ago, hybrid search, and a reranker, and in Anthropic's own testing, failed retrievals drop by about *two-thirds*. Same documents, same model, you're just finding the right stuff way more often. That's the modern retrieval stack right there.
 
 ---
 
@@ -85,14 +86,14 @@ Watch what changes. The agent gets your question, and first it *reformulates* it
 
 So instead of one blind grab, you get a little research loop. Ask a question that needs three hops to answer, and classic RAG face-plants, but an agentic retriever chains the hops together and nails it.
 
-Now, real talk, this isn't free. All that searching and re-reading burns three to ten times the tokens of classic RAG. So you use it where the question is genuinely hard, not for looking up one simple fact.
+Now, real talk, this isn't free. All that searching and re-reading burns roughly three to ten times the tokens of classic RAG. So you use it where the question is genuinely hard, not for looking up one simple fact.
 
 ---
 
 ### SCENE 6 — Just-in-time + memory retrieval [4:45–5:35]
 [Keep the energy, "this is my favorite part"]
 
-And here's the part I really like. The agent doesn't have to do all this up front. It can retrieve *mid-task*, the moment it hits something it doesn't know.
+And it gets better. The agent doesn't have to do all this up front. It can retrieve *mid-task*, the moment it hits something it doesn't know.
 
 Think about how a coding agent works. It's editing a file, it hits a function it doesn't recognize, so right there in the middle of the loop it fires off a search, grabs *just* that function's definition, uses it, and moves on. Retrieval becomes a tool the agent calls whenever it has a gap. Just in time, not just in case.
 
@@ -129,7 +130,7 @@ That's the skill worth learning right now.
 
 So just to recap how agents find the right context:
 
-Classic RAG retrieves once, by meaning, and that's a decent start. Hybrid search adds keywords so you catch the exact terms too. Agentic retrieval lets the model run a real search loop, reformulating and going multi-step until it's got the answer. It pulls context just in time, mid-task, and it works on memory the same way. And big context windows don't replace any of this, they team up with it.
+It starts at indexing. Contextual retrieval, so your chunks actually carry their meaning. Then hybrid search plus a reranker pulls and sorts the best results. Agentic retrieval lets the model run a real search loop, reformulating and going multi-step until it's got the answer. It pulls context just in time, mid-task, and it works on memory the same way. And big context windows don't replace any of this, they team up with it.
 
 If this helped it click, do me a favor and hit like and subscribe, it genuinely helps the channel, and there's a whole series on building agents that actually work. I'll see you in the next one.
 
@@ -142,13 +143,13 @@ If this helped it click, do me a favor and hit like and subscribe, it genuinely 
 |---|-------|-----------|-----------------------------|
 | 1 | Hook | A MODEL core next to a HUGE wall of documents/code (millions of tokens) vs its tiny window outline. A question drops; a "stuff it all in" attempt floods the window red (slow/cost/✕). Then a single spotlight finds 3 glowing lines in the wall. Punchline alone, big: "Find the needle. Not the haystack." | `1,000,000 tokens` wall vs `~200K` window · spotlight on 3 lines |
 | 2 | The core problem | Split: LEFT tiny window, RIGHT giant knowledge cloud. An arrow tries to cram the cloud into the window → overflow. Reframe: a single "reach + grab" arm pulls ONE chip out of the cloud into the clean window. Caption: "the right context, on demand." | window ≪ knowledge · "can't preload: doesn't fit + rots" |
-| 3 | Classic RAG | Pipeline builds left-to-right: docs → chop into chunks → embedding model → vectors in a DB. Then query → embed → nearest-neighbor lines light up → top-k chunks fly into context → answer. Break beat: a "one-shot" stamp; a reliability meter ticks to "~40% retrieval miss" red. | `embed → vector DB → top-k → generate` · "naive RAG misses ~40% (reported)" |
+| 3 | Index: chunking + contextual retrieval | A document gets sliced; one chunk ("The fee is $50.") drifts away from its "Section 4 · Refunds" heading and dims → confused ✕ when retrieved. Fix replay: a small model writes a context blurb and PREPENDS it ("[Refund policy] The fee is $50.") → the chunk re-lights, retrieved correctly. A "failed retrievals" bar then drops in steps: −35% bright, then −49% and −67% greyed/queued as "next scene". | naked chunk ✗ → contextualized chunk ✓ · failed retrievals −35% (Anthropic's own testing) |
 | 4 | Hybrid + rerank | Two lanes race a query: SEMANTIC lane catches a paraphrase ("reset password"→"account recovery") but MISSES an error code; KEYWORD lane catches the exact `ERR_4032` but misses the paraphrase. Lanes MERGE → both hits captured. Then a "rerank" beat: a wide net of ~50 candidates pours in → a reranker model re-sorts → the best 3 float to the top. (No undefined acronyms on screen — no "RRF"/"NDCG".) | semantic ✓meaning ✗exact · keyword ✓exact ✗meaning · hybrid = both ✓ · rerank: 50 → best 3 |
 | 5 | Agentic retrieval | Break: classic RAG one-shot on a 3-hop question → grabs wrong chunks → ✕. Fix replay: agent core runs a mini-loop — reformulate query → split into sub-queries → search → READ → "enough? no" → search again → ✓. A small "~3–10× tokens" honesty chip glows. NOTE: draw a *search* loop, visually distinct from t01's ReAct/harness ring — don't recreate t01's signature loop. | loop: reformulate · decompose · search · judge · repeat · "multi-hop ✓ · costs ~3–10× tokens" |
 | 6 | Just-in-time + memory | Coding agent mid-edit hits an unknown function → fires a search tool inline → pulls just that definition → continues (the window stays small the whole time). Then swap the doc-store for a "MEMORY" store: agent searches past notes, pulls ONE relevant chip from a thousand. | "retrieve mid-loop, just-in-time" · same machinery over docs AND memory |
 | 7 | RAG vs long context | A "1M token" window balloon vs a retrieval arm. Two meters race as RELATIVE bars (no literal numbers): LATENCY (long ▮▮▮▮ vs retrieval ▮) and COST (big vs sliver); a "misses facts in the middle — model-dependent" warning blinks on the big window. Resolve: retrieval NARROWS the cloud → a small focused set → big window reasons over it. "Use both." | long-ctx: slower · pricier · misses the middle → retrieve-to-narrow, then reason · "they team up" |
 | 8 | Why it matters | A balance: a genius MODEL core staring at the WRONG 3 paragraphs → confident ✕ answer; vs a normal core handed the RIGHT 3 → ✓. Then "RETRIEVAL = the agent's senses" with eyes/sensor motif lighting up. Punchline alone, big: "An agent is only as smart as what it can find." | wrong-context genius loses to right-context normal · "retrieval = senses" |
-| 9 | Recap + CTA | 5-row recap animating in sequence (RAG → Hybrid → Agentic → Just-in-time/Memory → + Long context), then the existing Like/Subscribe animated scene (channel icon + cursor taps). | RAG once · Hybrid=both · Agentic=loop · JIT+memory · long-ctx teams up |
+| 9 | Recap + CTA | 5-row recap animating in sequence (Index/Contextual → Hybrid+Rerank → Agentic → Just-in-time/Memory → + Long context), then the existing Like/Subscribe animated scene (channel icon + cursor taps). | Index=contextual · Retrieve=hybrid+rerank · Agentic=loop · JIT+memory · long-ctx teams up |
 
 ---
 
@@ -157,15 +158,16 @@ If this helped it click, do me a favor and hit like and subscribe, it genuinely 
 
 ---
 
-### Scene 3 — Classic RAG pipeline (schematic)
+### Scene 3 — Contextual retrieval (index-time fix)
 ```
-INDEX (once):
-  docs → chunk → embed → [ vector DB ]
+NAIVE chunk:       "The fee is $50."                    → embed → ambiguous
+CONTEXTUAL chunk:  "[Refund policy] The fee is $50."    → embed → grounded
+       ▲ a cheap model prepends each chunk's context BEFORE embedding
 
-QUERY (each question):
-  question → embed → nearest_neighbors(k=5) → top chunks
-           → context = [system, top_chunks, question] → answer
-  # one query, fixed k, no re-checking  → ~40% retrieval miss in production
+Failed retrievals, top-20 (Anthropic's own testing):
+  contextual embeddings ............ −35%
+  + contextual BM25 (hybrid) ....... −49%   ← Scene 4
+  + reranking ...................... −67%   ← Scene 4
 ```
 
 ### Scene 4 — Hybrid search (why both)
@@ -207,18 +209,20 @@ tools = [search_docs, grep_code, fetch_url, search_memory]
 ---
 
 ### Fact-check notes (keep claims defensible)
-- **"Naive RAG fails retrieval ~40% of the time"**: reported production-reliability figure (2026 agentic-RAG guides). Frame as "by some reports / around," not a single hard benchmark. ⚠️ practitioner figure. (Do NOT cross-justify this with long-context recall — different mechanism; keep them independent claims.)
-- **RAG mechanics (chunk → embed → vector DB → top-k → generate)**: standard, accurate. ✅
-- **Semantic vs keyword; hybrid (BM25 + dense, RRF) beats either**: well-established. WANDS benchmark ~+7.4% NDCG for tuned hybrid; BM25 beat dense on financial docs (2026). ✅ cite as benchmark figures, qualitative on screen ("~+7%").
-- **Reranking (cross-encoder over top-N candidates)**: standard modern retrieval stage — retrieve wide (hybrid, ~50), then a reranker model re-scores each candidate against the query and re-sorts so the best few rise. ✅ established (Cohere Rerank, BGE/cross-encoders); "hybrid + reranker" is the canonical 2026 stack. No specific number claimed on screen (kept qualitative).
+- **Audience = intermediate/advanced**: RAG-101 (embed→retrieve→generate) is assumed, NOT taught. Scene 3 is now the advanced indexing layer (chunking + contextual retrieval) instead of a RAG tutorial. The old "naive RAG misses ~40%" soft figure was DROPPED with the tutorial scene — don't reintroduce it.
+- **Chunking caps retrieval quality**: accurate, well-established — chunk boundaries lose surrounding context; too-big drags noise, too-small loses meaning. ✅
+- **Contextual Retrieval (Anthropic, Sept 2024)**: prepend an LLM-written context blurb to each chunk BEFORE embedding. Anthropic's own testing, top-20 failed-retrieval reduction: **contextual embeddings −35% (5.7%→3.7%); + contextual BM25 (hybrid) −49% (→2.9%); + reranking −67% (→1.9%)**. ✅ verified against Anthropic's post. ⚠️ vendor-internal — on screen + VO MUST say "in Anthropic's own testing." Scene 3 lands the −35%; Scene 4 lands the combined −67% as the full-stack payoff.
+- **Semantic vs keyword; hybrid (BM25 + dense) beats either**: well-established. WANDS ~+7.4% NDCG for tuned hybrid; BM25 beat dense on financial docs (2026) — kept as supporting evidence; the on-screen number is now the Anthropic −67% stack, not WANDS. ✅
+- **Reranking (cross-encoder over top-N candidates)**: standard modern retrieval stage — retrieve wide (hybrid, ~50), then a reranker re-scores each candidate against the query and re-sorts so the best few rise. ✅ established (Cohere Rerank, BGE/cross-encoders); it's the final layer of Anthropic's −67% stack.
 - **Agentic RAG = query reformulation + decomposition + multi-hop + self-check loop**: canonical 2025–2026 framing (LangGraph, Kore.ai, multiple guides). ✅
 - **"3–10× the tokens of classic RAG"**: reported cost range for agentic/reflection loops. ⚠️ practitioner figure — say "roughly."
 - **Retrieval as a tool / just-in-time (retrieve mid-loop)**: standard agentic pattern. ✅ Do NOT re-use t02's Tool Search 49→74% stat (already spent in t02-agent-failures).
 - **Memory retrieval = same semantic-search machinery over past context**: accurate; standard episodic-memory pattern.
 - **RAG vs long context — latency, cost, multi-fact recall**: underlying figures (≈45s, ≈1,250× cheaper, ≈60% recall) come from a SINGLE 2026 comparison blog (open-techstack). So the script states them DIRECTIONALLY only — narration says "tens of seconds," "pennies-to-dollars," "tiny fraction," "recall can sag below the headline number," and the on-screen layer uses RELATIVE bars with NO literal numbers. Do not print ~45s / ~60% / 1,250× on screen. Lost-in-the-middle is corroborated by Liu et al. (TACL 2024) ✅ but severity is MODEL-DEPENDENT (frontier 2025–26 models reduce it) — always frame as "real, depends on the model," consistent with the t02 caveat.
-- **No overlap check**: this script intentionally avoids t02's spent material (tool-search 49→74, sub-agent 30K→2K, memory-file line, RAM-not-hard-drive metaphor) and t01's subagent/compaction explanations. RAG, embeddings, hybrid search, agentic/multi-hop retrieval, memory retrieval, and RAG-vs-long-context are all net-new to the channel.
+- **No overlap check**: this script intentionally avoids t02's spent material (tool-search 49→74, sub-agent 30K→2K, memory-file line, RAM-not-hard-drive metaphor) and t01's subagent/compaction explanations. Chunking/contextual retrieval, hybrid search + reranking, agentic/multi-hop retrieval, memory retrieval, and RAG-vs-long-context are all net-new to the channel. Spine = **Index → Retrieve → Reason**.
 
 ### Sources (2026 retrieval scan)
+- [Contextual Retrieval — Anthropic (−35% / −49% / −67% failed retrievals)](https://www.anthropic.com/news/contextual-retrieval)
 - [Agentic RAG Patterns 2026 — Digital Applied](https://www.digitalapplied.com/blog/agentic-rag-patterns-multi-step-reasoning-guide)
 - [RAG Architecture Patterns: Naive vs Advanced vs Agentic — BuildMVPFast](https://www.buildmvpfast.com/blog/rag-architecture-patterns-naive-advanced-agentic-2026)
 - [Agentic RAG: comprehensive guide — Kore.ai](https://www.kore.ai/blog/what-is-agentic-rag)
