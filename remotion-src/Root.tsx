@@ -3,12 +3,12 @@ import { T01 } from "../videos/t01-agent-harness/T01";
 import { TOTAL_FRAMES as T01_FRAMES } from "../videos/t01-agent-harness/timings";
 import { T02F } from "../videos/t02-agent-failures/T02F";
 import { TOTAL_FRAMES as T02F_FRAMES } from "../videos/t02-agent-failures/timings";
-import { T02 } from "../videos/t02-context-engineering/T02";
-import { TOTAL_FRAMES as T02_FRAMES } from "../videos/t02-context-engineering/timings";
-import { T03 } from "../videos/t03-context-rot/T03";
-import { TOTAL_FRAMES as T03_FRAMES } from "../videos/t03-context-rot/timings";
-import { T04 } from "../videos/t04-subagents/T04";
-import { TOTAL_FRAMES as T04_FRAMES } from "../videos/t04-subagents/timings";
+import { T03 } from "../videos/t03-agentic-retrieval/T03";
+import { TOTAL_FRAMES as T03_FRAMES } from "../videos/t03-agentic-retrieval/timings";
+import { T04 } from "../videos/t04-context-rot/T04";
+import { TOTAL_FRAMES as T04_FRAMES } from "../videos/t04-context-rot/timings";
+import { T05 } from "../videos/t05-subagents/T05";
+import { TOTAL_FRAMES as T05_FRAMES } from "../videos/t05-subagents/timings";
 import { T15 } from "../videos/t15-rag-dead/T15";
 import { TOTAL_FRAMES as T15_FRAMES } from "../videos/t15-rag-dead/timings";
 import { T16 } from "../videos/t16-test-time-compute/T16";
@@ -37,15 +37,7 @@ export const RemotionRoot: React.FC = () => {
         height={VIDEO_HEIGHT}
       />
       <Composition
-        id="T02-ContextEngineering"
-        component={T02}
-        durationInFrames={T02_FRAMES}
-        fps={30}
-        width={VIDEO_WIDTH}
-        height={VIDEO_HEIGHT}
-      />
-      <Composition
-        id="T03-ContextRot"
+        id="T03-AgenticRetrieval"
         component={T03}
         durationInFrames={T03_FRAMES}
         fps={30}
@@ -53,9 +45,17 @@ export const RemotionRoot: React.FC = () => {
         height={VIDEO_HEIGHT}
       />
       <Composition
-        id="T04-Subagents"
+        id="T04-ContextRot"
         component={T04}
         durationInFrames={T04_FRAMES}
+        fps={30}
+        width={VIDEO_WIDTH}
+        height={VIDEO_HEIGHT}
+      />
+      <Composition
+        id="T05-Subagents"
+        component={T05}
+        durationInFrames={T05_FRAMES}
         fps={30}
         width={VIDEO_WIDTH}
         height={VIDEO_HEIGHT}

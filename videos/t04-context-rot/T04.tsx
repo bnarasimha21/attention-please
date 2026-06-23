@@ -3,30 +3,30 @@ import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { TIMINGS, XFADE } from "./timings";
 import { Scene1Hook } from "./scenes/Scene1Hook";
-import { Scene2PromptVsContext } from "./scenes/Scene2PromptVsContext";
-import { Scene3WhatGoesIn } from "./scenes/Scene3WhatGoesIn";
-import { Scene4FiniteWindow } from "./scenes/Scene4FiniteWindow";
-import { Scene5Curation } from "./scenes/Scene5Curation";
-import { Scene6JustInTime } from "./scenes/Scene6JustInTime";
+import { Scene2Definition } from "./scenes/Scene2Definition";
+import { Scene3LostInMiddle } from "./scenes/Scene3LostInMiddle";
+import { Scene4WhyItHappens } from "./scenes/Scene4WhyItHappens";
+import { Scene5Demo } from "./scenes/Scene5Demo";
+import { Scene6Fixes } from "./scenes/Scene6Fixes";
 import { Scene7WhyMatters } from "./scenes/Scene7WhyMatters";
 import { Scene8CTA } from "./scenes/Scene8CTA";
 import { Scene9CTA } from "./scenes/Scene9CTA";
 
-// Trending 02 — Context engineering
+// Trending 03 — Context Rot: why long conversations get dumber
 // Scenes are crossfaded with @remotion/transitions. Each transition overlaps
 // the trailing hold of one scene with the intro of the next, so no content is
 // lost. Timings (incl. XFADE) live in timings.ts.
 
-export const T02: React.FC = () => {
-  // IMPORTANT: build the children array INSIDE the component body. Putting JSX
-  // in a module-level const breaks the esbuild bundler ("React is not defined").
+export const T04: React.FC = () => {
+  // Build the children array INSIDE the component body so esbuild keeps React
+  // in scope (module-level JSX consts break the bundler).
   const SCENES = [
     { C: Scene1Hook, duration: TIMINGS.scene1.duration },
-    { C: Scene2PromptVsContext, duration: TIMINGS.scene2.duration },
-    { C: Scene3WhatGoesIn, duration: TIMINGS.scene3.duration },
-    { C: Scene4FiniteWindow, duration: TIMINGS.scene4.duration },
-    { C: Scene5Curation, duration: TIMINGS.scene5.duration },
-    { C: Scene6JustInTime, duration: TIMINGS.scene6.duration },
+    { C: Scene2Definition, duration: TIMINGS.scene2.duration },
+    { C: Scene3LostInMiddle, duration: TIMINGS.scene3.duration },
+    { C: Scene4WhyItHappens, duration: TIMINGS.scene4.duration },
+    { C: Scene5Demo, duration: TIMINGS.scene5.duration },
+    { C: Scene6Fixes, duration: TIMINGS.scene6.duration },
     { C: Scene7WhyMatters, duration: TIMINGS.scene7.duration },
     { C: Scene8CTA, duration: TIMINGS.scene8.duration },
     { C: Scene9CTA, duration: TIMINGS.scene9.duration },

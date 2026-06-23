@@ -18,13 +18,25 @@ Register each composition in `remotion-src/Root.tsx`. Script in `scripts/tNN-*.m
 1. **Create the video script** — `scripts/tNN-<slug>.md`: title, duration target,
    scene-by-scene narration + an animation guide + on-screen code blocks.
 2. **Critique it** — adversarial pass for accuracy, clarity, pacing, hooks.
+   - **ALWAYS run an INDEPENDENT critique before asking Narsi to review** (his standing
+     ask). Spawn a SEPARATE critic subagent (not just your own self-check) to red-team the
+     script across accuracy/overlap/clarity/pacing/voice/hook/missing-content. This is
+     mandatory and happens up front — never hand Narsi a draft and offer the independent
+     critique as an optional next step.
    - **Verify the claims** — every factual/number claim must be checked (deep-research
      workflow for depth); cite vendor numbers as vendor numbers ("in Anthropic's own testing").
-   - **Cross-check the messaging** — does each scene say what it intends, in the right order, no contradictions?
-   - **Match Narsi's writing style** — read his articles repo **`bnarasimha21/my-articles`**
-     (LinkedIn articles; `bnarasimha21/technical-deep-dives` secondary) and write the
-     narration in that voice/tone. Clone or `gh`-fetch a few pieces and mirror their cadence.
-3. **Make it better** — fold the critique/research back into the script.
+     Don't cross-justify one soft figure with an unrelated one. Keep on-screen numbers as
+     humble as the narration — if VO softens a figure, the animation/diagram must too
+     (no hard "~45s"/"~60%"/acronyms the narration never defines).
+   - **Cross-check the messaging** — does each scene say what it intends, in the right order, no contradictions? Check it does NOT re-teach material already shipped in earlier videos (read the prior `scripts/tNN-*.md`).
+   - **Write in Matthew Berman's explainer voice** — conversational, high-energy, accessible;
+     constant signposting ("Okay so…", "here's where it gets really cool", "let me break this
+     down", "so just to recap"), direct "you" address, define every term immediately, honest
+     about tradeoffs ("real talk, this isn't free…"), contractions, flowing spoken cadence —
+     NOT terse/literary one-liners. (This OVERRIDES the old "match Narsi's article voice" rule —
+     Narsi explicitly switched to Berman's style. See memory `distilled-ai-script-voice`.)
+3. **Make it better** — fold the independent critique + research back into the script, THEN
+   tell Narsi it's ready to review (critique + fixes always precede the "please review" message).
 4. **Record audio per scene** — Narsi records (deliberately a little slow,
    ~135–140 wpm). Files land in `public/audio/tNN-<slug>/sNN.m4a` (one per scene).
    Always copy originals to `public/audio/tNN-<slug>/raw/` before processing.
