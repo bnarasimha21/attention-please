@@ -1,11 +1,10 @@
-// Scene timings — adjust these after audio is recorded
-// All values in FRAMES at 30fps
-// To convert seconds to frames: seconds * 30
+// Scene timings — t03 Agentic Retrieval (9 scenes).
+// All values in FRAMES at 30fps.
 //
-// NOTE: these are currently tightened for SILENT preview — each scene ends
-// ~2s after its last animation beat (no narration dead-air). When you record
-// voiceover, lengthen each `duration` to match the spoken script in
-// scripts/t02-context-engineering.md.
+// NOTE: these are SILENT-PREVIEW estimates (~150 wpm from the script word counts).
+// When the per-scene VO is recorded (public/audio/t03-agentic-retrieval/sNN.m4a),
+// set each `duration` = trimmed clip length + ~0.7s tail and wire <Audio> in T03.tsx
+// (skill Step 7), then re-time the scene beats to the Whisper transcripts (Step 9).
 
 export const FPS = 30;
 
@@ -13,21 +12,21 @@ export const FPS = 30;
 // scenes, so it's subtracted from the grand total below.
 export const XFADE = 18;
 
-// Scene start frames (cumulative).
-// NOTE: `start` is reference-only now; scene layout is driven by `duration`
-// via <TransitionSeries> in T02.tsx.
-// Durations enlarged so every readable line holds >= 3s before the scene ends.
+// Scene start frames are reference-only; layout is driven by `duration` via
+// <TransitionSeries> in T03.tsx.
 export const TIMINGS = {
-  scene1: { start: 0,          duration: 17 * FPS }, // Hook
-  scene2: { start: 17 * FPS,   duration: 17 * FPS }, // Prompt vs context
-  scene3: { start: 34 * FPS,   duration: 22 * FPS }, // What goes into context
-  scene4: { start: 56 * FPS,   duration: 18 * FPS }, // The window is finite
-  scene5: { start: 74 * FPS,   duration: 19 * FPS }, // Curation is the skill
-  scene6: { start: 93 * FPS,   duration: 18 * FPS }, // Right info, right place, right time
-  scene7: { start: 111 * FPS,  duration: 16 * FPS }, // Why it matters
-  scene8: { start: 127 * FPS,  duration: 17 * FPS }, // Recap + CTA
-  scene9: { start: 144 * FPS, duration: 14 * FPS }, // Like & Subscribe CTA
+  scene1: { start: 0, duration: 1320 }, // Hook — needle vs haystack
+  scene2: { start: 0, duration: 1260 }, // The core problem — retrieve on demand
+  scene3: { start: 0, duration: 2220 }, // Index it right — chunking + contextual retrieval
+  scene4: { start: 0, duration: 2280 }, // Hybrid + rerank — the modern stack (-67%)
+  scene5: { start: 0, duration: 2100 }, // Agentic retrieval — the search loop
+  scene6: { start: 0, duration: 1620 }, // Just-in-time + memory retrieval
+  scene7: { start: 0, duration: 1440 }, // RAG vs long context — use both
+  scene8: { start: 0, duration: 1200 }, // Why it matters — retrieval = senses
+  scene9: { start: 0, duration: 420 },  // Like & Subscribe CTA (~14s choreography)
 };
 
-// Sum of scene durations (144s) minus the 7 overlapping crossfades.
-export const TOTAL_FRAMES = 158 * FPS - 8 * XFADE; // ~2:33 (+ CTA)
+// Sum of scene durations minus the overlapping crossfades (one per gap between scenes).
+export const TOTAL_FRAMES =
+  Object.values(TIMINGS).reduce((s, t) => s + t.duration, 0) -
+  (Object.keys(TIMINGS).length - 1) * XFADE;

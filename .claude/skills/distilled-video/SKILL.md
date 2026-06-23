@@ -101,6 +101,7 @@ Register each composition in `remotion-src/Root.tsx`. Script in `scripts/tNN-*.m
 - **Don't oversize boxes.** Size cards/boxes to their content + padding; an over-tall box collides with the caption/footnote below it. Reduce box height rather than letting things overlap.
 - **Guard against NaN.** Keep `interpolate` inputs and any array indices finite — clamp time-derived indices to ≥ 0 (e.g. `Math.max(0, …)`) so frames before a phase starts don't produce a negative index → undefined → NaN → render crash.
 - **Verify THOROUGHLY with stills** before declaring done: sample every phase AND every phase boundary of each scene (not just one mid-phase frame), and actually open/inspect the images. A subagent that only checks safe frames will miss the early/boundary breakage.
+- **DELETE the verification stills/screenshots when done** (Narsi's standing ask). Render them to the session scratchpad (never the repo), inspect, fix, then remove them — leave no screenshots or temp render scripts behind in the repo or scratchpad. Don't commit stills.
 
 ## Snippets
 

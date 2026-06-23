@@ -3,32 +3,32 @@ import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { TIMINGS, XFADE } from "./timings";
 import { Scene1Hook } from "./scenes/Scene1Hook";
-import { Scene2PromptVsContext } from "./scenes/Scene2PromptVsContext";
-import { Scene3WhatGoesIn } from "./scenes/Scene3WhatGoesIn";
-import { Scene4FiniteWindow } from "./scenes/Scene4FiniteWindow";
-import { Scene5Curation } from "./scenes/Scene5Curation";
-import { Scene6JustInTime } from "./scenes/Scene6JustInTime";
-import { Scene7WhyMatters } from "./scenes/Scene7WhyMatters";
-import { Scene8CTA } from "./scenes/Scene8CTA";
+import { Scene2CoreProblem } from "./scenes/Scene2CoreProblem";
+import { Scene3Indexing } from "./scenes/Scene3Indexing";
+import { Scene4HybridRerank } from "./scenes/Scene4HybridRerank";
+import { Scene5AgenticRetrieval } from "./scenes/Scene5AgenticRetrieval";
+import { Scene6JustInTimeMemory } from "./scenes/Scene6JustInTimeMemory";
+import { Scene7VsLongContext } from "./scenes/Scene7VsLongContext";
+import { Scene8WhyItMatters } from "./scenes/Scene8WhyItMatters";
 import { Scene9CTA } from "./scenes/Scene9CTA";
 
-// Trending 03 — Context engineering
-// Scenes are crossfaded with @remotion/transitions. Each transition overlaps
-// the trailing hold of one scene with the intro of the next, so no content is
-// lost. Timings (incl. XFADE) live in timings.ts.
+// Trending 03 — How AI Agents Find the RIGHT Information (Agentic Retrieval).
+// Script: scripts/t03-agentic-retrieval.md. Spine: Index -> Retrieve -> Reason.
+// SILENT preview for now — audio gets recorded per scene tomorrow and wired with
+// <Audio> (skill Step 7); durations in timings.ts are pre-record estimates.
 
 export const T03: React.FC = () => {
   // IMPORTANT: build the children array INSIDE the component body. Putting JSX
   // in a module-level const breaks the esbuild bundler ("React is not defined").
   const SCENES = [
     { C: Scene1Hook, duration: TIMINGS.scene1.duration },
-    { C: Scene2PromptVsContext, duration: TIMINGS.scene2.duration },
-    { C: Scene3WhatGoesIn, duration: TIMINGS.scene3.duration },
-    { C: Scene4FiniteWindow, duration: TIMINGS.scene4.duration },
-    { C: Scene5Curation, duration: TIMINGS.scene5.duration },
-    { C: Scene6JustInTime, duration: TIMINGS.scene6.duration },
-    { C: Scene7WhyMatters, duration: TIMINGS.scene7.duration },
-    { C: Scene8CTA, duration: TIMINGS.scene8.duration },
+    { C: Scene2CoreProblem, duration: TIMINGS.scene2.duration },
+    { C: Scene3Indexing, duration: TIMINGS.scene3.duration },
+    { C: Scene4HybridRerank, duration: TIMINGS.scene4.duration },
+    { C: Scene5AgenticRetrieval, duration: TIMINGS.scene5.duration },
+    { C: Scene6JustInTimeMemory, duration: TIMINGS.scene6.duration },
+    { C: Scene7VsLongContext, duration: TIMINGS.scene7.duration },
+    { C: Scene8WhyItMatters, duration: TIMINGS.scene8.duration },
     { C: Scene9CTA, duration: TIMINGS.scene9.duration },
   ];
 
@@ -36,7 +36,9 @@ export const T03: React.FC = () => {
   SCENES.forEach(({ C, duration }, i) => {
     children.push(
       <TransitionSeries.Sequence key={`s${i}`} durationInFrames={duration}>
-        <C />
+        <AbsoluteFill>
+          <C />
+        </AbsoluteFill>
       </TransitionSeries.Sequence>
     );
     if (i < SCENES.length - 1) {

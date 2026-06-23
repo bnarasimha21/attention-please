@@ -1,13 +1,14 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, staticFile, Img } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { theme } from "../../../remotion-src/theme";
 import { SceneBackground, gradientText, CameraRig, pop } from "../../../remotion-src/visuals";
+import { Sfx } from "../../../remotion-src/sfx";
 
-// Scene 9 — Like & Subscribe CTA
-// Channel icon springs in → wordmark → an animated cursor taps the LIKE button
-// (fills + sparks), then the SUBSCRIBE button (turns to "Subscribed ✓" + bell
-// rings). Closes with "See you in the next one."
+// Scene 9 - Like & Subscribe CTA (Distilled AI)
+// Channel wordmark + handle spring in, then an animated cursor taps LIKE
+// (fills + sparks) and SUBSCRIBE (turns to "Subscribed" + bell). Timeline is
+// compressed to ~6.4s of action; the scene then holds. Closing line teases the
+// next videos (generic - no specific topic promised).
 
-// short press "dip" around frame t
 const pressDip = (frame: number, t: number) =>
   interpolate(frame, [t - 4, t, t + 6], [0, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
@@ -15,37 +16,33 @@ export const Scene9CTA: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // icon + brand
-  const iconSpring = pop(frame, fps, fps * 0.4, { damping: 11 });
-  const iconGlow = 0.5 + 0.5 * Math.sin(frame / 9);
-  const brandT = interpolate(frame, [fps * 1.3, fps * 2.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const headlineT = interpolate(frame, [fps * 2.6, fps * 3.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // brand
+  const brandT = interpolate(frame, [fps * 0.9, fps * 1.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const headlineT = interpolate(frame, [fps * 1.8, fps * 2.4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // buttons pop in
-  const likeIn = pop(frame, fps, fps * 3.6, { damping: 11 });
-  const subIn = pop(frame, fps, fps * 4.1, { damping: 11 });
+  // buttons appear
+  const likeIn = pop(frame, fps, fps * 2.4, { damping: 11 });
+  const subIn = pop(frame, fps, fps * 2.8, { damping: 11 });
 
-  // click moments
-  const likeClick = fps * 6.0;
-  const subClick = fps * 8.6;
+  // click moments (compressed)
+  const likeClick = fps * 3.7;
+  const subClick = fps * 5.1;
   const likePressed = frame > likeClick;
   const subPressed = frame > subClick;
   const likeFill = interpolate(frame, [likeClick - 2, likeClick + 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const subFill = interpolate(frame, [subClick - 2, subClick + 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // animated cursor: enters → like → subscribe
-  const cx = interpolate(frame, [fps * 4.4, fps * 5.9, fps * 7.2, fps * 8.5], [1340, 720, 720, 1135], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const cy = interpolate(frame, [fps * 4.4, fps * 5.9, fps * 7.2, fps * 8.5], [980, 712, 712, 712], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // animated cursor: enters, taps like, taps subscribe
+  const cx = interpolate(frame, [fps * 2.6, fps * 3.6, fps * 4.4, fps * 5.0], [1340, 720, 720, 1135], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const cy = interpolate(frame, [fps * 2.6, fps * 3.6, fps * 4.4, fps * 5.0], [980, 712, 712, 712], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const cursorClickDip = Math.max(pressDip(frame, likeClick), pressDip(frame, subClick));
 
-  // bell ring wiggle after subscribe
   const bellWiggle = subPressed ? Math.sin((frame - subClick) / 1.6) * interpolate(frame, [subClick, subClick + fps * 1.4], [18, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 0;
 
-  // sparks on like
   const sparks = Array.from({ length: 8 });
   const sparkT = interpolate(frame, [likeClick, likeClick + fps * 0.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  const closeT = interpolate(frame, [fps * 10.2, fps * 11.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const closeT = interpolate(frame, [fps * 5.8, fps * 6.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   const likeDip = pressDip(frame, likeClick);
   const subDip = pressDip(frame, subClick);
@@ -53,34 +50,26 @@ export const Scene9CTA: React.FC = () => {
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.accentWarm} />
+      {/* SFX: pop on the Like tap, success when Subscribed, stinger to close */}
+      <Sfx name="pop" at={likeClick} volume={0.4} />
+      <Sfx name="success" at={subClick} volume={0.4} />
+      <Sfx name="stinger" at={fps * 6.3} volume={0.4} />
 
-      <CameraRig intensity={0.6} push={0.022} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-      {/* Channel icon */}
-      <div style={{
-        position: "absolute", top: 150,
-        transform: `scale(${0.8 + iconSpring * 0.2})`,
-      }}>
-        <div style={{
-          width: 180, height: 180, borderRadius: 40, overflow: "hidden",
-          boxShadow: `0 0 ${50 + iconGlow * 60}px ${theme.accentWarm}aa, 0 24px 70px rgba(0,0,0,0.6)`,
-        }}>
-          <Img src={staticFile("icon.png")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        </div>
-      </div>
+      <CameraRig style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
 
-      {/* Wordmark */}
-      <div style={{ position: "absolute", top: 360, textAlign: "center", opacity: brandT, transform: `translateY(${(1 - brandT) * 18}px)` }}>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 64, fontWeight: 800, color: theme.text, letterSpacing: 2 }}>
-          Attention<span style={gradientText("#fbbf24", theme.accentWarm)}> Please</span>
+      {/* Wordmark + handle */}
+      <div style={{ position: "absolute", top: 300, textAlign: "center", opacity: brandT, transform: `translateY(${(1 - brandT) * 18}px)` }}>
+        <div style={{ fontFamily: theme.fontSans, fontSize: 76, fontWeight: 800, color: theme.text, letterSpacing: 1 }}>
+          Distilled<span style={gradientText("#fbbf24", theme.accentWarm)}> AI</span>
         </div>
-        <div style={{ fontFamily: theme.fontSans, fontSize: 26, color: theme.textMuted, marginTop: 8 }}>
-          AI concepts, animated clearly
+        <div style={{ fontFamily: theme.fontMono, fontSize: 30, color: theme.accentWarm, marginTop: 12, letterSpacing: 1 }}>
+          @Distilled_AI_Studio
         </div>
       </div>
 
       {/* Headline */}
-      <div style={{ position: "absolute", top: 510, textAlign: "center", opacity: headlineT, transform: `translateY(${(1 - headlineT) * 16}px)`, fontFamily: theme.fontSans, fontSize: 40, fontWeight: 700, color: theme.text }}>
-        If this made something click —
+      <div style={{ position: "absolute", top: 470, textAlign: "center", opacity: headlineT, transform: `translateY(${(1 - headlineT) * 16}px)`, fontFamily: theme.fontSans, fontSize: 42, fontWeight: 700, color: theme.text }}>
+        Found this useful?
       </div>
 
       {/* Buttons */}
@@ -89,7 +78,7 @@ export const Scene9CTA: React.FC = () => {
         <div style={{
           position: "relative",
           opacity: likeIn,
-          transform: `translateY(${(1 - likeIn) * 30}px) scale(${(0.85 + likeIn * 0.15) * (1 - likeDip * 0.08)})`,
+          transform: `translateY(${(1 - likeIn) * 30}px) scale(${1 - likeDip * 0.08})`,
           display: "flex", alignItems: "center", gap: 18,
           padding: "22px 40px", borderRadius: 999,
           background: likePressed
@@ -100,7 +89,6 @@ export const Scene9CTA: React.FC = () => {
         }}>
           <span style={{ fontSize: 46, transform: `rotate(${-likeFill * 8}deg)`, display: "inline-block" }}>👍</span>
           <span style={{ fontFamily: theme.fontSans, fontSize: 38, fontWeight: 800, color: theme.text }}>Like</span>
-          {/* sparks */}
           {sparkT > 0 && sparkT < 1 && sparks.map((_, i) => {
             const ang = (i / sparks.length) * Math.PI * 2;
             const d = sparkT * 70;
@@ -118,7 +106,7 @@ export const Scene9CTA: React.FC = () => {
         {/* SUBSCRIBE */}
         <div style={{
           opacity: subIn,
-          transform: `translateY(${(1 - subIn) * 30}px) scale(${(0.85 + subIn * 0.15) * (1 - subDip * 0.08)})`,
+          transform: `translateY(${(1 - subIn) * 30}px) scale(${1 - subDip * 0.08})`,
           display: "flex", alignItems: "center", gap: 16,
           padding: "22px 44px", borderRadius: 999,
           background: subPressed ? "linear-gradient(160deg, #2a2a32, #1a1a20)" : "linear-gradient(160deg, #ef4444, #b91c1c)",
@@ -145,7 +133,6 @@ export const Scene9CTA: React.FC = () => {
         <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
           <path d="M4 2 L4 19 L9 14.5 L12.5 22 L15.5 20.5 L12 13.5 L18.5 13 Z" fill="#ffffff" stroke="#0a0a0a" strokeWidth="1.2" strokeLinejoin="round" />
         </svg>
-        {/* click ripple */}
         {cursorClickDip > 0.2 && (
           <div style={{
             position: "absolute", left: -10, top: -10, width: 40, height: 40, borderRadius: 20,
@@ -155,13 +142,14 @@ export const Scene9CTA: React.FC = () => {
         )}
       </div>
 
-      {/* Closing line */}
+      {/* Closing line - generic teaser */}
       <div style={{
-        position: "absolute", bottom: 90, width: "100%", textAlign: "center",
+        position: "absolute", bottom: 200, width: "100%", textAlign: "center",
         opacity: closeT, transform: `translateY(${(1 - closeT) * 14}px)`,
-        fontFamily: theme.fontSans, fontSize: 34, color: theme.textMuted,
+        fontFamily: theme.fontSans, fontSize: 32, color: theme.textMuted,
+        padding: "0 200px", lineHeight: 1.4,
       }}>
-        See you in the <span style={{ color: theme.accentWarm, fontWeight: 700 }}>next one.</span>
+        More deep dives on <span style={{ color: theme.accentWarm, fontWeight: 700 }}>building agents that actually work</span> - dropping soon.
       </div>
       </CameraRig>
     </AbsoluteFill>
