@@ -9,7 +9,8 @@ Focused on the **trending track**: short, punchy explainers on what's the talk o
 - `videos/` — one folder per video (`tNN-slug/`), each with `TNN.tsx`, `timings.ts`, and `scenes/`
 - `scripts/` — narration scripts + scene-by-scene animation guides (`tNN-slug.md`)
 - `remotion-src/` — shared design system + motion toolkit (`theme.ts`, `visuals.tsx`) and `Root.tsx`
-- `public/` — static assets (channel `icon.png`)
+- `assets/` — source/design files not used at render time: `logo/` (brand marks) and `thumbnails/` (YouTube thumbnails, one per video)
+- `public/` — Remotion `staticFile()` runtime root: `icon.png` and per-video narration under `audio/<tNN-slug>/` (recorded `*.m4a` is gitignored — kept local)
 
 ## Format
 - Length: ~2–3 min per video (tightened preview cut; lengthen `timings.ts` after recording voiceover)
