@@ -1,0 +1,32 @@
+1
+00:00:00,000 --> 00:00:04,020
+ You give your agent a task, it starts running.
+
+2
+00:00:04,020 --> 00:00:07,520
+ You check back 20 minutes later, it's still running.
+
+3
+00:00:07,520 --> 00:00:13,320
+ Your bill hit just $40, and it hasn't made a single useful change.
+
+4
+00:00:13,320 --> 00:00:15,000
+ That's not a model problem.
+
+5
+00:00:15,000 --> 00:00:17,500
+ The model is doing exactly what you told it.
+
+6
+00:00:17,500 --> 00:00:23,280
+ The problem is the harness around it, specifically the harness failed to prevent.
+
+7
+00:00:23,280 --> 00:00:25,960
+ There are four ways a harness can go wrong.
+
+8
+00:00:25,960 --> 00:00:28,320
+ Once you see them, you will recognize them everywhere.
+

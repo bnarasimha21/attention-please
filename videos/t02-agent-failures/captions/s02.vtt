@@ -1,0 +1,17 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:06.000
+ These 4 failure modes aren't random bugs, they are architectural gaps.
+
+00:00:06.000 --> 00:00:09.000
+ Things are naive, harness leaves open by default.
+
+00:00:09.000 --> 00:00:18.000
+ A harness that does nothing special will loop forever, bury itself in junk, hand the model a hundred tools it can't choose between
+
+00:00:18.000 --> 00:00:22.000
+ and let it delete your database on the first bad suggestion.
+
+00:00:22.000 --> 00:00:25.000
+ Here is each one and the exact fix.
+

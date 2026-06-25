@@ -1,0 +1,140 @@
+1
+00:00:00,000 --> 00:00:04,020
+ The most dangerous failure is the quite one.
+
+2
+00:00:04,020 --> 00:00:09,840
+ An agent that auto approves everything will eventually do something catastrophic.
+
+3
+00:00:09,840 --> 00:00:13,680
+ Not because it's malicious, because it's confident.
+
+4
+00:00:13,680 --> 00:00:15,780
+ Models are fluent and decisive.
+
+5
+00:00:15,780 --> 00:00:22,200
+ They propose force pushes, schema drops, curl to shell scripts with the same calm tone they
+
+6
+00:00:22,200 --> 00:00:25,400
+ use to suggest a variable rename.
+
+7
+00:00:25,400 --> 00:00:27,940
+ Over-permission is trusting that tone.
+
+8
+00:00:27,940 --> 00:00:30,940
+ The fix is a three tier permission model.
+
+9
+00:00:30,940 --> 00:00:38,160
+ Read-only actions, file reads, searches, directory listings, auto-approved, no interruption.
+
+10
+00:00:38,160 --> 00:00:44,620
+ State changing actions, edits, API calls, package installs, pause and surface to the
+
+11
+00:00:44,620 --> 00:00:47,200
+ human before executing.
+
+12
+00:00:47,200 --> 00:00:53,840
+ Destructive or irreversible actions, deletes, force pushes, anything touching production,
+
+13
+00:00:53,840 --> 00:00:59,400
+ blocked by default, require explicit opt-in every single time.
+
+14
+00:00:59,400 --> 00:01:02,240
+ The keyword is irreversible.
+
+15
+00:01:02,240 --> 00:01:04,180
+ Ask this about every tool.
+
+16
+00:01:04,180 --> 00:01:08,680
+ If the model calls this on bad data, can I undo it in 30 seconds?
+
+17
+00:01:08,680 --> 00:01:12,440
+ If the answer is no, that tool needs a gate.
+
+18
+00:01:12,440 --> 00:01:17,620
+ If the answer is I can't undo it at all, it needs a hard block.
+
+19
+00:01:17,620 --> 00:01:20,000
+ But tiers only decide what's allowed.
+
+20
+00:01:20,000 --> 00:01:25,660
+ Two more layers decide what happens when something slips through.
+
+21
+00:01:25,660 --> 00:01:26,740
+ Sandbox it.
+
+22
+00:01:26,740 --> 00:01:32,600
+ Run the agent in a box that can only touch its working directory and only reach the domains
+
+23
+00:01:32,600 --> 00:01:34,240
+ you approve.
+
+24
+00:01:34,240 --> 00:01:36,040
+ Everything else is walled off.
+
+25
+00:01:36,040 --> 00:01:41,720
+ Anthropic says this alone cut their permission prompts by around 84%.
+
+26
+00:01:41,720 --> 00:01:46,600
+ Contain the blast radius and you don't need to wet every single move.
+
+27
+00:01:46,600 --> 00:01:48,320
+ Know the real threat.
+
+28
+00:01:48,320 --> 00:01:52,480
+ The nightmare isn't a clumsy agent, it's a hijacked one.
+
+29
+00:01:52,480 --> 00:01:55,520
+ Simon Willison calls it the lethal trifecta.
+
+30
+00:01:55,520 --> 00:02:01,880
+ The moment an agent can read private data in just untrusted content and send data out,
+
+31
+00:02:01,880 --> 00:02:06,560
+ one poisoned webpage or email can turn its own permissions against you.
+
+32
+00:02:06,560 --> 00:02:13,080
+ The fix is to break one leg, cut its ability to phone home or gate the send email and external
+
+33
+00:02:13,080 --> 00:02:15,640
+ right actions specifically.
+
+34
+00:02:15,640 --> 00:02:22,760
+ And keep an undo, plan then apply, approve the diff before it lands like terraform, checkpoints
+
+35
+00:02:22,760 --> 00:02:27,200
+ and git commits so any bad write is one command from gone.
+

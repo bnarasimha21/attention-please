@@ -1,0 +1,156 @@
+1
+00:00:00,000 --> 00:00:06,100
+ The agentic loop has no natural stopping condition by design.
+
+2
+00:00:06,100 --> 00:00:08,920
+ Each iteration costs tokens.
+
+3
+00:00:08,920 --> 00:00:14,120
+ Input tokens for the full context you are resending every turn plus output tokens for
+
+4
+00:00:14,120 --> 00:00:15,360
+ the reply.
+
+5
+00:00:15,360 --> 00:00:23,920
+ On a 200,000 token context, one loop iteration can cost 30 cents, 50 iterations, 15 dollars.
+
+6
+00:00:23,920 --> 00:00:29,400
+ And a model that's stuck chasing a bug it can't reproduce or oscillating between two
+
+7
+00:00:29,400 --> 00:00:34,960
+ tool calls will happily loop until you stop it or your credit goes out.
+
+8
+00:00:34,960 --> 00:00:37,000
+ The fix has two parts.
+
+9
+00:00:37,000 --> 00:00:38,960
+ Hard iteration limits.
+
+10
+00:00:38,960 --> 00:00:43,320
+ Set a max iteration's budget before the agent starts.
+
+11
+00:00:43,320 --> 00:00:44,320
+ Not a suggestion.
+
+12
+00:00:44,320 --> 00:00:45,720
+ A kill switch.
+
+13
+00:00:45,720 --> 00:00:49,020
+ Claude code's default is around 200.
+
+14
+00:00:49,020 --> 00:00:54,440
+ Production systems are often tighter, 10 to 20 for focused tasks.
+
+15
+00:00:54,440 --> 00:00:55,840
+ Stall detection.
+
+16
+00:00:55,840 --> 00:01:00,520
+ If the last three tool calls are identical you are in a loop.
+
+17
+00:01:00,520 --> 00:01:01,520
+ Surface it.
+
+18
+00:01:01,520 --> 00:01:02,520
+ Stop the agent.
+
+19
+00:01:02,520 --> 00:01:05,320
+ Ask the human what to do next.
+
+20
+00:01:05,320 --> 00:01:09,160
+ Don't let the model retry its way to the bankruptcy.
+
+21
+00:01:09,160 --> 00:01:11,680
+ But iterations are just one meter.
+
+22
+00:01:11,680 --> 00:01:14,000
+ Runaway cost runs on three.
+
+23
+00:01:14,000 --> 00:01:16,360
+ Steps, tokens and wall clock time.
+
+24
+00:01:16,360 --> 00:01:18,200
+ So budget all the three.
+
+25
+00:01:18,200 --> 00:01:20,160
+ A token card.
+
+26
+00:01:20,160 --> 00:01:21,900
+ A hard time out.
+
+27
+00:01:21,900 --> 00:01:23,760
+ Not only a loop limit.
+
+28
+00:01:23,760 --> 00:01:26,560
+ Very serious framework shifts these now.
+
+29
+00:01:26,560 --> 00:01:30,560
+ Langraff halts at 25 steps by default.
+
+30
+00:01:30,560 --> 00:01:34,080
+ Autogen has a separate token and time out cutoffs.
+
+31
+00:01:34,080 --> 00:01:39,400
+ The OpenAI agent's SDK cap turns and throws the moment you blow past it.
+
+32
+00:01:39,400 --> 00:01:42,240
+ And the smartest stop isn't a counter at all.
+
+33
+00:01:42,240 --> 00:01:43,240
+ It's progress.
+
+34
+00:01:43,240 --> 00:01:48,560
+ If the tests are still read and the file is unchanged, the agent isn't working.
+
+35
+00:01:48,560 --> 00:01:50,120
+ It's failing.
+
+36
+00:01:50,120 --> 00:01:53,560
+ Stop on no progress even at iteration three.
+
+37
+00:01:53,560 --> 00:01:55,600
+ One number to hold onto.
+
+38
+00:01:55,600 --> 00:01:58,920
+ Cost scales with context length times iterations.
+
+39
+00:01:58,920 --> 00:02:03,200
+ A bloated context makes runaway loops catastrophically expensive.
+

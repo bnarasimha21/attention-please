@@ -1,0 +1,194 @@
+# SCENE 1  (clip 28.3s)
+   0.00	   4.02	You give your agent a task, it starts running.
+   4.02	   7.52	You check back 20 minutes later, it's still running.
+   7.52	  13.32	Your bill just hit $40, and it hasn't made a single useful change.
+  13.32	  15.00	That's not a model problem.
+  15.00	  17.50	The model is doing exactly what you told it.
+  17.50	  23.28	The problem is the harness around it, specifically the harness failed to prevent.
+  23.28	  25.96	There are four ways a harness can go wrong.
+  25.96	  28.32	Once you see them, you will recognize them everywhere.
+
+# SCENE 2  (clip 25.0s)
+   0.00	   6.00	These 4 failure modes aren't random bugs, they are architectural gaps.
+   6.00	   9.00	Things are naive, harness leaves open by default.
+   9.00	  18.00	A harness that does nothing special will loop forever, bury itself in junk, hand the model a hundred tools it can't choose between
+  18.00	  22.00	and let it delete your database on the first bad suggestion.
+  22.00	  25.00	Here is each one and the exact fix.
+
+# SCENE 3  (clip 123.2s)
+   0.00	   6.10	The agentic loop has no natural stopping condition by design.
+   6.10	   8.92	Each iteration costs tokens.
+   8.92	  14.12	Input tokens for the full context you are resending every turn plus output tokens for
+  14.12	  15.36	the reply.
+  15.36	  23.92	On a 200,000 token context, one loop iteration can cost 30 cents, 50 iterations, 15 dollars.
+  23.92	  29.40	And a model that's stuck chasing a bug it can't reproduce or oscillating between two
+  29.40	  34.96	tool calls will happily loop until you stop it or your credit card does.
+  34.96	  37.00	The fix has two parts.
+  37.00	  38.96	Hard iteration limits.
+  38.96	  43.32	Set a max iteration's budget before the agent starts.
+  43.32	  44.32	Not a suggestion.
+  44.32	  45.72	A kill switch.
+  45.72	  49.02	Claude code's default is around 200.
+  49.02	  54.44	Production systems are often tighter, 10 to 20 for focused tasks.
+  54.44	  55.84	Stall detection.
+  55.84	  60.52	If the last three tool calls are identical you are in a loop.
+  60.52	  61.52	Surface it.
+  61.52	  62.52	Stop the agent.
+  62.52	  65.32	Ask the human what to do next.
+  65.32	  69.16	Don't let the model retry its way to the bankruptcy.
+  69.16	  71.68	But iterations are just one meter.
+  71.68	  74.00	Runaway cost runs on three.
+  74.00	  76.36	Steps, tokens and wall clock time.
+  76.36	  78.20	So budget all the three.
+  78.20	  80.16	A token card.
+  80.16	  81.90	A hard time out.
+  81.90	  83.76	Not only a loop limit.
+  83.76	  86.56	Very serious framework shifts these now.
+  86.56	  90.56	LangGraph halts at 25 steps by default.
+  90.56	  94.08	AutoGen has a separate token and time out cutoffs.
+  94.08	  99.40	The OpenAI agent's SDK cap turns and throws the moment you blow past it.
+  99.40	 102.24	And the smartest stop isn't a counter at all.
+ 102.24	 103.24	It's progress.
+ 103.24	 108.56	If the tests are still red and the file is unchanged, the agent isn't working.
+ 108.56	 110.12	It's failing.
+ 110.12	 113.56	Stop on no progress even at iteration three.
+ 113.56	 115.60	One number to hold onto.
+ 115.60	 118.92	Cost scales with context length times iterations.
+ 118.92	 123.20	A bloated context makes runaway loops catastrophically expensive.
+
+# SCENE 4  (clip 119.8s)
+   0.00	   2.64	Here is the one that surprises people.
+   2.64	   6.00	A longer conversation makes the model dumber.
+   6.00	  10.00	The model re-reads the entire context every single turn.
+  10.00	  13.28	Early in a task, the context is tight.
+  13.28	  15.60	System prompt, tools, the goal.
+  15.60	  17.76	But tool results pile up fast.
+  17.76	  20.88	A grep that returned 800 lines.
+  20.88	  24.12	A file read that was only partially relevant.
+  24.12	  27.60	A failed attempt that's now just noise.
+  27.60	  31.00	By turn 30, the model is wading through thousands of tokens
+  31.00	  35.20	of junk to find the three lines that actually matter.
+  35.20	  37.24	This is context rot.
+  37.24	  39.60	And it causes real regressions.
+  39.60	  42.08	The model starts losing the thread,
+  42.08	  44.40	contradicting its earlier decisions,
+  44.40	  47.88	forgetting things it knew 10 turns ago.
+  47.88	  50.24	The fix is context engineering.
+  50.24	  52.76	You don't dump everything into the prompt.
+  52.76	  54.12	You curate it.
+  54.12	  57.24	Summaries instead of raw tool output.
+  57.24	  61.36	Truncated file reads with the relevant section highlighted.
+  61.36	  66.00	Compaction that preserves decisions, not transcripts.
+  66.00	  68.76	Curation has a deeper move than trimming.
+  68.76	  71.12	Get the junk out of the window entirely.
+  71.12	  72.84	Offload to a subagent.
+  72.84	  75.80	Let a helper burn 30,000 tokens reading
+  75.80	  79.36	and hand back a 2,000 token summary.
+  79.36	  81.96	The noise never touches the main thread.
+  81.96	  83.64	Write to a memory file.
+  83.64	  86.32	Notes on disk, the agent re-reads.
+  86.32	  88.84	So state outlives the window.
+  88.84	  90.32	And mind the middle.
+  90.32	  92.72	Models reliably lose what's buried
+  92.72	  94.80	in the middle of a long context.
+  94.80	  98.92	It's a U-shaped curve, sharp at the start and end,
+  98.92	 102.56	weak in between, and a bigger window doesn't fix it.
+ 102.56	 105.52	Put what matters at the edges.
+ 105.52	 108.52	Think of the harness as the model's working memory.
+ 108.52	 111.36	Treat it like RAM, not a hard drive.
+ 111.36	 114.64	Keep only what the model needs right now.
+ 114.64	 116.40	Everything else is noise.
+ 116.40	 119.84	And noise costs you IQ points per turn.
+
+# SCENE 5  (clip 123.2s)
+   0.00	   4.64	More tools feels like more power, it's not.
+   4.64	  10.48	When you hand a model 50 tools, you have given it a decision problem on every turn.
+  10.48	  16.56	Which tool fits here, read file or get file contents, search code base or grep files.
+  16.56	  23.00	The names blur, the descriptions overlap and the model makes bad picks or hedges, calling
+  23.00	  25.80	two tools where one would do.
+  25.80	  29.48	Tool sprawl also inflates the context directly.
+  29.48	  34.92	Every tool definition, name, description, typed parameters, costs tokens before the
+  34.92	  37.44	model writes a single character.
+  37.44	  43.08	50 tools can burn 8000 tokens on tool schemas alone.
+  43.08	  44.08	The fix?
+  44.08	  46.20	Fewer, sharper tools.
+  46.20	  49.92	Each tool should do one thing with an unmistakable name.
+  49.92	  55.16	If two tools are overlapping descriptions, merge them or delete them.
+  55.16	  61.36	Cloud Code ships around 15 core tools, not as a limitation, but as a deliberate design
+  61.36	  62.36	choice.
+  62.36	  66.72	The model picks faster and picks better when the menu is short.
+  66.72	  73.20	A good rule of thumb, if you can't describe what a tool does in 5 words, it's too vague
+  73.20	  74.60	to be useful.
+  74.60	  78.28	But there is a sharper move than trimming the list by hand.
+  78.28	  80.24	Low tools on demand.
+  80.24	  86.52	Keep the big catalog, just expose the 3 to 5 relevant tools each turn, in Anthropics own
+  86.52	  89.64	testing that took 58 tools.
+  89.64	  97.56	55,000 tokens before you type a word, down to about 3,000 and lifted tool selection accuracy
+  97.56	 101.20	from 49 to 74%.
+ 101.20	 103.60	Same model, shorter menu.
+ 103.60	 106.72	One level further with Code Mode.
+ 106.72	 112.52	Let the model write code that calls the tools and filters the results before they ever hit
+ 112.52	 113.88	the context.
+ 113.88	 122.08	Anthropic measured a 37% token cut on complex tasks that fixes tool sprawl and context rot
+ 122.08	 123.24	in one stroke.
+
+# SCENE 6  (clip 147.2s)
+   0.00	   4.02	The most dangerous failure is the quite one.
+   4.02	   9.84	An agent that auto approves everything will eventually do something catastrophic.
+   9.84	  13.68	Not because it's malicious, because it's confident.
+  13.68	  15.78	Models are fluent and decisive.
+  15.78	  22.20	They propose force pushes, schema drops, curl to shell scripts with the same calm tone they
+  22.20	  25.40	use to suggest a variable rename.
+  25.40	  27.94	Over-permission is trusting that tone.
+  27.94	  30.94	The fix is a three tier permission model.
+  30.94	  38.16	Read-only actions, file reads, searches, directory listings, auto-approved, no interruption.
+  38.16	  44.62	State changing actions, edits, API calls, package installs, pause and surface to the
+  44.62	  47.20	human before executing.
+  47.20	  53.84	Destructive or irreversible actions, deletes, force pushes, anything touching production,
+  53.84	  59.40	blocked by default, require explicit opt-in every single time.
+  59.40	  62.24	The keyword is irreversible.
+  62.24	  64.18	Ask this about every tool.
+  64.18	  68.68	If the model calls this on bad data, can I undo it in 30 seconds?
+  68.68	  72.44	If the answer is no, that tool needs a gate.
+  72.44	  77.62	If the answer is I can't undo it at all, it needs a hard block.
+  77.62	  80.00	But tiers only decide what's allowed.
+  80.00	  85.66	Two more layers decide what happens when something slips through.
+  85.66	  86.74	Sandbox it.
+  86.74	  92.60	Run the agent in a box that can only touch its working directory and only reach the domains
+  92.60	  94.24	you approve.
+  94.24	  96.04	Everything else is walled off.
+  96.04	 101.72	Anthropic says this alone cut their permission prompts by around 84%.
+ 101.72	 106.60	Contain the blast radius and you don't need to vet every single move.
+ 106.60	 108.32	Know the real threat.
+ 108.32	 112.48	The nightmare isn't a clumsy agent, it's a hijacked one.
+ 112.48	 115.52	Simon Willison calls it the lethal trifecta.
+ 115.52	 121.88	The moment an agent can read private data, ingest untrusted content and send data out,
+ 121.88	 126.56	one poisoned webpage or email can turn its own permissions against you.
+ 126.56	 133.08	The fix is to break one leg, cut its ability to phone home or gate the send email and external
+ 133.08	 135.64	right actions specifically.
+ 135.64	 142.76	And keep an undo, plan then apply, approve the diff before it lands like terraform, checkpoints
+ 142.76	 147.20	and git commits so any bad write is one command from gone.
+
+# SCENE 7  (clip 43.6s)
+   0.00	   3.68	Notice what all four fixes have in common.
+   3.68	  10.96	They are defaults, a harness that does nothing will loop forever, rot its own context, drown
+  10.96	  15.80	the model in tools, and let it run free with no guardrails.
+  15.80	  19.84	Every single fix is something you have to deliberately add.
+  19.84	  21.92	That's the mindset shift.
+  21.92	  26.02	Building an agent isn't just picking the right model and plugging in tools.
+  26.02	  31.68	It's designing the constraints, the budgets, the curated context, the short menus and the
+  31.68	  38.12	permission tiers that keep a capable but directionless system actually useful.
+  38.12	  43.64	The model thinks the harness makes sure it doesn't think itself into a corner.
+
+# SCENE 8  (clip 31.4s)
+   0.00	   6.80	4 failure modes - 4 fixes Runaway loop - Hard iteration budgets and
+   6.80	  11.76	stall detection Context rot - curate the prompt, don't just
+  11.76	  16.96	append Tool sprawl - fewer, sharper tools with unmistakable
+  16.96	  22.20	names Over permission - read auto, write gate, destroy
+  22.20	  26.56	block If your agent is behaving strangely, odds
+  26.56	  31.44	are it's one of those four Now you know exactly where to look
+
+# SCENE 9  (clip 12.9s)
+   0.00	   6.06	If this clicked hit like and subscribe. There is more where this came from plenty
+   6.06	  12.90	more deep dives on building agents that actually work. See you in the next one.
+
