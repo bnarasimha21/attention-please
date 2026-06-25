@@ -16,8 +16,6 @@
 |-----|-------|------|----------------|
 | 01 | What is an agent harness? | "Claude Code isn't a CLI that calls Claude. It's a harness — and that's the real product." | LLM in the center → harness layers wrapping it (tools, permissions, memory, loop) |
 | 02 | Context engineering — the skill that's replacing prompt engineering | "Prompt engineering optimizes the question. Context engineering optimizes everything around it." | Prompt (small) vs context window (the whole stage) being assembled |
-| 03 | Context rot — why long conversations get dumber | "It's not your imagination. The longer the chat, the worse it gets." | Signal degrading across a long context, key facts buried/lost |
-| 04 | Subagents — giving each task its own brain | "Verbose work pollutes the main thread. So you spin off a clone." | Main agent → spawns subagent with isolated context → returns just the answer |
 | 05 | Skills vs prompts vs tools — when to use what | "Three ways to give an agent a new ability. Only one is right per job." | Decision tree: domain logic → skill, action → tool, instruction → prompt |
 | 06 | The agent loop — observe, plan, act, repeat | "Every agent is just a while-loop with a budget. Here's the budget part." | Loop animated with a token/step budget draining each cycle |
 | 07 | Context windows & compaction — how agents don't run out of room | "Your conversation is too big to fit. So the agent quietly rewrites it." | Context filling up → compaction summarizes old turns → room freed |
@@ -44,9 +42,6 @@
 
 | Day | Title | Hook | Core animation |
 |-----|-------|------|----------------|
-| 15 | Is RAG dead? | "Every other post says so. Let's actually settle it." | Classic RAG pipeline → crossed out → "it's complicated" reveal |
-| 16 | Test-time compute — why the best models now "think" before answering | "The biggest shift since transformers: pay more at answer-time, get more intelligence." | Fast guess vs deliberate reasoning chain, accuracy climbing with thinking |
-| 17 | Inside a reasoning model — what "thinking" actually is | "It's not magic. It's the model talking to itself first." | Hidden reasoning trace generating, then collapsing into the final answer |
 | 18 | Agentic retrieval — RAG that thinks before it searches | "The fix wasn't killing RAG. It was letting the agent drive it." | Query → agent reformulates into subqueries → multi-step retrieval |
 | 19 | Long context vs RAG vs memory — which one when | "Million-token windows changed the math. Here's the decision rule." | Three approaches side by side with the use-case that fits each |
 | 20 | Context architecture — what's replacing naive RAG | "Stop bolting retrieval on. Start designing the whole context." | Semantic layer + memory + retrieval composed into one context system |
@@ -74,7 +69,7 @@
 ## Notes
 - Each video: script → `scripts/tNN-slug.md`, Remotion code → `videos/tNN-slug/` (prefix `tNN`).
 - **Trending topics go stale fast.** Re-verify Days 19–23 (reasoning models, model landscape, local models) right before you record — names and numbers change monthly.
-- Shorts: the harness, context engineering, "is RAG dead?", and test-time compute days are the most viral-friendly — cut those first.
+- Shorts: the harness, context engineering, and agentic-retrieval days are the most viral-friendly — cut those first.
 
 ---
 
