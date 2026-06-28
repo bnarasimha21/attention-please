@@ -1,0 +1,72 @@
+1
+00:00:00,000 --> 00:00:04,360
+ Now to the part that's genuinely changing right now.
+
+2
+00:00:04,360 --> 00:00:09,920
+ In classic RAG, retrieval happens once before the model even starts thinking.
+
+3
+00:00:09,920 --> 00:00:12,640
+ Agentic retrieval asks a different question.
+
+4
+00:00:12,640 --> 00:00:15,460
+ What if the model drove the search itself?
+
+5
+00:00:15,460 --> 00:00:19,800
+ It's essentially the agent loop pointed at search.
+
+6
+00:00:19,800 --> 00:00:21,080
+ Here is what changes.
+
+7
+00:00:21,080 --> 00:00:26,080
+ The agent takes your question and reformulates it into a better query.
+
+8
+00:00:26,080 --> 00:00:30,720
+ If it's complex, it breaks it into sub-questions and searches each one.
+
+9
+00:00:30,720 --> 00:00:34,680
+ Then the key part, it looks at what came back and judges it.
+
+10
+00:00:34,680 --> 00:00:35,680
+ Do I have enough?
+
+11
+00:00:35,680 --> 00:00:39,440
+ No, the answer references something I haven't looked up yet.
+
+12
+00:00:39,440 --> 00:00:44,480
+ So it searches again and keeps going until it has what it needs.
+
+13
+00:00:44,480 --> 00:00:49,000
+ Instead of one blind grab, you get a small research loop.
+
+14
+00:00:49,000 --> 00:00:55,000
+ Ask something that takes three hops to answer and classic RAG tends to fall apart.
+
+15
+00:00:55,000 --> 00:00:58,840
+ While an agentic retrieval chains the hops and gets there.
+
+16
+00:00:58,840 --> 00:01:00,200
+ This isn't free though.
+
+17
+00:01:00,200 --> 00:01:04,460
+ It costs roughly three to ten times the tokens of classic RAG.
+
+18
+00:01:04,460 --> 00:01:09,440
+ So use it where the question is genuinely hard not to look up a simple fact.
+

@@ -1,4 +1,4 @@
-import { AbsoluteFill } from "remotion";
+import { AbsoluteFill, Audio, staticFile } from "remotion";
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { TIMINGS, XFADE } from "./timings";
@@ -14,30 +14,33 @@ import { Scene9CTA } from "./scenes/Scene9CTA";
 
 // Trending 03 — How AI Agents Find the RIGHT Information (Agentic Retrieval).
 // Script: scripts/t03-agentic-retrieval.md. Spine: Index -> Retrieve -> Reason.
-// SILENT preview for now — audio gets recorded per scene tomorrow and wired with
-// <Audio> (skill Step 7); durations in timings.ts are pre-record estimates.
+// Per-scene narration clips (public/audio/t03-agentic-retrieval/sNN.m4a) wired below;
+// scene durations in timings.ts = trimmed clip length + ~0.7s tail.
+
+const AUDIO_DIR = "audio/t03-agentic-retrieval";
 
 export const T03: React.FC = () => {
   // IMPORTANT: build the children array INSIDE the component body. Putting JSX
   // in a module-level const breaks the esbuild bundler ("React is not defined").
   const SCENES = [
-    { C: Scene1Hook, duration: TIMINGS.scene1.duration },
-    { C: Scene2CoreProblem, duration: TIMINGS.scene2.duration },
-    { C: Scene3Indexing, duration: TIMINGS.scene3.duration },
-    { C: Scene4HybridRerank, duration: TIMINGS.scene4.duration },
-    { C: Scene5AgenticRetrieval, duration: TIMINGS.scene5.duration },
-    { C: Scene6JustInTimeMemory, duration: TIMINGS.scene6.duration },
-    { C: Scene7VsLongContext, duration: TIMINGS.scene7.duration },
-    { C: Scene8WhyItMatters, duration: TIMINGS.scene8.duration },
-    { C: Scene9CTA, duration: TIMINGS.scene9.duration },
+    { C: Scene1Hook, duration: TIMINGS.scene1.duration, audio: "s01.m4a" },
+    { C: Scene2CoreProblem, duration: TIMINGS.scene2.duration, audio: "s02.m4a" },
+    { C: Scene3Indexing, duration: TIMINGS.scene3.duration, audio: "s03.m4a" },
+    { C: Scene4HybridRerank, duration: TIMINGS.scene4.duration, audio: "s04.m4a" },
+    { C: Scene5AgenticRetrieval, duration: TIMINGS.scene5.duration, audio: "s05.m4a" },
+    { C: Scene6JustInTimeMemory, duration: TIMINGS.scene6.duration, audio: "s06.m4a" },
+    { C: Scene7VsLongContext, duration: TIMINGS.scene7.duration, audio: "s07.m4a" },
+    { C: Scene8WhyItMatters, duration: TIMINGS.scene8.duration, audio: "s08.m4a" },
+    { C: Scene9CTA, duration: TIMINGS.scene9.duration, audio: "s09.m4a" },
   ];
 
   const children: React.ReactNode[] = [];
-  SCENES.forEach(({ C, duration }, i) => {
+  SCENES.forEach(({ C, duration, audio }, i) => {
     children.push(
       <TransitionSeries.Sequence key={`s${i}`} durationInFrames={duration}>
         <AbsoluteFill>
           <C />
+          <Audio src={staticFile(`${AUDIO_DIR}/${audio}`)} />
         </AbsoluteFill>
       </TransitionSeries.Sequence>
     );

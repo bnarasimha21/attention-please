@@ -84,7 +84,7 @@ export const Scene8WhyItMatters: React.FC = () => {
       <Sfx name="error" at={fps * 4.6} volume={0.35} />
       <Sfx name="success" at={fps * 10} volume={0.4} />
       <Sfx name="whoosh" at={fps * 16.6} volume={0.3} />
-      <Sfx name="stinger" at={fps * 30} volume={0.4} />
+      <Sfx name="stinger" at={fps * 30} volume={0.4} rate={1.04} />
 
       <CameraRig>
         {/* ---------- P1: contrast ---------- */}
@@ -97,7 +97,7 @@ export const Scene8WhyItMatters: React.FC = () => {
           <div style={{ position: "absolute", top: 360, left: 0, right: 0, textAlign: "center", fontFamily: theme.fontMono, fontSize: 40, color: theme.textDim }}>vs</div>
           {/* verdict */}
           <div style={{ position: "absolute", top: 836, width: "100%", textAlign: "center", opacity: verdict, transform: `translateY(${(1 - verdict) * 12}px)` }}>
-            <span style={{ fontFamily: theme.fontSans, fontSize: 38, fontWeight: 800, color: theme.accentGreen }}>The right context wins — even with the weaker model.</span>
+            <span style={{ fontFamily: theme.fontSans, fontSize: 38, fontWeight: 800, color: theme.accentGreen }}>The right context wins, even with the weaker model.</span>
           </div>
         </div>
 

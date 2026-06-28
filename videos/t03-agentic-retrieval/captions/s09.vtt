@@ -1,0 +1,50 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:03.700
+ Quick recap of how agents find the right context.
+
+00:00:03.700 --> 00:00:05.620
+ It starts at indexing.
+
+00:00:05.620 --> 00:00:09.580
+ Contextual retrieval, so your chunks carry their meaning.
+
+00:00:09.580 --> 00:00:12.580
+ Then hybrid search plus a re-ranker
+
+00:00:12.580 --> 00:00:15.220
+ pulls and sorts the best results.
+
+00:00:15.220 --> 00:00:18.660
+ Agentic retrieval lets the model run a real search loop
+
+00:00:18.660 --> 00:00:21.780
+ going multi-step until it has the answer.
+
+00:00:21.780 --> 00:00:24.540
+ It retrieves just-in-time mid-task
+
+00:00:24.540 --> 00:00:27.000
+ and works on memory the same way.
+
+00:00:27.000 --> 00:00:30.300
+ And large context windows don't replace any of this.
+
+00:00:30.300 --> 00:00:32.180
+ They work alongside it.
+
+00:00:32.180 --> 00:00:35.720
+ If this made things clearer, hit like and subscribe.
+
+00:00:35.720 --> 00:00:37.360
+ It genuinely helps the channel
+
+00:00:37.360 --> 00:00:39.840
+ and there's a whole series on building agents
+
+00:00:39.840 --> 00:00:41.280
+ that actually work.
+
+00:00:41.280 --> 00:00:42.480
+ See you in the next one.
+

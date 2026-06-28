@@ -1,0 +1,555 @@
+1
+00:00:00,000 --> 00:00:05,480
+Here is a problem that sounds simple but turns out to be one of the harder things in AI right
+
+2
+00:00:05,480 --> 00:00:06,580
+now.
+
+3
+00:00:06,580 --> 00:00:11,920
+You point an agent at your whole codebase or your company's entire knowledge base.
+
+4
+00:00:11,920 --> 00:00:17,400
+That's millions of tokens far more than fits in its context window.
+
+5
+00:00:17,400 --> 00:00:22,400
+Then you ask one question and the answer lives in maybe three sentences buried somewhere
+
+6
+00:00:22,400 --> 00:00:23,820
+in all of that.
+
+7
+00:00:23,820 --> 00:00:27,400
+So how does the agent find those three sentences?
+
+8
+00:00:27,400 --> 00:00:33,240
+If it dumps everything in, it slows down, it costs more, and it actually gets less accurate
+
+9
+00:00:33,240 --> 00:00:35,320
+which we covered last time.
+
+10
+00:00:35,320 --> 00:00:37,520
+The real skill is the opposite.
+
+11
+00:00:37,520 --> 00:00:43,000
+Pulling in only the right context exactly when it's needed, that's retrieval.
+
+12
+00:00:43,000 --> 00:00:45,640
+And it's changed a lot recently.
+
+13
+00:00:45,640 --> 00:00:46,400
+Let's walk through it.
+
+14
+00:00:46,767 --> 00:00:52,827
+let's frame the problem because it's the whole game your context window is small
+
+15
+00:00:52,827 --> 00:00:58,407
+the information the agent might need is enormous and you can't preload all of it
+
+16
+00:00:58,407 --> 00:01:04,427
+first because it doesn't fit and second because even if it did buying the answer
+
+17
+00:01:04,427 --> 00:01:10,147
+in a mountain of irrelevant text makes the model worse not better so instead
+
+18
+00:01:10,147 --> 00:01:15,587
+you let the model reach out and grab the exact piece it needs the moment it needs
+
+19
+00:01:15,587 --> 00:01:21,347
+it and nothing else that's all retrieval is the right context on demand you
+
+20
+00:01:21,347 --> 00:01:26,147
+already know the basic version that's a rag but the gap between a toy rag demo
+
+21
+00:01:26,147 --> 00:01:30,687
+and the retrieval that holds up in production is large and closing that gap
+
+22
+00:01:30,687 --> 00:01:36,807
+is the rest of this video it starts somewhere most people overlook
+
+23
+00:01:35,467 --> 00:01:39,467
+You already know the basic loop, embed your docs,
+
+24
+00:01:39,467 --> 00:01:42,667
+embed the query, grab the nearest chunks.
+
+25
+00:01:42,667 --> 00:01:45,547
+We will skip that because what actually decides
+
+26
+00:01:45,547 --> 00:01:49,767
+whether retrieval works happens earlier at indexing time
+
+27
+00:01:49,767 --> 00:01:52,307
+and most setups get it wrong.
+
+28
+00:01:52,307 --> 00:01:53,807
+Start with chunking.
+
+29
+00:01:53,807 --> 00:01:55,907
+The moment you split a document up,
+
+30
+00:01:55,907 --> 00:01:58,887
+each chunk loses the context around it.
+
+31
+00:01:58,887 --> 00:02:03,807
+A line like the fee is $50 gets stored as a naked blob
+
+32
+00:02:03,807 --> 00:02:07,767
+with no record that it lived under Section 4 refunds.
+
+33
+00:02:07,767 --> 00:02:10,187
+Retrieve it later and the model has no idea
+
+34
+00:02:10,187 --> 00:02:11,767
+what it's looking at.
+
+35
+00:02:11,767 --> 00:02:14,307
+Chunks too big and you drag in noise.
+
+36
+00:02:14,307 --> 00:02:16,447
+Too small and you lose the meaning.
+
+37
+00:02:16,447 --> 00:02:18,387
+This one decision sets a ceiling
+
+38
+00:02:18,387 --> 00:02:20,827
+on how good your system can get.
+
+39
+00:02:20,827 --> 00:02:23,027
+There's a useful upgrade here.
+
+40
+00:02:23,027 --> 00:02:26,007
+Anthropic calls it contextual retrieval.
+
+41
+00:02:26,007 --> 00:02:29,747
+Before you embed a chunk, a cheap model writes a short note
+
+42
+00:02:29,747 --> 00:02:33,487
+on where it sits in the document and prepends it.
+
+43
+00:02:33,487 --> 00:02:37,067
+So the fee is $50 becomes in the refund policy,
+
+44
+00:02:37,067 --> 00:02:38,787
+the fee is $50.
+
+45
+00:02:38,787 --> 00:02:42,107
+Same chunk, but now it carries its context.
+
+46
+00:02:42,107 --> 00:02:44,987
+In an anthropic own testing, that single change
+
+47
+00:02:44,987 --> 00:02:48,907
+to the embedding's cut field retrievals by about a third
+
+48
+00:02:48,907 --> 00:02:52,187
+before you have even touched the search.
+
+49
+00:02:52,187 --> 00:02:55,707
+Fix the index and everything downstream gets easier.
+
+50
+00:02:56,167 --> 00:03:00,967
+With a solid index, the next question is the search itself.
+
+51
+00:03:00,967 --> 00:03:03,667
+And there is a result here worth knowing.
+
+52
+00:03:03,667 --> 00:03:07,167
+Semantic search is good at understanding what you mean.
+
+53
+00:03:07,167 --> 00:03:12,707
+Ask how do I reset my password and it finds a doc titled account recovery steps with no
+
+54
+00:03:12,707 --> 00:03:14,527
+matching words at all.
+
+55
+00:03:14,527 --> 00:03:15,687
+That's powerful.
+
+56
+00:03:15,687 --> 00:03:21,847
+But it has a blind spot, exact terms, error codes, product IDs, a function name.
+
+57
+00:03:21,847 --> 00:03:28,207
+The meaning matching blurs those out and on some 2026 benchmarks, plain keyword search
+
+58
+00:03:28,207 --> 00:03:31,507
+actually beat vector search outright.
+
+59
+00:03:31,507 --> 00:03:34,087
+So the better systems use both.
+
+60
+00:03:34,087 --> 00:03:39,667
+That's hybrid search, run keyword and semantic together and merge the rankings.
+
+61
+00:03:39,667 --> 00:03:43,527
+One catches the exact terms, the other catches the meaning.
+
+62
+00:03:43,527 --> 00:03:46,487
+Then there is one more layer, re-ranking.
+
+63
+00:03:46,487 --> 00:03:50,127
+Hybrid pulls a wide set, say 50 candidates.
+
+64
+00:03:50,127 --> 00:03:54,707
+A second smarter model rereads those 50 and resorts them.
+
+65
+00:03:54,707 --> 00:04:00,327
+So the best three rise to the top, cast a wide net quickly, then let a specialist pick
+
+66
+00:04:00,327 --> 00:04:01,847
+the winners.
+
+67
+00:04:01,847 --> 00:04:08,327
+Stack all of it, contextual embeddings, hybrid search and a re-rangle and in anthropic's
+
+68
+00:04:08,327 --> 00:04:12,847
+own testing, failed retrievals drop by about two thirds.
+
+69
+00:04:12,847 --> 00:04:17,967
+Same documents, same model, it just finds the right context far more often.
+
+70
+00:04:17,967 --> 00:04:19,747
+That's the modern retrieval stack.
+
+71
+00:04:20,600 --> 00:04:24,960
+Now to the part that's genuinely changing right now.
+
+72
+00:04:24,960 --> 00:04:30,520
+In classic RAG, retrieval happens once before the model even starts thinking.
+
+73
+00:04:30,520 --> 00:04:33,240
+Agentic retrieval asks a different question.
+
+74
+00:04:33,240 --> 00:04:36,060
+What if the model drove the search itself?
+
+75
+00:04:36,060 --> 00:04:40,400
+It's essentially the agent loop pointed at search.
+
+76
+00:04:40,400 --> 00:04:41,680
+Here is what changes.
+
+77
+00:04:41,680 --> 00:04:46,680
+The agent takes your question and reformulates it into a better query.
+
+78
+00:04:46,680 --> 00:04:51,320
+If it's complex, it breaks it into sub-questions and searches each one.
+
+79
+00:04:51,320 --> 00:04:55,280
+Then the key part, it looks at what came back and judges it.
+
+80
+00:04:55,280 --> 00:04:56,280
+Do I have enough?
+
+81
+00:04:56,280 --> 00:05:00,040
+No, the answer references something I haven't looked up yet.
+
+82
+00:05:00,040 --> 00:05:05,080
+So it searches again and keeps going until it has what it needs.
+
+83
+00:05:05,080 --> 00:05:09,600
+Instead of one blind grab, you get a small research loop.
+
+84
+00:05:09,600 --> 00:05:15,600
+Ask something that takes three hops to answer and classic RAG tends to fall apart.
+
+85
+00:05:15,600 --> 00:05:19,440
+While an agentic retrieval chains the hops and gets there.
+
+86
+00:05:19,440 --> 00:05:20,800
+This isn't free though.
+
+87
+00:05:20,800 --> 00:05:25,060
+It costs roughly three to ten times the tokens of classic RAG.
+
+88
+00:05:25,060 --> 00:05:30,040
+So use it where the question is genuinely hard not to look up a simple fact.
+
+89
+00:05:30,533 --> 00:05:33,673
+It also doesn't have to happen up front.
+
+90
+00:05:33,673 --> 00:05:38,753
+The agent can retrieve mid-task the moment it hits something it doesn't know.
+
+91
+00:05:38,753 --> 00:05:43,513
+Take a coding agent, it's editing a file, hits a function it doesn't recognize, and
+
+92
+00:05:43,513 --> 00:05:49,353
+right there in the loop it runs a search, grabs just that definition and moves on.
+
+93
+00:05:49,353 --> 00:05:55,193
+Retrieval becomes a tool the agent calls whenever it has a gap, just in time rather than just
+
+94
+00:05:55,193 --> 00:05:56,513
+in case.
+
+95
+00:05:56,513 --> 00:06:03,433
+And it's not only documents, the same machinery works on memory, past conversations, decisions,
+
+96
+00:06:03,433 --> 00:06:05,073
+notes about the user.
+
+97
+00:06:05,073 --> 00:06:10,473
+When something's relevant, the agent searches its own memory and pulls back the one item
+
+98
+00:06:10,473 --> 00:06:13,273
+that matters out of thousands.
+
+99
+00:06:13,273 --> 00:06:15,273
+Find the needle, leave the haystack.
+
+100
+00:06:15,433 --> 00:06:20,553
+At this point you might be thinking, we have million token windows now, can't I just put
+
+101
+00:06:20,553 --> 00:06:23,193
+everything in and skip all this?
+
+102
+00:06:23,193 --> 00:06:26,833
+Mostly no, those large windows are slow and expensive.
+
+103
+00:06:26,833 --> 00:06:32,273
+One analysis clogged a long context query at tens of seconds and pennies to dollars
+
+104
+00:06:32,273 --> 00:06:37,873
+each versus retrieval at about a second for a small fraction of the cost.
+
+105
+00:06:37,873 --> 00:06:42,393
+And even with a giant window, models still miss facts buried in the middle.
+
+106
+00:06:42,393 --> 00:06:47,073
+It's a real effect, though how strong it is depends on the model.
+
+107
+00:06:47,073 --> 00:06:49,913
+So the better teams don't choose one or the other.
+
+108
+00:06:49,913 --> 00:06:56,473
+They use retrieval to narrow a million documents down to the handful few that matter then let
+
+109
+00:06:56,473 --> 00:07:00,393
+the large window reason over that focused set.
+
+110
+00:07:00,393 --> 00:07:02,513
+Retrieval and long context working together.
+
+111
+00:07:02,833 --> 00:07:07,153
+Step back because this changes how you build agents.
+
+112
+00:07:07,153 --> 00:07:09,993
+We tend to focus on which model is smartest,
+
+113
+00:07:09,993 --> 00:07:12,593
+but the more useful framing is this.
+
+114
+00:07:12,593 --> 00:07:15,793
+An agent is only as good as what it can find
+
+115
+00:07:15,793 --> 00:07:18,753
+and bring into focus at the right moment.
+
+116
+00:07:18,753 --> 00:07:20,493
+The smartest model available
+
+117
+00:07:20,493 --> 00:07:22,853
+looking at the wrong three paragraphs
+
+118
+00:07:22,853 --> 00:07:25,873
+just gives you a confident wrong answer.
+
+119
+00:07:25,873 --> 00:07:29,733
+So retrieval is how the agent sees, it's the sensors.
+
+120
+00:07:29,733 --> 00:07:33,753
+Get it right and an ordinary model starts to feel sharp
+
+121
+00:07:33,753 --> 00:07:35,913
+because every time it answers,
+
+122
+00:07:35,913 --> 00:07:38,353
+it's looking at exactly what it needs.
+
+123
+00:07:38,353 --> 00:07:41,153
+That's the skill worth focusing on right now.
+
+124
+00:07:41,267 --> 00:07:44,967
+Quick recap of how agents find the right context.
+
+125
+00:07:44,967 --> 00:07:46,887
+It starts at indexing.
+
+126
+00:07:46,887 --> 00:07:50,847
+Contextual retrieval, so your chunks carry their meaning.
+
+127
+00:07:50,847 --> 00:07:53,847
+Then hybrid search plus a re-ranker
+
+128
+00:07:53,847 --> 00:07:56,487
+pulls and sorts the best results.
+
+129
+00:07:56,487 --> 00:07:59,927
+Agentic retrieval lets the model run a real search loop
+
+130
+00:07:59,927 --> 00:08:03,047
+going multi-step until it has the answer.
+
+131
+00:08:03,047 --> 00:08:05,807
+It retrieves just-in-time mid-task
+
+132
+00:08:05,807 --> 00:08:08,267
+and works on memory the same way.
+
+133
+00:08:08,267 --> 00:08:11,567
+And large context windows don't replace any of this.
+
+134
+00:08:11,567 --> 00:08:13,447
+They work alongside it.
+
+135
+00:08:13,447 --> 00:08:16,987
+If this made things clearer, hit like and subscribe.
+
+136
+00:08:16,987 --> 00:08:18,627
+It genuinely helps the channel
+
+137
+00:08:18,627 --> 00:08:21,107
+and there's a whole series on building agents
+
+138
+00:08:21,107 --> 00:08:22,547
+that actually work.
+
+139
+00:08:22,547 --> 00:08:23,747
+See you in the next one.

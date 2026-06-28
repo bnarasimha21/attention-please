@@ -1,0 +1,52 @@
+1
+00:00:00,000 --> 00:00:05,480
+ Here is a problem that sounds simple but turns out to be one of the harder things in AI right
+
+2
+00:00:05,480 --> 00:00:06,580
+ now.
+
+3
+00:00:06,580 --> 00:00:11,920
+ You point an agent at your whole code base or your company's entire knowledge base.
+
+4
+00:00:11,920 --> 00:00:17,400
+ That's millions of tokens far more than fits in this context window.
+
+5
+00:00:17,400 --> 00:00:22,400
+ Then you ask one question and the answer lives in maybe three sentences buried somewhere
+
+6
+00:00:22,400 --> 00:00:23,820
+ in all of that.
+
+7
+00:00:23,820 --> 00:00:27,400
+ So how does the agent find those three sentences?
+
+8
+00:00:27,400 --> 00:00:33,240
+ If it dumps everything in, it slows down, it costs more, and it actually gets less accurate
+
+9
+00:00:33,240 --> 00:00:35,320
+ which we covered last time.
+
+10
+00:00:35,320 --> 00:00:37,520
+ The real skill is the opposite.
+
+11
+00:00:37,520 --> 00:00:43,000
+ Pulling in only the right context exactly when it's needed, that's retrieval.
+
+12
+00:00:43,000 --> 00:00:45,640
+ And it's changed a lot recently.
+
+13
+00:00:45,640 --> 00:00:46,400
+ Let's walk through it.
+

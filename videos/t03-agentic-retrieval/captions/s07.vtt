@@ -1,0 +1,35 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:05.120
+ At this point you might be thinking, we have million token windows now, can't I just put
+
+00:00:05.120 --> 00:00:07.760
+ everything in and skip all this?
+
+00:00:07.760 --> 00:00:11.400
+ Mostly no, those large windows are slow and expensive.
+
+00:00:11.400 --> 00:00:16.840
+ One analysis clogged a long context query at tens of seconds and pennies to dollars
+
+00:00:16.840 --> 00:00:22.440
+ each versus retrieval at about a second for a small fraction of the cost.
+
+00:00:22.440 --> 00:00:26.960
+ And even with a giant window, models still miss facts buried in the middle.
+
+00:00:26.960 --> 00:00:31.640
+ It's a real effect, though how strong it is depends on the model.
+
+00:00:31.640 --> 00:00:34.480
+ So the better teams don't choose one or the other.
+
+00:00:34.480 --> 00:00:41.040
+ They use retrieval to narrow a million documents down to the handful few that matter then let
+
+00:00:41.040 --> 00:00:44.960
+ the large window reason over that focused set.
+
+00:00:44.960 --> 00:00:47.080
+ Retrieval and long context working together.
+

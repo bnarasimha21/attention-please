@@ -1,0 +1,65 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:04.800
+ With a solid index, the next question is the search itself.
+
+00:00:04.800 --> 00:00:07.500
+ And there is a result here worth knowing.
+
+00:00:07.500 --> 00:00:11.000
+ Semantic search is good at understanding what you mean.
+
+00:00:11.000 --> 00:00:16.540
+ Ask how do I reset my password and it finds a doc titled account recovery steps with no
+
+00:00:16.540 --> 00:00:18.360
+ matching words at all.
+
+00:00:18.360 --> 00:00:19.520
+ That's powerful.
+
+00:00:19.520 --> 00:00:25.680
+ But it has a blind spot, exact terms, error codes, product IDs, a function name.
+
+00:00:25.680 --> 00:00:32.040
+ The meaning matching blurs those out and on some 2026 benchmarks, plain keyword search
+
+00:00:32.040 --> 00:00:35.340
+ actually beat vector search outright.
+
+00:00:35.340 --> 00:00:37.920
+ So the better systems use both.
+
+00:00:37.920 --> 00:00:43.500
+ That's hybrid search, run keyword and semantic together and merge the rankings.
+
+00:00:43.500 --> 00:00:47.360
+ One catches the exact terms, the other catches the meaning.
+
+00:00:47.360 --> 00:00:50.320
+ Then there is one more layer, re-ranking.
+
+00:00:50.320 --> 00:00:53.960
+ Hybrid pulls a wide set, say 50 candidates.
+
+00:00:53.960 --> 00:00:58.540
+ A second smarter model rereads those 50 and resorts them.
+
+00:00:58.540 --> 00:01:04.160
+ So the best three rise to the top, cast a wide net quickly, then let a specialist pick
+
+00:01:04.160 --> 00:01:05.680
+ the winners.
+
+00:01:05.680 --> 00:01:12.160
+ Stack all of it, contextual embeddings, hybrid search and a re-rangle and in anthropic's
+
+00:01:12.160 --> 00:01:16.680
+ own testing, failed retrievals drop by about two thirds.
+
+00:01:16.680 --> 00:01:21.800
+ Same documents, same model, it just finds the right context far more often.
+
+00:01:21.800 --> 00:01:23.580
+ That's the modern retrieval stack.
+
