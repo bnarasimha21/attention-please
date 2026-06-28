@@ -7,6 +7,7 @@ import { T03 } from "../videos/t03-agentic-retrieval/T03";
 import { TOTAL_FRAMES as T03_FRAMES } from "../videos/t03-agentic-retrieval/timings";
 import { T04 } from "../videos/t04-loop-engineering/T04";
 import { TOTAL_FRAMES as T04_FRAMES } from "../videos/t04-loop-engineering/timings";
+import { T03Thumb } from "../videos/t03-agentic-retrieval/Thumbnail";
 import { VIDEO_WIDTH, VIDEO_HEIGHT } from "./theme";
 
 export const RemotionRoot: React.FC = () => {
@@ -43,6 +44,14 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={VIDEO_WIDTH}
         height={VIDEO_HEIGHT}
+      />
+      <Composition
+        id="T03-Thumb"
+        component={T03Thumb}
+        durationInFrames={1}
+        fps={30}
+        width={1280}
+        height={720}
       />
     </>
   );
