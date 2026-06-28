@@ -3,123 +3,158 @@ import { theme } from "../../remotion-src/theme";
 
 // t03 YouTube thumbnail (1280x720). Render as a still:
 //   npx remotion still T03-Thumb assets/thumbnails/t03-agentic-retrieval.png --frame=0
-// Deliberately DIFFERENT from the channel's usual left-text/right-bot layout:
-// blue+gold palette, a full document "wall" (haystack) with ONE spotlighted hit,
-// and a boxed-highlight word instead of a gradient. Message matches the video
-// (find the RIGHT context among many — agentic retrieval).
+// DIFFERENT layout from t01/t02 (both text-left + graphic-right): centered,
+// title-on-top over a FULL-FRAME document haystack, with a magnifier finding the
+// one glowing doc. Warm gold-on-dark palette (vs t01 teal, t02 red).
 
 const GOLD = "#fbbf24";
 
 export const T03Thumb: React.FC = () => {
-  // Document wall (the haystack), right ~half. 5 cols x 4 rows; one tile is the hit.
-  const startX = 648;
-  const startY = 96;
-  const tileW = 96;
-  const tileH = 116;
-  const gapX = 20;
-  const gapY = 16;
-  const cols = 5;
-  const rows = 4;
-  const hitC = 2; // highlighted column
-  const hitR = 1; // highlighted row
-  const hitX = startX + hitC * (tileW + gapX);
-  const hitY = startY + hitR * (tileH + gapY);
-  const tiles: { x: number; y: number; hot: boolean }[] = [];
+  // full-frame haystack: dense field of dim document cards edge to edge
+  const cols = 13;
+  const rows = 6;
+  const fStartX = 28;
+  const fStartY = 30;
+  const fcW = 64;
+  const fcH = 72;
+  const fgX = 32;
+  const fgY = 40;
+  const field: { x: number; y: number }[] = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      tiles.push({
-        x: startX + c * (tileW + gapX),
-        y: startY + r * (tileH + gapY),
-        hot: r === hitR && c === hitC,
-      });
+      field.push({ x: fStartX + c * (fcW + fgX), y: fStartY + r * (fcH + fgY) });
     }
   }
 
-  const Lines: React.FC<{ color: string; w: number }> = ({ color, w }) => (
-    <>
-      {[0, 1, 2, 3].map((k) => (
-        <div
-          key={k}
-          style={{
-            height: 8,
-            borderRadius: 4,
-            width: k === 3 ? `${w * 0.55}%` : `${w}%`,
-            background: color,
-          }}
-        />
-      ))}
-    </>
-  );
+  // magnifier
+  const cx = 640;
+  const cy = 474;
+  const lensR = 168;
 
   return (
     <AbsoluteFill
       style={{
         background:
-          "radial-gradient(130% 130% at 78% 38%, #103a52 0%, #0a1f30 52%, #040d16 100%)",
+          "radial-gradient(125% 120% at 50% 60%, #1d1733 0%, #0e0b1c 52%, #060509 100%)",
         fontFamily: theme.fontSans,
       }}
     >
-      {/* spotlight halo over the hit tile (lights the surrounding wall) */}
-      <div
-        style={{
-          position: "absolute",
-          left: hitX + tileW / 2 - 320,
-          top: hitY + tileH / 2 - 320,
-          width: 640,
-          height: 640,
-          borderRadius: "50%",
-          background: `radial-gradient(circle, ${GOLD}33 0%, ${GOLD}14 38%, transparent 66%)`,
-        }}
-      />
-
-      {/* document wall */}
-      {tiles.map((t, i) => (
+      {/* full-frame haystack field (dim) */}
+      {field.map((d, i) => (
         <div
           key={i}
           style={{
             position: "absolute",
-            left: t.x,
-            top: t.y,
-            width: tileW,
-            height: tileH,
-            borderRadius: 10,
-            background: t.hot ? "#3a2c06" : "#1b2c3a",
-            border: t.hot ? `4px solid ${GOLD}` : "1px solid #ffffff14",
-            boxShadow: t.hot ? `0 0 46px ${GOLD}` : "none",
-            opacity: t.hot ? 1 : 0.5,
-            transform: t.hot ? "scale(1.12)" : "scale(1)",
+            left: d.x,
+            top: d.y,
+            width: fcW,
+            height: fcH,
+            borderRadius: 8,
+            background: "#231d37",
+            border: "1px solid #ffffff12",
+            opacity: 0.4,
             display: "flex",
             flexDirection: "column",
-            gap: 11,
-            padding: "18px 14px",
+            gap: 7,
+            padding: "12px 10px",
           }}
         >
-          <Lines color={t.hot ? GOLD : "#5b7186"} w={100} />
+          {[0, 1, 2].map((k) => (
+            <div key={k} style={{ height: 6, borderRadius: 3, width: k === 2 ? "55%" : "100%", background: "#6a6390" }} />
+          ))}
         </div>
       ))}
 
-      {/* headline (left) — eyebrow + boxed highlight, NOT a gradient */}
-      <div style={{ position: "absolute", left: 58, top: 226 }}>
-        <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: 6, color: GOLD }}>
-          AGENTIC RETRIEVAL
-        </div>
-        <div style={{ fontSize: 96, fontWeight: 900, color: theme.text, lineHeight: 1.04, marginTop: 16 }}>
-          FIND THE
-        </div>
+      {/* top scrim so the title stays readable over the field */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 320,
+          background: "linear-gradient(180deg, #07060ce6 0%, #07060cb0 46%, transparent 100%)",
+        }}
+      />
+
+      {/* vignette to lift the magnifier off the busy field */}
+      <div
+        style={{
+          position: "absolute",
+          left: cx - 290,
+          top: cy - 290,
+          width: 580,
+          height: 580,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, #07060ce6 0%, #07060c88 44%, transparent 70%)",
+        }}
+      />
+
+      {/* magnifier handle (behind the lens) */}
+      <div
+        style={{
+          position: "absolute",
+          left: cx + lensR * 0.62,
+          top: cy + lensR * 0.62,
+          width: 168,
+          height: 44,
+          borderRadius: 22,
+          background: "linear-gradient(180deg, #e2e8f0, #8a94a6)",
+          transform: "rotate(45deg)",
+          transformOrigin: "left center",
+          boxShadow: "0 6px 18px #00000077",
+        }}
+      />
+
+      {/* magnifier lens */}
+      <div
+        style={{
+          position: "absolute",
+          left: cx - lensR,
+          top: cy - lensR,
+          width: lensR * 2,
+          height: lensR * 2,
+          borderRadius: "50%",
+          border: "14px solid #eef2f7",
+          background: "rgba(255,255,255,0.04)",
+          boxShadow: `0 0 0 7px #00000055, 0 0 70px ${GOLD}66, inset 0 0 46px ${GOLD}22`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+        }}
+      >
+        {/* the ONE right document, magnified + glowing gold */}
         <div
           style={{
-            display: "inline-block",
-            marginTop: 10,
-            background: GOLD,
-            color: "#08263a",
-            fontSize: 96,
-            fontWeight: 900,
-            lineHeight: 1.04,
-            padding: "2px 20px",
+            width: 168,
+            height: 210,
             borderRadius: 14,
+            background: "#3a2c06",
+            border: `5px solid ${GOLD}`,
+            boxShadow: `0 0 50px ${GOLD}`,
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            padding: "26px 22px",
           }}
         >
-          RIGHT ONE
+          {[0, 1, 2, 3].map((k) => (
+            <div key={k} style={{ height: 12, borderRadius: 6, width: k === 3 ? "58%" : "100%", background: GOLD }} />
+          ))}
+        </div>
+      </div>
+
+      {/* TITLE (big) + subtitle (small), CENTERED, top */}
+      <div style={{ position: "absolute", top: 44, left: 0, right: 0, textAlign: "center" }}>
+        <div style={{ fontSize: 92, fontWeight: 900, color: theme.text, lineHeight: 1.0 }}>
+          AGENTIC
+        </div>
+        <div style={{ fontSize: 92, fontWeight: 900, color: GOLD, lineHeight: 1.0 }}>
+          RETRIEVAL
+        </div>
+        <div style={{ fontSize: 38, fontWeight: 700, letterSpacing: 1, color: "#cbc6da", marginTop: 16 }}>
+          Find the right document
         </div>
       </div>
     </AbsoluteFill>
