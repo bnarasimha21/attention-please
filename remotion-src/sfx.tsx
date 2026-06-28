@@ -17,12 +17,16 @@ export type SfxName =
   | "alarm"    // rising chirp — runaway cost climbing
   | "stinger"; // 3-note brand motif — scene punchline
 
-export const Sfx: React.FC<{ name: SfxName; at: number; volume?: number }> = ({
+// `rate` pitch-shifts/speeds the cue (playbackRate) so a reused sound doesn't feel
+// identical every time — vary it ~0.9–1.12 across repeats and per scene-end stinger
+// to break the monotony of the same file firing over and over.
+export const Sfx: React.FC<{ name: SfxName; at: number; volume?: number; rate?: number }> = ({
   name,
   at,
   volume = 0.5,
+  rate = 1,
 }) => (
   <Sequence from={Math.max(0, Math.round(at))} name={`sfx:${name}`}>
-    <Audio src={staticFile(`audio/sfx/${name}.mp3`)} volume={volume} />
+    <Audio src={staticFile(`audio/sfx/${name}.mp3`)} volume={volume} playbackRate={rate} />
   </Sequence>
 );

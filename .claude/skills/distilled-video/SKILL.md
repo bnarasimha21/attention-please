@@ -1,6 +1,6 @@
 ---
 name: distilled-video
-description: Produce a Distilled AI YouTube explainer video end-to-end with Remotion. Use when creating, editing, or finishing a tNN video in the distilled-ai repo — covers script→critique→improve, per-scene audio (record/trim), scene build, audio attach, Whisper subtitles, syncing animations to the narration, reserving subtitle-safe space, and rendering only on explicit confirmation.
+description: Produce a Distilled AI YouTube explainer video end-to-end with Remotion. Use when creating, editing, or finishing a tNN video in the distilled-ai repo — covers script→critique→improve, per-scene audio (record/trim), scene build, audio attach, Whisper subtitles, syncing animations to the narration, reserving subtitle-safe space, rendering only on explicit confirmation, building the thumbnail, and drafting the YouTube upload package (title, description with chapters, tags).
 ---
 
 # Distilled AI — video production pipeline
@@ -58,7 +58,9 @@ Register each composition in `remotion-src/Root.tsx`. Script in `scripts/tNN-*.m
    scene `duration` in `timings.ts` = trimmed clip length + ~0.7s tail.
 8. **Create subtitles** — transcribe locally with Whisper (see snippet); produce
    per-scene `captions/sNN.{srt,vtt,json}` and a combined `tNN-<slug>.srt`/`.vtt`
-   offset by each scene's global start frame; fix obvious ASR homophones.
+   offset by each scene's global start frame; fix obvious ASR homophones. NOTE: this
+   combined SRT is at NATURAL pace — it must be re-scaled by the speed factor in step 11
+   before it's the upload deliverable (the natural-pace one won't sync with the final video).
 9. **Re-adjust animations to the narration** — using the per-segment/token ms
    timestamps, move each scene's beat + SFX so it fires exactly when its phrase is
    spoken (not proportional guesses). Timing/SFX only — never alter the polished
@@ -72,6 +74,40 @@ Register each composition in `remotion-src/Root.tsx`. Script in `scripts/tNN-*.m
     explicitly says go. Then apply the **global speed-up LAST**: speed the final
     render uniformly (`ffmpeg setpts` video + `atempo` audio, pitch preserved) to
     land ~150–165 wpm; tunable by ear, A/V sync auto-preserved.
+    - **Re-scale the upload SRT by the SAME factor.** The combined `captions/tNN-<slug>.srt`
+      is built at NATURAL pace (step 8), so after the speed-up its timestamps no longer match
+      the rendered video. Produce `captions/tNN-<slug>-final.srt` with every timestamp divided
+      by the speed factor F (see snippet) and hand THAT to Narsi for YouTube — not the
+      natural-pace one. If F changes, regenerate both the final mp4 and the final SRT together.
+12. **Build the thumbnail** — make it a Remotion composition (1280×720), NOT a one-off
+    image, so it's on-brand and re-renderable. Add `videos/tNN-<slug>/Thumbnail.tsx`
+    (reuse `theme` + `gradientText` from `remotion-src/`), register it in `Root.tsx` as
+    `TNN-Thumb` (`durationInFrames={1}`, `width={1280} height={720}`), then render:
+    `npx remotion still TNN-Thumb assets/thumbnails/tNN-<slug>.png --frame=0`. Design rules:
+    - **FIRST look at the existing thumbnails** in `assets/thumbnails/` (open the PNGs) and make
+      the new one DELIBERATELY DIFFERENT — vary the layout, palette, visual metaphor, and type
+      treatment so the channel doesn't look samey. Don't reuse the same left-text/right-mascot
+      template every time; push it a notch better each video. (Narsi's ask — caught on t03: the
+      first cut reused the usual layout and looked too similar.)
+    - **The hook MUST match the video** — never bait with a claim the content contradicts
+      (caught on t03: a "RAG is dead / your stack is obsolete" thumbnail when the video argues
+      the opposite). Mismatched thumbnail↔content tanks retention.
+    - **Big + mobile-legible**: ≤2 text blocks, hero ≤~4 words at 100px+, readable as a tiny
+      square. No small sub-pills that vanish on phones.
+    - **Tell the story visually** (e.g. a wall of docs with ONE spotlighted = "find the right one").
+    - On-brand but fresh; keep elements (and glows) off the frame edges; verify by opening the PNG.
+    - Verify by opening the rendered PNG; present to Narsi and iterate on his feedback.
+13. **Write the YouTube upload package** — after the final render, draft the publish metadata
+    and save it to `videos/tNN-<slug>/upload.md`:
+    - **Title** — give 2–3 options: clear + curiosity-driven, front-load the keyword, ≤~60 chars
+      so it isn't truncated. Match the channel's existing style (look at prior titles).
+    - **Description** — a 2–3 sentence hook/summary up top, then **chapters** as `m:ss Label`
+      lines (YouTube auto-links them; the FIRST must be `0:00`). Derive chapter times from each
+      scene's start frame ÷ the speed factor F (the FINAL-video times, same basis as the SRT) —
+      one chapter per scene/section. Close with a short CTA + 3–6 relevant hashtags.
+    - **Tags** — a handful of search terms (topic + synonyms + channel themes).
+    - Keep claims consistent with the script's fact-check notes; no numbers the video doesn't show.
+    Present it to Narsi for review — don't publish anything yourself.
 
 ## Version control — commit changes to the repo
 - **Commit at milestones**, not just at the end: after the script is approved, after
@@ -88,10 +124,13 @@ Register each composition in `remotion-src/Root.tsx`. Script in `scripts/tNN-*.m
 - **Bigger fonts** (Narsi asks repeatedly): captions/body ≥30–34px, labels ≥24px,
   sub-labels/footnotes ≥22px, card titles ≥36px, hero numbers 80px+. Size up when unsure.
 - **Fill the frame** — no empty lower-third/dead space; scale/distribute to fill 1920×1080.
-- **Align** everything (vertical + horizontal): shared baselines/centers, nothing off-axis.
+- **Align** everything (vertical + horizontal): shared baselines/centers, nothing off-axis. **Align a row of differently-sized objects by their VERTICAL CENTERS, not their top edges** — a taller box (e.g. a 300px context-window next to a 200px core) aligned by `top:` hangs visibly low. Compute each element's center (`top + height/2`) and set tops so the centers match. (Caught in t03 Scene 1: window box hung 60px below the agent core.)
 - **Breathing room** — fill, but don't cram; deliberate padding between elements. Aim for an EVEN vertical rhythm (roughly equal gaps heading → hero → caption); never bunch at the top with an empty bottom. Narsi flags "cramped vertically."
 - **Subtitle-safe bottom band** (step 10) — keep the bottom ~165px clear.
 - **Readable text** — muted/secondary text must be legible on the dark bg: `theme.textMuted` ≈ #b4b4b4, `theme.textDim` ≈ #8c8c8c (never #888/#444). No near-invisible grey.
+- **NO em dashes (—) in on-screen scene text** (Narsi's repeated correction). Em dashes look wrong on screen — use a comma, colon, period, parentheses, or the `·` middle-dot separator (for label · source pairs) instead. Applies to every rendered string in `Scene*.tsx`; code comments don't matter. (e.g. "same chunk — now carries context" → "same chunk, now carries context"; "contextual retrieval — Anthropic" → "contextual retrieval · Anthropic".)
+- **SFX variety — don't let the sound feel monotonous** (Narsi's ask). Use the full 8-sound palette BY CONTEXT, not the same 2–3 cues on repeat: `tick`=counter/steps, `pop`=element/card reveal, `whoosh`=sweep/travel/transition, `success`=positive result (✓/fix lands), `error`=failure (✕/wrong), `block`=hard stop / can't-fit / overflow / wall, `alarm`=escalating danger / runaway cost, `stinger`=scene punchline. Don't leave any sound unused if a fitting beat exists (e.g. `block` for an overflow). Vary reused cues with the `Sfx` `rate` prop (pitch ~0.9–1.12) so the same file never fires identically twice, and **pitch-shift each scene's end-stinger differently** so the scene-ends don't all sound the same. Ascending `rate` across a sequence of reveals (e.g. recap rows: `rate={1 + i * 0.05}`) is a nice rising touch.
+- **SFX must be LOUD ENOUGH to hear under the narration.** The ffmpeg-synthesized cues in `public/audio/sfx/` can default far too quiet (~−25 dB peak) and vanish under the ~−15 dB VO — the `volume` prop only ATTENUATES, it can't rescue a quiet file. Peak-normalize every sfx file to ~−3 dBFS (`ffmpeg -i f.mp3 -af "volume=${-3 - maxdB}dB"`), then keep `volume` props ~0.35–0.5. After any SFX work, sanity-check levels with `ffmpeg -i f.mp3 -af volumedetect -f null /dev/null`. (Caught on t03: every cue was inaudible until the files were boosted ~+22 dB.)
 - **Punchlines stand alone, BIG** — a scene's closing line lands as the ONLY thing on screen (fade the prior phase OUT first), vertically centered, hero-sized (~60–84px). Not a small caption at the bottom of an empty frame.
 - Clean vector + emoji + CSS-motion aesthetic; avoid stock photos (logos on chips OK).
 
@@ -100,6 +139,8 @@ Register each composition in `remotion-src/Root.tsx`. Script in `scripts/tNN-*.m
 - **NO OVERLAPS at ANY frame — including phase handoffs.** Verify mid-phase AND at the boundaries. When a new phase/punchline enters, FADE THE PRIOR PHASE OUT so they don't collide. Use a tight ~0.4s offset cross at boundaries (outgoing fades out as incoming fades in, overlapping only at ≤~40% opacity) — this avoids BOTH a jumble (two things at full opacity) AND an empty gap (a near-blank frame mid-transition).
 - **Don't oversize boxes.** Size cards/boxes to their content + padding; an over-tall box collides with the caption/footnote below it. Reduce box height rather than letting things overlap.
 - **Guard against NaN.** Keep `interpolate` inputs and any array indices finite — clamp time-derived indices to ≥ 0 (e.g. `Math.max(0, …)`) so frames before a phase starts don't produce a negative index → undefined → NaN → render crash.
+- **Don't toggle a CHARACTER that changes line width** (blinking carets, spinners, counters that gain digits). Swapping `"|"`/`" "` reflows the line — HTML collapses the trailing space so the caret-on state is wider, and at a tight container width it wraps to a 2nd line and back, making the element jump every blink. Keep the element ALWAYS in the layout and toggle its `opacity` instead (`<span style={{opacity: blink ? 1 : 0}}>|</span>`), and add `whiteSpace: "nowrap"` so a one-line label can never wrap. (Caught on t03 Scene 3: the "writes context ✎|" caret made the cheap-model column bounce.)
+- **Full-width centered absolute text MUST set `left: 0`** (not just `width: "100%"` + `textAlign: center`). With no `left`, an absolutely-positioned element uses `left: auto` = its static position; nested inside a non-positioned/zero-width wrapper (e.g. a `<div style={{opacity}}>` that's a flex child) that static-left resolves to screen-center, so width:100% overflows off the right edge and the text clips. Always set `left: 0` (or `left:0; right:0`) on full-width centered absolute text. (Caught in t03 Scene 1: "the answer" line rendered bottom-right and clipped.)
 - **Verify THOROUGHLY with stills** before declaring done: sample every phase AND every phase boundary of each scene (not just one mid-phase frame), and actually open/inspect the images. A subagent that only checks safe frames will miss the early/boundary breakage.
 - **DELETE the verification stills/screenshots when done** (Narsi's standing ask). Render them to the session scratchpad (never the repo), inspect, fix, then remove them — leave no screenshots or temp render scripts behind in the repo or scratchpad. Don't commit stills.
 
@@ -121,6 +162,23 @@ The `sNN.json` has per-segment and per-token `offsets` (ms) → use for step 9.
 Global speed-up of the FINAL render (step 11), factor F (e.g. 1.15):
 ```
 ffmpeg -i out/tNN.mp4 -filter_complex "[0:v]setpts=PTS/F[v];[0:a]atempo=F[a]" -map "[v]" -map "[a]" out/tNN-final.mp4
+```
+
+Re-scale the upload SRT by the SAME factor F (step 11) so captions match the sped video:
+```
+python3 - "$F" <<'PY'
+import re, sys, pathlib
+F = float(sys.argv[1])
+src = pathlib.Path("videos/tNN-<slug>/captions/tNN-<slug>.srt")
+def scale(ts):
+    h,m,rest = ts.split(":"); s,ms = rest.split(",")
+    t = ((int(h)*3600+int(m)*60+int(s))*1000+int(ms)) / F
+    t = int(round(t)); h=t//3600000; t%=3600000; m=t//60000; t%=60000; s=t//1000; ms=t%1000
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+out = re.sub(r"(\d\d:\d\d:\d\d,\d\d\d) --> (\d\d:\d\d:\d\d,\d\d\d)",
+             lambda x: f"{scale(x.group(1))} --> {scale(x.group(2))}", src.read_text())
+src.with_name(src.stem + "-final.srt").write_text(out)
+PY
 ```
 
 ## Gotchas

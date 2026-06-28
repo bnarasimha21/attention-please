@@ -15,20 +15,28 @@ export const Scene6JustInTimeMemory: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const aOp = Math.min(clampFade(frame, 0, 15), 1 - clampFade(frame, 820, 842));
-  const bOp = Math.min(clampFade(frame, 846, 870), 1 - clampFade(frame, 1360, 1382));
-  const punchOp = clampFade(frame, 1386, 1414);
+  // ---- phase envelopes (re-timed to VO; ~0.4s crosses, no overlap) ----
+  // Beat A: f0 → fade out f700–724.  Beat B: in f726–750 → fade out f1238–1262.
+  // Punchline: f1262 → fully landed by f1330, holds to 1365.
+  const A_OUT_S = 700, A_OUT_E = 724;
+  const B_IN_S = 726, B_IN_E = 750;
+  const B_OUT_S = 1238, B_OUT_E = 1262;
+  const aOp = Math.min(clampFade(frame, 0, 15), 1 - clampFade(frame, A_OUT_S, A_OUT_E));
+  const bOp = Math.min(clampFade(frame, B_IN_S, B_IN_E), 1 - clampFade(frame, B_OUT_S, B_OUT_E));
+  const punchOp = clampFade(frame, 1264, 1320);
 
   // ---- Beat A: just-in-time ----
-  const lineIn = (i: number) => clampFade(frame, 20 + i * 22, 40 + i * 22);
-  const unknownQ = pop(frame, fps, 180);
-  const toolFire = clampFade(frame, 250, 280);
-  const toolTravel = clampFade(frame, 280, 370);
-  const defReturn = clampFade(frame, 390, 480);
-  const resolved = clampFade(frame, 520, 560);
+  // f0 editor lines in · f94 unknown "?" pops · f247 agent reacts · f389 tool fires
+  // → def returns → f520 resolved ✓ · f565 caption "just in time, not just in case"
+  const lineIn = (i: number) => clampFade(frame, 10 + i * 14, 30 + i * 14);
+  const unknownQ = pop(frame, fps, 94);
+  const toolFire = clampFade(frame, 389, 415);
+  const toolTravel = clampFade(frame, 410, 470);
+  const defReturn = clampFade(frame, 470, 520);
+  const resolved = clampFade(frame, 535, 565);
   const caret = Math.sin(frame / 7) > 0 ? 1 : 0.15;
   const winBreathe = 0.5 + 0.5 * Math.sin(frame / 12);
-  const capA = clampFade(frame, 600, 650);
+  const capA = clampFade(frame, 565, 605);
   const codeLines = [
     "function refresh(token) {",
     "  const ok = verifySignature(token)",
@@ -37,15 +45,17 @@ export const Scene6JustInTimeMemory: React.FC = () => {
     "}",
   ];
 
-  // ---- Beat B: memory ----
-  const bLocal = frame - 846;
-  const gridIn = clampFade(frame, 866, 940);
-  const ripple = (bLocal - 120) / 8; // expanding search ring
-  const rippleOn = bLocal > 110 && bLocal < 320;
-  const hitLight = clampFade(frame, 846 + 230, 846 + 270);
-  const hitFly = clampFade(frame, 846 + 270, 846 + 370);
-  const labelIn = clampFade(frame, 846 + 80, 846 + 150);
-  const capB = clampFade(frame, 846 + 410, 846 + 460);
+  // ---- Beat B: memory ----  (base f726; VO: f779 grid/labels, f1036 hit + fly)
+  const bBase = 726;
+  const bLocal = frame - bBase;
+  const gridIn = clampFade(frame, bBase + 30, bBase + 110);
+  // search ripple sweeps the grid right before the hit lights up (~f980+)
+  const ripple = (bLocal - 250) / 8; // expanding search ring
+  const rippleOn = bLocal > 240 && bLocal < 470;
+  const hitLight = clampFade(frame, 1036, 1066);          // f1036: "pulls back the one item"
+  const hitFly = clampFade(frame, 1066, 1170);            // the one that matters flies back
+  const labelIn = clampFade(frame, bBase + 60, bBase + 130);
+  const capB = clampFade(frame, 1175, 1220);
   const cols = 12, rows = 5;
   const hitIdx = 27; // the one relevant memory
   const corePulseB = 0.4 + 0.4 * Math.sin(frame / 7);
@@ -53,12 +63,12 @@ export const Scene6JustInTimeMemory: React.FC = () => {
   return (
     <AbsoluteFill>
       <SceneBackground glow={theme.accentGreen} />
-      <Sfx name="pop" at={180} volume={0.35} />
-      <Sfx name="whoosh" at={280} volume={0.3} />
+      <Sfx name="pop" at={100} volume={0.35} />
+      <Sfx name="whoosh" at={410} volume={0.3} />
       <Sfx name="success" at={540} volume={0.38} />
-      <Sfx name="whoosh" at={846 + 120} volume={0.3} />
-      <Sfx name="success" at={846 + 250} volume={0.4} />
-      <Sfx name="stinger" at={1394} volume={0.4} />
+      <Sfx name="whoosh" at={980} volume={0.3} rate={0.9} />
+      <Sfx name="success" at={1040} volume={0.4} rate={1.08} />
+      <Sfx name="stinger" at={1272} volume={0.4} rate={1.12} />
 
       <CameraRig>
         <SceneHeading kicker="JUST-IN-TIME + MEMORY" accent={theme.accentGreen} size={56}>
@@ -74,7 +84,7 @@ export const Scene6JustInTimeMemory: React.FC = () => {
               borderRadius: 16, background: "#0d0d12", border: `2px solid ${theme.border}`,
             }}>
               <div style={{ fontFamily: theme.fontMono, fontSize: 22, color: theme.textDim, marginBottom: 14, letterSpacing: 1 }}>
-                refresh.ts — coding agent at work
+                refresh.ts · coding agent at work
               </div>
               {codeLines.map((l, i) => {
                 const isUnknown = i === 1;
@@ -146,7 +156,7 @@ export const Scene6JustInTimeMemory: React.FC = () => {
                 }} />
               </div>
               <div style={{ fontFamily: theme.fontSans, fontSize: 24, color: theme.accentGreen, marginTop: 8, fontWeight: 600 }}>
-                stays small — only what's needed, right now
+                stays small: only what's needed, right now
               </div>
             </div>
 
@@ -186,7 +196,7 @@ export const Scene6JustInTimeMemory: React.FC = () => {
               <div style={{ position: "relative", display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 12 }}>
                 {Array.from({ length: cols * rows }).map((_, i) => {
                   const isHit = i === hitIdx;
-                  const appear = clampFade(frame, 866 + (i % cols) * 4, 900 + (i % cols) * 4);
+                  const appear = clampFade(frame, bBase + 40 + (i % cols) * 4, bBase + 74 + (i % cols) * 4);
                   const lit = isHit ? hitLight : 0;
                   return (
                     <div key={i} style={{
@@ -229,7 +239,7 @@ export const Scene6JustInTimeMemory: React.FC = () => {
               position: "absolute", top: 838, width: "100%", textAlign: "center", opacity: capB,
               fontFamily: theme.fontSans, fontSize: 34, fontWeight: 700, color: theme.text,
             }}>
-              Same machinery — now over <span style={{ color: theme.accentGreen }}>memory</span>.
+              Same machinery, now over <span style={{ color: theme.accentGreen }}>memory</span>.
             </div>
           </div>
         )}

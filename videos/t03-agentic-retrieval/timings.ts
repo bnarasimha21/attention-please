@@ -1,10 +1,9 @@
 // Scene timings — t03 Agentic Retrieval (9 scenes).
 // All values in FRAMES at 30fps.
 //
-// NOTE: these are SILENT-PREVIEW estimates (~150 wpm from the script word counts).
-// When the per-scene VO is recorded (public/audio/t03-agentic-retrieval/sNN.m4a),
-// set each `duration` = trimmed clip length + ~0.7s tail and wire <Audio> in T03.tsx
-// (skill Step 7), then re-time the scene beats to the Whisper transcripts (Step 9).
+// Durations are LOCKED to the recorded VO (trimmed clip length + ~0.7s tail).
+// Built at NATURAL pace (trimmed total ~503s ≈ 8.4 min); the global speed-up
+// (~1.2x, skill Step 11) lands it near ~7:00 at render time.
 
 export const FPS = 30;
 
@@ -15,15 +14,15 @@ export const XFADE = 18;
 // Scene start frames are reference-only; layout is driven by `duration` via
 // <TransitionSeries> in T03.tsx.
 export const TIMINGS = {
-  scene1: { start: 0, duration: 1320 }, // Hook — needle vs haystack
-  scene2: { start: 0, duration: 1260 }, // The core problem — retrieve on demand
-  scene3: { start: 0, duration: 2220 }, // Index it right — chunking + contextual retrieval
-  scene4: { start: 0, duration: 2280 }, // Hybrid + rerank — the modern stack (-67%)
-  scene5: { start: 0, duration: 2100 }, // Agentic retrieval — the search loop
-  scene6: { start: 0, duration: 1620 }, // Just-in-time + memory retrieval
-  scene7: { start: 0, duration: 1440 }, // RAG vs long context — use both
-  scene8: { start: 0, duration: 1200 }, // Why it matters — retrieval = senses
-  scene9: { start: 0, duration: 420 },  // Like & Subscribe CTA (~14s choreography)
+  scene1: { start: 0, duration: 1421 }, // Hook — needle vs haystack (s01 46.66s)
+  scene2: { start: 0, duration: 1479 }, // The core problem — retrieve on demand (s02 48.58s)
+  scene3: { start: 0, duration: 2439 }, // Index it right — chunking + contextual retrieval (s03 80.57s)
+  scene4: { start: 0, duration: 2551 }, // Hybrid + rerank — the modern stack (-67%) (s04 84.31s)
+  scene5: { start: 0, duration: 2116 }, // Agentic retrieval — the search loop (s05 69.83s)
+  scene6: { start: 0, duration: 1365 }, // Just-in-time + memory retrieval (s06 44.78s)
+  scene7: { start: 0, duration: 1440 }, // RAG vs long context — use both (s07 47.27s)
+  scene8: { start: 0, duration: 1171 }, // Why it matters — retrieval = senses (s08 38.31s)
+  scene9: { start: 0, duration: 1303 }, // Recap + Like & Subscribe CTA (s09 42.71s)
 };
 
 // Sum of scene durations minus the overlapping crossfades (one per gap between scenes).

@@ -1,0 +1,44 @@
+1
+00:00:00,000 --> 00:00:03,140
+ It also doesn't have to happen up front.
+
+2
+00:00:03,140 --> 00:00:08,220
+ The agent can retrieve mid-task the moment it hits something it doesn't know.
+
+3
+00:00:08,220 --> 00:00:12,980
+ Take a coding agent, it's editing a file, hits a function it doesn't recognize, and
+
+4
+00:00:12,980 --> 00:00:18,820
+ right there in the loop it runs a search, grabs just that definition and moves on.
+
+5
+00:00:18,820 --> 00:00:24,660
+ Retrieval becomes a tool the agent calls whenever it has a gap, just in time rather than just
+
+6
+00:00:24,660 --> 00:00:25,980
+ in case.
+
+7
+00:00:25,980 --> 00:00:32,900
+ And it's not only documents, the same machinery works on memory, past conversations, decisions,
+
+8
+00:00:32,900 --> 00:00:34,540
+ notes about the user.
+
+9
+00:00:34,540 --> 00:00:39,940
+ When something's relevant, the agent searches its own memory and pulls back the one item
+
+10
+00:00:39,940 --> 00:00:42,740
+ that matters out of thousands.
+
+11
+00:00:42,740 --> 00:00:44,740
+ Find the needle, leave the haystack.
+

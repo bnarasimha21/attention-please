@@ -1,0 +1,83 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:04.000
+ You already know the basic loop, embed your docs,
+
+00:00:04.000 --> 00:00:07.200
+ embed the query, grab the nearest chunks.
+
+00:00:07.200 --> 00:00:10.080
+ We will skip that because what actually decides
+
+00:00:10.080 --> 00:00:14.300
+ whether retrieval works happens earlier at indexing time
+
+00:00:14.300 --> 00:00:16.840
+ and most setups get it wrong.
+
+00:00:16.840 --> 00:00:18.340
+ Start with chunking.
+
+00:00:18.340 --> 00:00:20.440
+ The moment you split a document up,
+
+00:00:20.440 --> 00:00:23.420
+ each chunk loses the context around it.
+
+00:00:23.420 --> 00:00:28.340
+ A line like the fee is $50 gets stored as a naked blob
+
+00:00:28.340 --> 00:00:32.300
+ with no record that it lived under Section 4 refunds.
+
+00:00:32.300 --> 00:00:34.720
+ Retrieve it later and the model has no idea
+
+00:00:34.720 --> 00:00:36.300
+ what it's looking at.
+
+00:00:36.300 --> 00:00:38.840
+ Chunks too big and you drag in noise.
+
+00:00:38.840 --> 00:00:40.980
+ Too small and you lose the meaning.
+
+00:00:40.980 --> 00:00:42.920
+ This one decision sets a ceiling
+
+00:00:42.920 --> 00:00:45.360
+ on how good your system can get.
+
+00:00:45.360 --> 00:00:47.560
+ There's a useful upgrade here.
+
+00:00:47.560 --> 00:00:50.540
+ Anthropic calls it contextual retrieval.
+
+00:00:50.540 --> 00:00:54.280
+ Before you embed a chunk, a cheap model writes a short note
+
+00:00:54.280 --> 00:00:58.020
+ on where it sits in the document and prepends it.
+
+00:00:58.020 --> 00:01:01.600
+ So the fee is $50 becomes in the refund policy,
+
+00:01:01.600 --> 00:01:03.320
+ the fee is $50.
+
+00:01:03.320 --> 00:01:06.640
+ Same chunk, but now it carries its context.
+
+00:01:06.640 --> 00:01:09.520
+ In an anthropic own testing, that single change
+
+00:01:09.520 --> 00:01:13.440
+ to the embedding's cut field retrievals by about a third
+
+00:01:13.440 --> 00:01:16.720
+ before you have even touched the search.
+
+00:01:16.720 --> 00:01:20.240
+ Fix the index and everything downstream gets easier.
+

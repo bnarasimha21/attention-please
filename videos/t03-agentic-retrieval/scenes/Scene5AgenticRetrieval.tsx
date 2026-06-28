@@ -62,9 +62,9 @@ export const Scene5AgenticRetrieval: React.FC = () => {
       <Sfx name="error" at={380} volume={0.4} />
       <Sfx name="whoosh" at={565} volume={0.35} />
       <Sfx name="tick" at={585 + 3 * stepDur} volume={0.3} />
-      <Sfx name="tick" at={585 + 6 * stepDur} volume={0.3} />
+      <Sfx name="tick" at={585 + 6 * stepDur} volume={0.3} rate={1.08} />
       <Sfx name="success" at={585 + 10 * stepDur + 30} volume={0.45} />
-      <Sfx name="stinger" at={1792} volume={0.4} />
+      <Sfx name="stinger" at={1792} volume={0.4} rate={0.9} />
 
       <CameraRig>
         <SceneHeading kicker="AGENTIC RETRIEVAL" accent={theme.accentWarm} size={58}>
@@ -192,7 +192,7 @@ export const Scene5AgenticRetrieval: React.FC = () => {
                 background: judgeNo ? theme.accentRed : theme.border, borderRadius: 2,
               }} />
               <span style={{ position: "absolute", left: "62%", top: 0, fontFamily: theme.fontMono, fontSize: 24, color: theme.accentRed, fontWeight: 700 }}>
-                ↺ NO — search again
+                ↺ NO, search again
               </span>
             </div>
 

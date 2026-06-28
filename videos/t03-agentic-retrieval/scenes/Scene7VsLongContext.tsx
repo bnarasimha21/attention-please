@@ -59,9 +59,9 @@ export const Scene7VsLongContext: React.FC = () => {
       <SceneBackground glow={theme.accentWarm} />
       <Sfx name="whoosh" at={fps * 0.3} volume={0.35} />
       <Sfx name="tick" at={fps * 12.6} volume={0.3} />
-      <Sfx name="tick" at={fps * 18.4} volume={0.3} />
+      <Sfx name="tick" at={fps * 18.4} volume={0.3} rate={1.08} />
       <Sfx name="success" at={fps * 36.3} volume={0.4} />
-      <Sfx name="stinger" at={fps * 40} volume={0.4} />
+      <Sfx name="stinger" at={fps * 40} volume={0.4} rate={0.95} />
 
       <CameraRig>
         {/* ---------- P1: the objection ---------- */}
@@ -89,7 +89,7 @@ export const Scene7VsLongContext: React.FC = () => {
           {/* warning banner */}
           <div style={{ position: "absolute", top: 232, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
             <div style={{ opacity: 0.55 + 0.45 * warnBlink, padding: "12px 28px", borderRadius: 999, border: `2px solid ${theme.accentRed}88`, background: "#1a0e0e", fontFamily: theme.fontMono, fontSize: 26, color: theme.accentRed }}>
-              ⚠ even a giant window misses facts in the middle — model-dependent
+              ⚠ even a giant window misses facts in the middle (model-dependent)
             </div>
           </div>
           {/* meters */}
@@ -108,7 +108,7 @@ export const Scene7VsLongContext: React.FC = () => {
         {/* ---------- P3: retrieve-to-narrow, then reason ---------- */}
         <div style={{ position: "absolute", inset: 0, opacity: p3 }}>
           <div style={{ position: "absolute", top: 120, width: "100%", textAlign: "center", fontFamily: theme.fontSans, fontSize: 56, fontWeight: 800, color: theme.text }}>
-            Don’t choose — <span style={gradientText(theme.accentWarm, theme.accentGreen)}>narrow, then reason</span>
+            Don’t choose: <span style={gradientText(theme.accentWarm, theme.accentGreen)}>narrow, then reason</span>
           </div>
           {/* knowledge cloud */}
           <div style={{ position: "absolute", top: 360, left: 230, width: 360, height: 360, transform: `translateY(${cloudDrift}px)` }}>

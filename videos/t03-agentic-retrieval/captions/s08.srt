@@ -1,0 +1,52 @@
+1
+00:00:00,000 --> 00:00:04,320
+ Step back because this changes how you build agents.
+
+2
+00:00:04,320 --> 00:00:07,160
+ We tend to focus on which model is smartest,
+
+3
+00:00:07,160 --> 00:00:09,760
+ but the more useful framing is this.
+
+4
+00:00:09,760 --> 00:00:12,960
+ An agent is only as good as what it can find
+
+5
+00:00:12,960 --> 00:00:15,920
+ and bring into focus at the right moment.
+
+6
+00:00:15,920 --> 00:00:17,660
+ The smartest model available
+
+7
+00:00:17,660 --> 00:00:20,020
+ looking at the wrong three paragraphs
+
+8
+00:00:20,020 --> 00:00:23,040
+ just gives you a confident wrong answer.
+
+9
+00:00:23,040 --> 00:00:26,900
+ So retrieval is how the agent sees, it's the sensors.
+
+10
+00:00:26,900 --> 00:00:30,920
+ Get it right and an ordinary model starts to feel sharp
+
+11
+00:00:30,920 --> 00:00:33,080
+ because every time it answers,
+
+12
+00:00:33,080 --> 00:00:35,520
+ it's looking at exactly what it needs.
+
+13
+00:00:35,520 --> 00:00:38,320
+ That's the skill worth focusing on right now.
+

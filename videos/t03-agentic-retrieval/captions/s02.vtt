@@ -1,0 +1,29 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:06.060
+ let's frame the problem because it's the whole game your context window is small
+
+00:00:06.060 --> 00:00:11.640
+ the information the agent might need is enormous and you can't preload all of it
+
+00:00:11.640 --> 00:00:17.660
+ first because it doesn't fit and second because even if it did buying the answer
+
+00:00:17.660 --> 00:00:23.380
+ in a mountain of irrelevant text makes the model worse not better so instead
+
+00:00:23.380 --> 00:00:28.820
+ you let the model reach out and grab the exact piece it needs the moment it needs
+
+00:00:28.820 --> 00:00:34.580
+ it and nothing else that's all retrieval is the right context on demand you
+
+00:00:34.580 --> 00:00:39.380
+ already know the basic version that's a rag but the gap between a toy rag demo
+
+00:00:39.380 --> 00:00:43.920
+ and the retrieval that holds up in production is large and closing that gap
+
+00:00:43.920 --> 00:00:50.040
+ is the rest of this video it starts somewhere most people overlook
+
